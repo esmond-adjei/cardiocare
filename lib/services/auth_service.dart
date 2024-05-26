@@ -18,7 +18,7 @@ class AuthService {
   Future<Map<String, String>> getUserProfile() async {
     // Dummy user profile data
     await Future.delayed(const Duration(seconds: 1));
-    return {'name': 'John Doe', 'email': 'user@example.com'};
+    return {'name': 'John Carter', 'email': 'user@example.com'};
   }
 
   Future<bool> updateUserProfile(String name, String email) async {

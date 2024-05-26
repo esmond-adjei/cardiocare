@@ -4,6 +4,7 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String labelText;
   final String hintText;
+  final String initialValue;
   final bool obscureText;
   final TextStyle textStyle;
   final InputDecoration decoration;
@@ -13,6 +14,7 @@ class CustomTextField extends StatelessWidget {
     required this.controller,
     required this.hintText,
     this.labelText = '',
+    this.initialValue = '',
     this.obscureText = false,
     this.textStyle = const TextStyle(),
     this.decoration = const InputDecoration(),
@@ -23,6 +25,7 @@ class CustomTextField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       obscureText: obscureText,
+      // initialValue: initialValue,
       decoration: decoration.copyWith(
         labelText: labelText,
         hintText: hintText,

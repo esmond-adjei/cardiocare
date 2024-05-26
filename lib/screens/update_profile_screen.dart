@@ -1,11 +1,7 @@
-// screens/update_profile_screen.dart
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:xmonapp/services/auth_service.dart';
-import 'package:xmonapp/widgets/custom_text_field.dart';
-import 'package:xmonapp/widgets/custom_button.dart';
-import 'profile_screen.dart';
+// import 'package:xmonapp/widgets/custom_button.dart';
+import 'home_screen.dart';
 
 class UpdateProfileScreen extends StatefulWidget {
   const UpdateProfileScreen({super.key});
@@ -17,7 +13,18 @@ class UpdateProfileScreen extends StatefulWidget {
 class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  late Future<Map<String, String>> _userProfile;
   final AuthService _authService = AuthService();
+
+  @override
+  void initState() {
+    super.initState();
+    _userProfile = _authService.getUserProfile();
+    _userProfile.then((profile) {
+      _nameController.text = profile['name'] ?? '';
+      _emailController.text = profile['email'] ?? '';
+    });
+  }
 
   void _updateProfile() async {
     final name = _nameController.text;
@@ -27,7 +34,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     if (success) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+        MaterialPageRoute(builder: (context) => const Home()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -40,30 +47,65 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Update Profile'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 56.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            CustomTextField(
-              controller: _nameController,
-              hintText: 'Name',
+            const Text(
+              'User Profile',
+              style: TextStyle(color: Colors.white, fontSize: 24),
             ),
-            const SizedBox(height: 16.0),
-            CustomTextField(
-              controller: _emailController,
-              hintText: 'Email',
-            ),
-            const SizedBox(height: 16.0),
-            CustomButton(
-              text: 'Update',
+            IconButton(
+              icon: const Icon(Icons.check),
               onPressed: _updateProfile,
             ),
           ],
         ),
+        backgroundColor: Colors.redAccent,
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
+      ),
+      body: FutureBuilder<Map<String, String>>(
+        future: _userProfile,
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return const Center(child: CircularProgressIndicator());
+            case ConnectionState.done:
+              if (snapshot.hasError) {
+                return const Center(child: Text('Error loading profile'));
+              } else if (snapshot.hasData) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 56.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Full Name',
+                          hintText: 'e.g., Jane Doe',
+                        ),
+                      ),
+                      const SizedBox(height: 20.0),
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          hintText: 'e.g., user@example.com',
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                return const Center(child: Text('No profile data'));
+              }
+            default:
+              return const SizedBox.shrink();
+          }
+        },
       ),
     );
   }
