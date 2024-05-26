@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:xmonapp/screens/login_screen.dart';
+import 'package:xmonapp/screens/signal_screen.dart';
 import 'package:xmonapp/screens/update_profile_screen.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -75,7 +77,24 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.person),
             title: const Text('Profile'),
             onTap: () {
-              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const UpdateProfileScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.data_exploration),
+            title: const Text('Analyse'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VitalSignalsScreen(userId: 1),
+                ),
+              );
             },
           ),
           Container(
@@ -93,7 +112,10 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.logout),
             title: const Text('Logout'),
             onTap: () {
-              // Implement Logout
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+              );
             },
           ),
           ListTile(

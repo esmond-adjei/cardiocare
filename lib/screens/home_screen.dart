@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:xmonapp/screens/screen_with_header.dart';
-// import 'package:xmonapp/services/auth_service.dart';
-// import 'package:xmonapp/widgets/custom_button.dart';
-// import 'update_profile_screen.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
