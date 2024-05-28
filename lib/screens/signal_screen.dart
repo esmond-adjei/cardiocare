@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:xmonapp/services/db_schema.dart';
 import 'package:xmonapp/services/db_crud.dart';
-import 'package:xmonapp/screens/screen_with_header.dart';
+import 'package:xmonapp/utils/create_dummy_data.dart';
 
 class VitalSignalsScreen extends StatefulWidget {
   final int userId;
@@ -16,18 +16,37 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
   late Future<List<EcgData>> _ecgDataFuture;
   late Future<List<BpData>> _bpDataFuture;
   late Future<List<TemperatureData>> _temperatureDataFuture;
+  final DummyDataGenerator _dummyDataGenerator = DummyDataGenerator();
 
   @override
   void initState() {
     super.initState();
-    _ecgDataFuture = getEcgData(widget.userId);
-    _bpDataFuture = getBpData(widget.userId);
-    _temperatureDataFuture = getTemperatureData(widget.userId);
+    _refreshData();
+  }
+
+  void _refreshData() {
+    setState(() {
+      _ecgDataFuture = getEcgData(widget.userId);
+      _bpDataFuture = getBpData(widget.userId);
+      _temperatureDataFuture = getTemperatureData(widget.userId);
+    });
+  }
+
+  void _insertDummyData() async {
+    List<int> ecgData = _dummyDataGenerator.generateEcgData();
+    Map<String, int> bpData = _dummyDataGenerator.generateBpData();
+    double temperatureData = _dummyDataGenerator.generateTemperatureData();
+
+    saveEcgData(widget.userId, ecgData);
+    saveBpData(widget.userId, bpData['systolic']!, bpData['diastolic']!);
+    saveTemperatureData(widget.userId, temperatureData);
+
+    _refreshData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BaseScreen(
+    return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -101,6 +120,53 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
               },
             ),
           ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _insertDummyData,
+        // () {
+        //   EcgData newEcgData = EcgData(
+        //     userId: widget.userId,
+        //     ecg: [/* ECG data as byte array */],
+        //     timestamp: DateTime.now(),
+        //   );
+        //   saveEcgData(
+        //     widget.userId,
+        //     newEcgData.ecg,
+        //   );
+
+        //   BpData newBpData = BpData(
+        //     userId: widget.userId,
+        //     bpSystolic: 120,
+        //     bpDiastolic: 80,
+        //     timestamp: DateTime.now(),
+        //   );
+        //   saveBpData(
+        //     widget.userId,
+        //     newBpData.bpSystolic,
+        //     newBpData.bpDiastolic,
+        //   );
+
+        //   TemperatureData newTemperatureData = TemperatureData(
+        //     userId: widget.userId,
+        //     bodyTemp: 36.6,
+        //     timestamp: DateTime.now(),
+        //   );
+        //   saveTemperatureData(
+        //     widget.userId,
+        //     newTemperatureData.bodyTemp,
+        //   );
+
+        //   setState(() {
+        //     _ecgDataFuture = getEcgData(widget.userId);
+        //     _bpDataFuture = getBpData(widget.userId);
+        //     _temperatureDataFuture = getTemperatureData(widget.userId);
+        //   });
+        // },
+        backgroundColor: Colors.redAccent,
+        child: const Icon(
+          Icons.refresh,
+          color: Colors.white,
         ),
       ),
     );

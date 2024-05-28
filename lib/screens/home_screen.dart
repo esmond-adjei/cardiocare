@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:xmonapp/screens/screen_with_header.dart';
+import 'package:xmonapp/screens/signal_screen.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -11,21 +12,9 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
-    return BaseScreen(
+    return const BaseScreen(
       screenTitle: 'Home',
-      body: Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            print('Profile button pressed!');
-          },
-          backgroundColor: Colors.redAccent,
-          child: const Icon(
-            Icons.bluetooth_searching_sharp,
-            color: Colors.white,
-          ),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      ),
+      body: VitalSignalsScreen(userId: 1),
     );
   }
 }

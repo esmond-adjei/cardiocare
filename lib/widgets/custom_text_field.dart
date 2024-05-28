@@ -25,7 +25,6 @@ class CustomTextField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       obscureText: obscureText,
-      // initialValue: initialValue,
       decoration: decoration.copyWith(
         labelText: labelText,
         hintText: hintText,

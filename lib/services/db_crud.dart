@@ -5,6 +5,7 @@ import 'package:xmonapp/services/db_helper.dart';
 void saveEcgData(int userId, List<int> ecg) async {
   DatabaseHelper dbHelper = DatabaseHelper();
   await dbHelper.insertEcgData(userId, ecg);
+  print("successfully inserted ECG data");
 }
 
 // BP DATA

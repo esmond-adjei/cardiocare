@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:xmonapp/screens/login_screen.dart';
-import 'package:xmonapp/screens/signal_screen.dart';
 import 'package:xmonapp/screens/update_profile_screen.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -81,18 +80,6 @@ class AppDrawer extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const UpdateProfileScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.data_exploration),
-            title: const Text('Analyse'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const VitalSignalsScreen(userId: 1),
                 ),
               );
             },

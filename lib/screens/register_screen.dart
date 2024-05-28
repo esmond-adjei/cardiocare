@@ -41,7 +41,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(
           // title: const Text('Register'),
-
           ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 56.0),
@@ -49,9 +48,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Image.asset('assets/icons/logo.png', height: 100, width: 100),
             const SizedBox(height: 20),
             const Text(
-              'Register | CardioCare',
+              'Register',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
