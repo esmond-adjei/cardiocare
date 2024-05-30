@@ -124,45 +124,6 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _insertDummyData,
-        // () {
-        //   EcgData newEcgData = EcgData(
-        //     userId: widget.userId,
-        //     ecg: [/* ECG data as byte array */],
-        //     timestamp: DateTime.now(),
-        //   );
-        //   saveEcgData(
-        //     widget.userId,
-        //     newEcgData.ecg,
-        //   );
-
-        //   BpData newBpData = BpData(
-        //     userId: widget.userId,
-        //     bpSystolic: 120,
-        //     bpDiastolic: 80,
-        //     timestamp: DateTime.now(),
-        //   );
-        //   saveBpData(
-        //     widget.userId,
-        //     newBpData.bpSystolic,
-        //     newBpData.bpDiastolic,
-        //   );
-
-        //   TemperatureData newTemperatureData = TemperatureData(
-        //     userId: widget.userId,
-        //     bodyTemp: 36.6,
-        //     timestamp: DateTime.now(),
-        //   );
-        //   saveTemperatureData(
-        //     widget.userId,
-        //     newTemperatureData.bodyTemp,
-        //   );
-
-        //   setState(() {
-        //     _ecgDataFuture = getEcgData(widget.userId);
-        //     _bpDataFuture = getBpData(widget.userId);
-        //     _temperatureDataFuture = getTemperatureData(widget.userId);
-        //   });
-        // },
         backgroundColor: Colors.redAccent,
         child: const Icon(
           Icons.refresh,

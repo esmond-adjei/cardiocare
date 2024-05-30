@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'User Management App',
+        title: 'X-Monitoring App',
         theme: ThemeData(
           primarySwatch: Colors.red,
         ),
@@ -40,11 +40,11 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _widgetOptions = <Widget>[
-    HomeScreen(),
-    RecordScreen(),
-    HistoryScreen(),
-    SettingsScreen(),
+  static const List<Map<String, Widget>> _screens = [
+    {'Home': HomeScreen()},
+    {'Record': RecordScreen()},
+    {'History': HistoryScreen()},
+    {'Settings': SettingsScreen()},
   ];
 
   void _onItemTapped(int index) {
@@ -57,9 +57,9 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'screenTitle',
-          style: TextStyle(color: Colors.white, fontSize: 24),
+        title: Text(
+          _screens[_selectedIndex].keys.first,
+          style: const TextStyle(color: Colors.white, fontSize: 24),
         ),
         backgroundColor: Colors.redAccent,
         iconTheme: const IconThemeData(
@@ -67,7 +67,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
       ),
       drawer: const AppDrawer(),
-      body: _widgetOptions.elementAt(_selectedIndex),
+      body: _screens[_selectedIndex].values.first,
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.redAccent,
