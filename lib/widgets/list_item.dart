@@ -18,7 +18,7 @@ class ListItem extends StatelessWidget {
     return Container(
       color: Colors.grey.shade100,
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
         title: Text(
           name,
           style: const TextStyle(

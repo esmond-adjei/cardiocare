@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:xmonapp/services/theme.dart';
 import 'package:xmonapp/screens/history_screen.dart';
 import 'package:xmonapp/screens/home_screen.dart';
 import 'package:xmonapp/screens/record_screen.dart';
@@ -17,9 +18,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'X-Monitoring App',
-        theme: ThemeData(
-          primarySwatch: Colors.red,
-        ),
+        theme: customRedTheme,
+        // ThemeData(
+        //   useMaterial3: true,
+        //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.redAccent),
+        // ),
         home: const MainScreen(),
         routes: {
           '/home': (context) => const HomeScreen(),
