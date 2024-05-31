@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:xmonapp/layout/list_container.dart';
-import 'package:xmonapp/services/dummy_data.dart';
+import 'package:xmonapp/widgets/list_container.dart';
+import 'package:xmonapp/services/models/dummy_data.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});

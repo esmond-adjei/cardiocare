@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:xmonapp/services/db_schema.dart';
-import 'package:xmonapp/services/db_crud.dart';
+import 'package:xmonapp/services/models/db_schema.dart';
+import 'package:xmonapp/services/models/db_crud.dart';
 import 'package:xmonapp/utils/create_dummy_data.dart';
 
 class VitalSignalsScreen extends StatefulWidget {
@@ -15,7 +15,7 @@ class VitalSignalsScreen extends StatefulWidget {
 class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
   late Future<List<EcgData>> _ecgDataFuture;
   late Future<List<BpData>> _bpDataFuture;
-  late Future<List<TemperatureData>> _temperatureDataFuture;
+  late Future<List<Btemp>> _btempFuture;
   final DummyDataGenerator _dummyDataGenerator = DummyDataGenerator();
 
   @override
@@ -28,18 +28,18 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
     setState(() {
       _ecgDataFuture = getEcgData(widget.userId);
       _bpDataFuture = getBpData(widget.userId);
-      _temperatureDataFuture = getTemperatureData(widget.userId);
+      _btempFuture = getBtemp(widget.userId);
     });
   }
 
   void _insertDummyData() async {
     List<int> ecgData = _dummyDataGenerator.generateEcgData();
     Map<String, int> bpData = _dummyDataGenerator.generateBpData();
-    double temperatureData = _dummyDataGenerator.generateTemperatureData();
+    double Btemp = _dummyDataGenerator.generateBtempData();
 
     saveEcgData(widget.userId, ecgData);
     saveBpData(widget.userId, bpData['systolic']!, bpData['diastolic']!);
-    saveTemperatureData(widget.userId, temperatureData);
+    saveBtempData(widget.userId, Btemp);
 
     _refreshData();
   }
@@ -66,7 +66,7 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
                   children: ecgData
                       .map((data) => ListTile(
                             title: const Text('ECG Data'),
-                            subtitle: Text('Timestamp: ${data.timestamp}'),
+                            subtitle: Text('Timestamp: ${data.startTime}'),
                           ))
                       .toList(),
                 );
@@ -89,14 +89,14 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
                       .map((data) => ListTile(
                             title: Text(
                                 'BP: ${data.bpSystolic}/${data.bpDiastolic} mmHg'),
-                            subtitle: Text('Timestamp: ${data.timestamp}'),
+                            subtitle: Text('Timestamp: ${data.startTime}'),
                           ))
                       .toList(),
                 );
               },
             ),
-            FutureBuilder<List<TemperatureData>>(
-              future: _temperatureDataFuture,
+            FutureBuilder<List<Btemp>>(
+              future: _btempFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -108,12 +108,12 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
                       child: Text('No temperature data available'));
                 }
 
-                List<TemperatureData> temperatureData = snapshot.data!;
+                List<Btemp> btemp = snapshot.data!;
                 return Column(
-                  children: temperatureData
+                  children: btemp
                       .map((data) => ListTile(
                             title: Text('Temperature: ${data.bodyTemp}°C'),
-                            subtitle: Text('Timestamp: ${data.timestamp}'),
+                            subtitle: Text('Timestamp: ${data.startTime}'),
                           ))
                       .toList(),
                 );

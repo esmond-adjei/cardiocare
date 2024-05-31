@@ -13,7 +13,7 @@ class DummyDataGenerator {
     return {'systolic': systolic, 'diastolic': diastolic};
   }
 
-  double generateTemperatureData() {
+  double generateBtempData() {
     return 36.0 + _random.nextDouble() * 2.0; // 36.0 to 38.0
   }
 }

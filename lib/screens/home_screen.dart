@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:xmonapp/layout/list_container.dart';
-import 'package:xmonapp/screens/signal_screen.dart';
-import 'package:xmonapp/services/dummy_data.dart';
+import 'package:xmonapp/widgets/list_container.dart';
+import 'package:xmonapp/screens/pages/signal_screen.dart';
+import 'package:xmonapp/services/models/dummy_data.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

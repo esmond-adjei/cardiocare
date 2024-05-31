@@ -19,6 +19,10 @@ class ListItem extends StatelessWidget {
       color: Colors.grey.shade100,
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+        leading: const Icon(
+          Icons.favorite,
+          color: Colors.red,
+        ),
         title: Text(
           name,
           style: const TextStyle(
@@ -44,10 +48,6 @@ class ListItem extends StatelessWidget {
               ),
             ),
           ],
-        ),
-        leading: const Icon(
-          Icons.favorite,
-          color: Colors.red,
         ),
       ),
     );
