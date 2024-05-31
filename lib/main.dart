@@ -4,7 +4,7 @@ import 'package:xmonapp/screens/history_screen.dart';
 import 'package:xmonapp/screens/home_screen.dart';
 import 'package:xmonapp/screens/record_screen.dart';
 import 'package:xmonapp/screens/settings_screen.dart';
-import 'package:xmonapp/widgets/nav_drawer.dart';
+import 'package:xmonapp/screens/pages/connect_device.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
           '/record': (context) => const RecordScreen(),
           '/history': (context) => const HistoryScreen(),
           '/setting': (context) => const SettingsScreen(),
+          '/device': (context) => const ConnectDevice(),
         });
   }
 }
@@ -43,11 +44,11 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  static const List<Map<String, Widget>> _screens = [
-    {'Home': HomeScreen()},
-    {'Record': RecordScreen()},
-    {'History': HistoryScreen()},
-    {'Settings': SettingsScreen()},
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const RecordScreen(),
+    const HistoryScreen(),
+    const SettingsScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -59,18 +60,10 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _screens[_selectedIndex].keys.first,
-          style: const TextStyle(color: Colors.white, fontSize: 24),
-        ),
-        backgroundColor: Colors.redAccent,
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _screens,
       ),
-      drawer: const AppDrawer(),
-      body: _screens[_selectedIndex].values.first,
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.redAccent,

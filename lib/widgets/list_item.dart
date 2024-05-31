@@ -22,7 +22,7 @@ class ListItem extends StatelessWidget {
         title: Text(
           name,
           style: const TextStyle(
-            fontSize: 14,
+            fontSize: 16,
           ),
         ),
         subtitle: Row(

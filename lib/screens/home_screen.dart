@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:xmonapp/layout/list_container.dart';
 import 'package:xmonapp/screens/signal_screen.dart';
+import 'package:xmonapp/services/dummy_data.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,6 +14,12 @@ class _HomeState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Home',
+          style: TextStyle(color: Colors.white, fontSize: 24),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,32 +62,23 @@ class _HomeState extends State<HomeScreen> {
               ],
             ),
             Container(
-              height: 600,
               margin: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey.shade300, width: 1),
-              ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.only(left: 10, top: 20),
-                    child: Text(
-                      'Vital Signals',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54,
-                      ),
-                    ),
+                  ListContainer(
+                    listHeading: 'ECG | last 3 days',
+                    listData: getECGData().sublist(0, 3),
                   ),
-                  // horizontal line
-                  Divider(
-                    height: 1,
-                    color: Colors.grey.shade300,
+                  const SizedBox(height: 40),
+                  ListContainer(
+                    listHeading: 'PPPG | last 3 days',
+                    listData: getBloodPressureData().sublist(0, 3),
                   ),
-                  // BP data will be displayed here
+                  const SizedBox(height: 40),
+                  ListContainer(
+                    listHeading: 'Body Temperature | last 3 days',
+                    listData: getBodyTemperatureData().sublist(0, 3),
+                  ),
                 ],
               ),
             ),

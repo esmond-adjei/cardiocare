@@ -3,7 +3,6 @@ import 'package:xmonapp/services/auth_service.dart';
 import 'package:xmonapp/widgets/custom_text_field.dart';
 import 'package:xmonapp/widgets/custom_button.dart';
 import 'register_screen.dart';
-import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -23,9 +22,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final success = await _authService.login(email, password);
     if (success) {
-      Navigator.pushReplacement(
+      Navigator.pushNamed(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        '/home',
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
