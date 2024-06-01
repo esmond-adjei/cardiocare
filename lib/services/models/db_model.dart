@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:xmonapp/services/constants.dart';
 
 // user table
 @immutable
@@ -32,22 +33,25 @@ abstract class Signal {
   final int userId;
   final DateTime startTime;
   final DateTime stopTime;
+  final String signalType;
 
   Signal({
     required this.id,
     required this.userId,
     required this.startTime,
     required this.stopTime,
+    required this.signalType,
   });
 
   Signal.fromRow(Map<String, Object?> map)
       : id = map[idColumn] as int,
         userId = map[userIdColumn] as int,
         startTime = map[startTimeColumn] as DateTime,
-        stopTime = map[stopTimeColumn] as DateTime;
+        stopTime = map[stopTimeColumn] as DateTime,
+        signalType = map[signalTypeColumn] as String;
 
   @override
-  String toString() => 'Signal: ID = $id, userID = $userId';
+  String toString() => 'Signal: ID = $id, userID = $userId, type = $signalType';
 
   @override
   bool operator ==(covariant Signal other) {
@@ -59,16 +63,16 @@ abstract class Signal {
 }
 
 // ECG table
-class EcgData extends Signal {
-  final List<int> ecg;
+class EcgModel extends Signal {
+  final Uint8List ecg;
 
-  EcgData({
+  EcgModel({
     required super.id,
     required super.userId,
     required super.startTime,
     required super.stopTime,
     required this.ecg,
-  });
+  }) : super(signalType: 'ECG');
 
   Map<String, dynamic> toMap() {
     return {
@@ -76,34 +80,35 @@ class EcgData extends Signal {
       userIdColumn: userId,
       startTimeColumn: startTime.toIso8601String(),
       stopTimeColumn: stopTime.toIso8601String(),
-      'ecg': Uint8List.fromList(ecg),
+      signalTypeColumn: signalType,
+      'ecg': ecg,
     };
   }
 
-  factory EcgData.fromMap(Map<String, dynamic> map) {
-    return EcgData(
+  factory EcgModel.fromMap(Map<String, dynamic> map) {
+    return EcgModel(
       id: map[idColumn],
       userId: map[userIdColumn],
       startTime: DateTime.parse(map[startTimeColumn]),
       stopTime: DateTime.parse(map[stopTimeColumn]),
-      ecg: List<int>.from(map['ecg']),
+      ecg: map['ecg'],
     );
   }
 }
 
 // BP table
-class BpData extends Signal {
+class BpModel extends Signal {
   final int bpSystolic;
   final int bpDiastolic;
 
-  BpData({
+  BpModel({
     required super.id,
     required super.userId,
     required super.startTime,
     required super.stopTime,
     required this.bpSystolic,
     required this.bpDiastolic,
-  });
+  }) : super(signalType: 'BP');
 
   Map<String, dynamic> toMap() {
     return {
@@ -111,13 +116,14 @@ class BpData extends Signal {
       userIdColumn: userId,
       startTimeColumn: startTime.toIso8601String(),
       stopTimeColumn: stopTime.toIso8601String(),
+      signalTypeColumn: signalType,
       'bp_systolic': bpSystolic,
       'bp_diastolic': bpDiastolic,
     };
   }
 
-  factory BpData.fromMap(Map<String, dynamic> map) {
-    return BpData(
+  factory BpModel.fromMap(Map<String, dynamic> map) {
+    return BpModel(
       id: map[idColumn],
       userId: map[userIdColumn],
       startTime: DateTime.parse(map[startTimeColumn]),
@@ -129,28 +135,30 @@ class BpData extends Signal {
 }
 
 // body temperature table
-class Btemp extends Signal {
+class BtempModel extends Signal {
   final double bodyTemp;
 
-  Btemp({
+  BtempModel({
     required super.id,
     required super.userId,
     required super.startTime,
     required super.stopTime,
     required this.bodyTemp,
-  });
+  }) : super(signalType: 'BTEMP');
 
   Map<String, dynamic> toMap() {
     return {
+      idColumn: id,
       userIdColumn: userId,
       startTimeColumn: startTime.toIso8601String(),
       stopTimeColumn: stopTime.toIso8601String(),
+      signalTypeColumn: signalType,
       'body_temp': bodyTemp,
     };
   }
 
-  factory Btemp.fromMap(Map<String, dynamic> map) {
-    return Btemp(
+  factory BtempModel.fromMap(Map<String, dynamic> map) {
+    return BtempModel(
       id: map[idColumn],
       userId: map[userIdColumn],
       startTime: DateTime.parse(map[startTimeColumn]),
@@ -159,16 +167,3 @@ class Btemp extends Signal {
     );
   }
 }
-
-// ------ CONSTANTS --------
-const dbName = 'cardio.db';
-const userTable = 'cardio_user';
-const ecgTable = 'cardio_ecg';
-const bpTable = 'cardio_bp';
-const btempTable = 'cardio_btemp';
-
-const idColumn = 'id';
-const emailColumn = 'email';
-const userIdColumn = 'user_id';
-const startTimeColumn = 'start_time';
-const stopTimeColumn = 'stop_time';

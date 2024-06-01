@@ -2,7 +2,8 @@ import 'dart:typed_data';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:xmonapp/services/models/db_schema.dart';
+import 'package:xmonapp/services/models/db_model.dart';
+import 'package:xmonapp/services/constants.dart';
 
 // exceptions
 class DatabaseRunningException implements Exception {}
@@ -216,38 +217,3 @@ class DatabaseHelper {
     );
   }
 }
-
-// ------ CONSTANTS --------
-
-const createUserTable = '''CREATE TABLE IF NOT EXISTS cardio_user (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT NOT NULL UNIQUE
-  );''';
-
-const createECGTable = '''CREATE TABLE IF NOT EXISTS cardio_ecg (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    start_time DATETIME NOT NULL,
-    stop_time DATETIME NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    ecg BLOB NOT NULL
-  );''';
-
-const createBPTable = '''CREATE TABLE IF NOT EXISTS cardio_bp (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    start_time DATETIME NOT NULL,
-    stop_time DATETIME NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    bp_systolic INTEGER NOT NULL,
-    bp_diastolic INTEGER NOT NULL
-  );''';
-
-const createBTempTable = '''CREATE TABLE IF NOT EXISTS cardio_btemp (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    start_time DATETIME NOT NULL,
-    stop_time DATETIME NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    body_temp REAL NOT NULL
-  );''';

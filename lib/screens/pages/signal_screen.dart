@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:xmonapp/services/models/db_schema.dart';
+import 'package:xmonapp/services/models/db_model.dart';
 import 'package:xmonapp/services/models/db_crud.dart';
 import 'package:xmonapp/utils/create_dummy_data.dart';
 
@@ -13,9 +13,9 @@ class VitalSignalsScreen extends StatefulWidget {
 }
 
 class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
-  late Future<List<EcgData>> _ecgDataFuture;
-  late Future<List<BpData>> _bpDataFuture;
-  late Future<List<Btemp>> _btempFuture;
+  late Future<List<EcgModel>> _ecgDataFuture;
+  late Future<List<BpModel>> _bpDataFuture;
+  late Future<List<BtempModel>> _btempFuture;
   final DummyDataGenerator _dummyDataGenerator = DummyDataGenerator();
 
   @override
@@ -28,7 +28,7 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
     setState(() {
       _ecgDataFuture = getEcgData(widget.userId);
       _bpDataFuture = getBpData(widget.userId);
-      _btempFuture = getBtemp(widget.userId);
+      _btempFuture = getBtempData(widget.userId);
     });
   }
 
@@ -50,7 +50,7 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            FutureBuilder<List<EcgData>>(
+            FutureBuilder<List<EcgModel>>(
               future: _ecgDataFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -61,7 +61,7 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
                   return const Center(child: Text('No ECG data available'));
                 }
 
-                List<EcgData> ecgData = snapshot.data!;
+                List<EcgModel> ecgData = snapshot.data!;
                 return Column(
                   children: ecgData
                       .map((data) => ListTile(
@@ -72,7 +72,7 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
                 );
               },
             ),
-            FutureBuilder<List<BpData>>(
+            FutureBuilder<List<BpModel>>(
               future: _bpDataFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -83,7 +83,7 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
                   return const Center(child: Text('No BP data available'));
                 }
 
-                List<BpData> bpData = snapshot.data!;
+                List<BpModel> bpData = snapshot.data!;
                 return Column(
                   children: bpData
                       .map((data) => ListTile(
@@ -95,7 +95,7 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
                 );
               },
             ),
-            FutureBuilder<List<Btemp>>(
+            FutureBuilder<List<BtempModel>>(
               future: _btempFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -108,7 +108,7 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
                       child: Text('No temperature data available'));
                 }
 
-                List<Btemp> btemp = snapshot.data!;
+                List<BtempModel> btemp = snapshot.data!;
                 return Column(
                   children: btemp
                       .map((data) => ListTile(
