@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 final ThemeData customRedTheme = ThemeData(
+  useMaterial3: true,
   primaryColor: Colors.redAccent,
   primarySwatch: Colors.red,
   hintColor: Colors.redAccent,
@@ -9,8 +10,7 @@ final ThemeData customRedTheme = ThemeData(
     backgroundColor: Colors.redAccent,
     titleTextStyle: TextStyle(
       color: Colors.white,
-      fontSize: 20,
-      fontWeight: FontWeight.bold,
+      fontSize: 24,
     ),
     iconTheme: IconThemeData(color: Colors.white),
   ),

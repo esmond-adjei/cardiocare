@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:xmonapp/widgets/list_container.dart';
 import 'package:xmonapp/screens/pages/signal_screen.dart';
-import 'package:xmonapp/services/models/dummy_data.dart';
+import 'package:xmonapp/services/dummy_data.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,10 +15,7 @@ class _HomeState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Home',
-          style: TextStyle(color: Colors.white, fontSize: 24),
-        ),
+        title: const Text('Home'),
       ),
       body: SingleChildScrollView(
         child: Column(

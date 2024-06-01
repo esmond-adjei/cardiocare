@@ -19,10 +19,6 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'X-Monitoring App',
         theme: customRedTheme,
-        // ThemeData(
-        //   useMaterial3: true,
-        //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.redAccent),
-        // ),
         home: const MainScreen(),
         routes: {
           '/home': (context) => const HomeScreen(),

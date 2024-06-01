@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:xmonapp/widgets/list_container.dart';
-import 'package:xmonapp/services/models/dummy_data.dart';
+import 'package:xmonapp/services/dummy_data.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
@@ -11,11 +11,7 @@ class HistoryScreen extends StatelessWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(
-            'History',
-            style: TextStyle(color: Colors.white, fontSize: 24),
-          ),
-          backgroundColor: Colors.redAccent,
+          title: const Text('History'),
           bottom: const TabBar(
             dividerColor: Colors.transparent,
             indicatorColor: Colors.white,

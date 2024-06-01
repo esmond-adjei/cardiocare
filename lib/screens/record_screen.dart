@@ -7,11 +7,7 @@ class RecordScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Record',
-          style: TextStyle(color: Colors.white, fontSize: 24),
-        ),
-        backgroundColor: Colors.redAccent,
+        title: const Text('Record'),
         iconTheme: const IconThemeData(
           color: Colors.white,
         ),

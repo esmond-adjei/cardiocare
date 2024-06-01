@@ -35,11 +35,11 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
   void _insertDummyData() async {
     List<int> ecgData = _dummyDataGenerator.generateEcgData();
     Map<String, int> bpData = _dummyDataGenerator.generateBpData();
-    double Btemp = _dummyDataGenerator.generateBtempData();
+    double btemp = _dummyDataGenerator.generateBtempData();
 
     saveEcgData(widget.userId, ecgData);
     saveBpData(widget.userId, bpData['systolic']!, bpData['diastolic']!);
-    saveBtempData(widget.userId, Btemp);
+    saveBtempData(widget.userId, btemp);
 
     _refreshData();
   }

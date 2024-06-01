@@ -8,12 +8,12 @@ class DummyDataGenerator {
   }
 
   Map<String, int> generateBpData() {
-    int systolic = 90 + _random.nextInt(51); // 90 to 140
-    int diastolic = 60 + _random.nextInt(41); // 60 to 100
+    int systolic = 90 + _random.nextInt(51);
+    int diastolic = 60 + _random.nextInt(41);
     return {'systolic': systolic, 'diastolic': diastolic};
   }
 
   double generateBtempData() {
-    return 36.0 + _random.nextDouble() * 2.0; // 36.0 to 38.0
+    return 36.0 + _random.nextDouble() * 2.0;
   }
 }

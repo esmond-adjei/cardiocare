@@ -224,29 +224,30 @@ const createUserTable = '''CREATE TABLE IF NOT EXISTS cardio_user (
     email TEXT NOT NULL UNIQUE
   );''';
 
-const createSignalTable = '''CREATE TABLE IF NOT EXISTS cardio_signal (
+const createECGTable = '''CREATE TABLE IF NOT EXISTS cardio_ecg (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     start_time DATETIME NOT NULL,
     stop_time DATETIME NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );''';
-
-const createECGTable = '''CREATE TABLE IF NOT EXISTS cardio_ecg (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    signal_info INTEGER FOREIGN KEY,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     ecg BLOB NOT NULL
   );''';
 
 const createBPTable = '''CREATE TABLE IF NOT EXISTS cardio_bp (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    signal_info INTEGER FOREIGN KEY,
+    user_id INTEGER NOT NULL,
+    start_time DATETIME NOT NULL,
+    stop_time DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     bp_systolic INTEGER NOT NULL,
     bp_diastolic INTEGER NOT NULL
   );''';
 
 const createBTempTable = '''CREATE TABLE IF NOT EXISTS cardio_btemp (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    signal_info INTEGER FOREIGN KEY,
+    user_id INTEGER NOT NULL,
+    start_time DATETIME NOT NULL,
+    stop_time DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     body_temp REAL NOT NULL
   );''';
