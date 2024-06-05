@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/theme.dart';
 import 'package:xmonapp/screens/history_screen.dart';
 import 'package:xmonapp/screens/home_screen.dart';
@@ -40,18 +41,30 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const RecordScreen(),
-    const HistoryScreen(),
-    const SettingsScreen(),
-  ];
+  List<Widget> _screens = [];
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
+
+// initialize db here
+  @override
+  void initState() {
+    // initialize screens here
+    _screens = [
+      const HomeScreen(),
+      const RecordScreen(),
+      const HistoryScreen(),
+      const SettingsScreen(),
+    ];
+    init();
+
+    super.initState();
+  }
+
+  init() async => await DatabaseHelper().onInitCreate();
 
   @override
   Widget build(BuildContext context) {

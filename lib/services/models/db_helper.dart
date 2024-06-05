@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:typed_data';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -22,6 +23,13 @@ class UserDoesNotExist implements Exception {}
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _db;
+  static const int _v = 1;
+  static const List dbs = [
+    createECGTable,
+    createBPTable,
+    createBTempTable,
+    createUserTable
+  ];
 
   factory DatabaseHelper() {
     return _instance;
@@ -93,6 +101,29 @@ class DatabaseHelper {
     await db.execute(createBPTable);
     await db.execute(createBTempTable);
   }
+
+//Initialize all databases at once.
+  Future<void> onInitCreate() async {
+    if (_db != null) {
+      return;
+    }
+    try {
+      String dbPath = "${await getDatabasesPath()}$dbName";
+
+      _db = await openDatabase(
+        dbPath,
+        version: _v,
+        onCreate: (db, version) {
+          for (var database in dbs) {
+            db.execute(database);
+          }
+        },
+      );
+    } on Exception catch (e) {
+      log(e.toString());
+    }
+  }
+//
 
   // ======== MANAGE USER TABLES ===========
   // manage user table
