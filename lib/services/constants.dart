@@ -38,6 +38,7 @@ const createBTempTable = '''CREATE TABLE IF NOT EXISTS cardio_btemp (
 
 // ------ CONSTANTS --------
 const dbName = 'cardio.db';
+const signalTable = 'cardio_signal';
 const userTable = 'cardio_user';
 const ecgTable = 'cardio_ecg';
 const bpTable = 'cardio_bp';
@@ -49,3 +50,6 @@ const userIdColumn = 'user_id';
 const startTimeColumn = 'start_time';
 const stopTimeColumn = 'stop_time';
 const signalTypeColumn = 'signal_type';
+const signalIdColumn = 'signal_id';
+
+const createdAtColumn = 'created_at';

@@ -4,35 +4,35 @@ import 'package:xmonapp/services/models/db_helper.dart';
 // ECG DATA
 void saveEcgData(int userId, List<int> ecg) async {
   // DatabaseHelper dbHelper = DatabaseHelper();
-  // await dbHelper.insertEcgData(userId, ecg);
+  // await dbHelper.createEcgData(userId, ecg);
 }
 
 // BP DATA
 void saveBpData(int userId, int systolic, int diastolic) async {
-  DatabaseHelper dbHelper = DatabaseHelper();
-  await dbHelper.insertBpData(userId, systolic, diastolic);
+  // DatabaseHelper dbHelper = DatabaseHelper();
+  // await dbHelper.createBpData(userId, systolic, diastolic);
 }
 
 // BODY TEMPERATURE DATA
 void saveBtempData(int userId, double temperature) async {
-  DatabaseHelper dbHelper = DatabaseHelper();
-  await dbHelper.insertTemperatureData(userId, temperature);
+  // DatabaseHelper dbHelper = DatabaseHelper();
+  // await dbHelper.getBtempData(userId, temperature);
 }
 
 Future<List<EcgModel>> getEcgData(int userId) async {
   DatabaseHelper dbHelper = DatabaseHelper();
-  List<Map<String, dynamic>> result = await dbHelper.getEcgData(userId);
-  return result.map((map) => EcgModel.fromMap(map)).toList();
+  List<EcgModel> result = await dbHelper.getEcgData(userId);
+  return result;
 }
 
 Future<List<BpModel>> getBpData(int userId) async {
   DatabaseHelper dbHelper = DatabaseHelper();
-  List<Map<String, dynamic>> result = await dbHelper.getBpData(userId);
-  return result.map((map) => BpModel.fromMap(map)).toList();
+  List<BpModel> result = await dbHelper.getBpData(userId);
+  return result;
 }
 
 Future<List<BtempModel>> getBtempData(int userId) async {
   DatabaseHelper dbHelper = DatabaseHelper();
-  List<Map<String, dynamic>> result = await dbHelper.getBpData(userId);
-  return result.map((map) => BtempModel.fromMap(map)).toList();
+  List<BtempModel> result = await dbHelper.getBtempData(userId);
+  return result;
 }

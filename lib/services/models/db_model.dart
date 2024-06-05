@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:xmonapp/services/constants.dart';
+import 'package:xmonapp/services/models/db_helper.dart';
 
 // user table
 @immutable
@@ -50,6 +51,8 @@ abstract class Signal {
         stopTime = map[stopTimeColumn] as DateTime,
         signalType = map[signalTypeColumn] as String;
 
+  Map<String, dynamic> toMap();
+
   @override
   String toString() => 'Signal: ID = $id, userID = $userId, type = $signalType';
 
@@ -64,6 +67,7 @@ abstract class Signal {
 
 // ECG table
 class EcgModel extends Signal {
+  static String tableName = ecgTable;
   final Uint8List ecg;
 
   EcgModel({
@@ -74,6 +78,7 @@ class EcgModel extends Signal {
     required this.ecg,
   }) : super(signalType: 'ECG');
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       idColumn: id,
@@ -94,10 +99,26 @@ class EcgModel extends Signal {
       ecg: map['ecg'],
     );
   }
+
+  Future<int> create() async {
+    final dbHelper = DatabaseHelper();
+    return await dbHelper.insert(tableName, toMap());
+  }
+
+  static Future<List<EcgModel>> getAllByUserId(int userId) async {
+    final dbHelper = DatabaseHelper();
+    final result = await dbHelper.query(
+      tableName,
+      where: '$userIdColumn = ?',
+      whereArgs: [userId],
+    );
+    return result.map((map) => EcgModel.fromMap(map)).toList();
+  }
 }
 
 // BP table
 class BpModel extends Signal {
+  static String tableName = bpTable;
   final int bpSystolic;
   final int bpDiastolic;
 
@@ -110,6 +131,7 @@ class BpModel extends Signal {
     required this.bpDiastolic,
   }) : super(signalType: 'BP');
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       idColumn: id,
@@ -132,10 +154,26 @@ class BpModel extends Signal {
       bpDiastolic: map['bp_diastolic'],
     );
   }
+
+  Future<int> create() async {
+    final dbHelper = DatabaseHelper();
+    return await dbHelper.insert(tableName, toMap());
+  }
+
+  static Future<List<BpModel>> getAllByUserId(int userId) async {
+    final dbHelper = DatabaseHelper();
+    final result = await dbHelper.query(
+      tableName,
+      where: '$userIdColumn = ?',
+      whereArgs: [userId],
+    );
+    return result.map((map) => BpModel.fromMap(map)).toList();
+  }
 }
 
 // body temperature table
 class BtempModel extends Signal {
+  static String tableName = btempTable;
   final double bodyTemp;
 
   BtempModel({
@@ -146,6 +184,7 @@ class BtempModel extends Signal {
     required this.bodyTemp,
   }) : super(signalType: 'BTEMP');
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       idColumn: id,
@@ -165,5 +204,20 @@ class BtempModel extends Signal {
       stopTime: DateTime.parse(map[stopTimeColumn]),
       bodyTemp: map['body_temp'],
     );
+  }
+
+  Future<int> create() async {
+    final dbHelper = DatabaseHelper();
+    return await dbHelper.insert(tableName, toMap());
+  }
+
+  static Future<List<BtempModel>> getAllByUserId(int userId) async {
+    final dbHelper = DatabaseHelper();
+    final result = await dbHelper.query(
+      tableName,
+      where: '$userIdColumn = ?',
+      whereArgs: [userId],
+    );
+    return result.map((map) => BtempModel.fromMap(map)).toList();
   }
 }

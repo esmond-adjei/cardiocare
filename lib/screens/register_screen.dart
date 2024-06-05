@@ -2,7 +2,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:xmonapp/services/auth_service.dart';
+import 'package:xmonapp/services/dummy_user_data.dart';
 import 'package:xmonapp/widgets/custom_text_field.dart';
 import 'package:xmonapp/widgets/custom_button.dart';
 import 'login_screen.dart';
