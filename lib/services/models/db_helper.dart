@@ -1,5 +1,4 @@
-import 'dart:async';
-
+import 'dart:developer';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
@@ -9,31 +8,23 @@ import 'package:xmonapp/services/exceptions.dart';
 
 // databseService
 class DatabaseHelper {
-  static Database? _db;
-
-  List<Signal> _signalCache = [];
-
-  CardioUser? _user;
-
   static final DatabaseHelper _instance = DatabaseHelper._internal();
-  DatabaseHelper._internal();
+  static Database? _db;
+  static const int _v = 1;
+  static const List dbs = [
+    createECGTable,
+    createBPTable,
+    createBTempTable,
+    createUserTable
+  ];
 
-  static final DatabaseHelper _shared = DatabaseHelper._sharedInstance();
-  factory DatabaseHelper() => _instance;
-
-  DatabaseHelper._sharedInstance() {
-    _signalStreamController = StreamController<List<Signal>>.broadcast(
-      onListen: () {
-        _signalStreamController.sink.add(_signalCache);
-      },
-    );
+  factory DatabaseHelper() {
+    return _instance;
   }
 
-  // factory DatabaseHelper() => _shared;
+  DatabaseHelper._internal();
 
-  late final StreamController<List<Signal>> _signalStreamController;
-
-  // ======== DATABASE LIFECYCLE MANAGEMENT ===========
+  // ======== MANAGE DATABASE ===========
   // get db or open if closed
   Future<Database> get database async {
     if (_db != null) return _db!;
@@ -98,44 +89,28 @@ class DatabaseHelper {
     }
   }
 
-  // ======== DATABASE LIFECYCLE MANAGEMENT ===========
-  Future<int> insert(
-    String table,
-    Map<String, dynamic> values,
-  ) async {
-    final db = await database;
-    return await db.insert(table, values);
-  }
+//Initialize all databases at once.
+  Future<void> onInitCreate() async {
+    if (_db != null) {
+      return;
+    }
+    try {
+      String dbPath = "${await getDatabasesPath()}$dbName";
 
-  Future<int> update(
-    String table,
-    Map<String, dynamic> values,
-    String where,
-    List<dynamic> whereArgs,
-  ) async {
-    final db = await database;
-    return await db.update(table, values, where: where, whereArgs: whereArgs);
+      _db = await openDatabase(
+        dbPath,
+        version: _v,
+        onCreate: (db, version) {
+          for (var database in dbs) {
+            db.execute(database);
+          }
+        },
+      );
+    } on Exception catch (e) {
+      log('db:  ${e.toString()}');
+    }
   }
-
-  Future<int> delete(
-    String table,
-    String where,
-    List<dynamic> whereArgs,
-  ) async {
-    final db = await database;
-    return await db.delete(table, where: where, whereArgs: whereArgs);
-  }
-
-  Future<List<Map<String, dynamic>>> query(
-    String table, {
-    String? where,
-    List<dynamic>? whereArgs,
-    String? orderBy,
-  }) async {
-    final db = await database;
-    return await db.query(table,
-        where: where, whereArgs: whereArgs, orderBy: orderBy);
-  }
+//
 
   // ======== MANAGE USER TABLES ===========
   // manage user table
