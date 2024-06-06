@@ -120,7 +120,7 @@ class DatabaseHelper {
         },
       );
     } on Exception catch (e) {
-      log(e.toString());
+      log('db:  ${e.toString()}');
     }
   }
 //
