@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:xmonapp/services/models/db_model.dart';
-import 'package:xmonapp/services/models/db_crud.dart';
 import 'package:xmonapp/utils/create_dummy_data.dart';
 
 class VitalSignalsScreen extends StatefulWidget {
@@ -25,23 +24,13 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
   }
 
   void _refreshData() {
-    setState(() {
-      _ecgDataFuture = getEcgData(widget.userId);
-      _bpDataFuture = getBpData(widget.userId);
-      _btempFuture = getBtempData(widget.userId);
-    });
+    setState(() {});
   }
 
   void _insertDummyData() async {
     List<int> ecgData = _dummyDataGenerator.generateEcgData();
     Map<String, int> bpData = _dummyDataGenerator.generateBpData();
     double btemp = _dummyDataGenerator.generateBtempData();
-
-    saveEcgData(widget.userId, ecgData);
-    saveBpData(widget.userId, bpData['systolic']!, bpData['diastolic']!);
-    saveBtempData(widget.userId, btemp);
-
-    _refreshData();
   }
 
   @override

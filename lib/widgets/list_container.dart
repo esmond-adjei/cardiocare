@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:xmonapp/services/models/db_model.dart';
 import 'package:xmonapp/widgets/list_item.dart';
 
 class ListContainer extends StatelessWidget {
-  final List<Map<String, String>> listData;
+  final List<dynamic> listData;
   final String listHeading;
 
   const ListContainer({
@@ -42,10 +43,11 @@ class ListContainer extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemBuilder: (BuildContext context, int index) {
+                Signal signal = listData[index];
                 return ListItem(
-                  name: listData[index]['name']!,
-                  startTime: listData[index]['startTime']!,
-                  endTime: listData[index]['endTime']!,
+                  name: signal.name,
+                  startTime: signal.startTime.toIso8601String(),
+                  endTime: signal.stopTime.toIso8601String(),
                 );
               },
               separatorBuilder: (BuildContext context, int index) => Divider(

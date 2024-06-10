@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:xmonapp/services/dummy_user_data.dart';
+import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/widgets/custom_text_field.dart';
 import 'package:xmonapp/widgets/custom_button.dart';
 import 'register_screen.dart';
@@ -15,21 +18,16 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
+  final DatabaseHelper _dbHelper = DatabaseHelper();
 
   void _login() async {
-    final email = _emailController.text;
     final password = _passwordController.text;
-
-    final success = await _authService.login(email, password);
-    if (success) {
-      Navigator.pushNamed(
-        context,
-        '/home',
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login failed')),
-      );
+    try {
+      await _dbHelper.getUser(email: _emailController.text);
+      Navigator.pushNamed(context, '/home');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      log('Login Error: $e');
     }
   }
 

@@ -26,5 +26,6 @@ final ThemeData customRedTheme = ThemeData(
   ),
   floatingActionButtonTheme: const FloatingActionButtonThemeData(
     backgroundColor: Colors.redAccent,
+    foregroundColor: Colors.white,
   ),
 );

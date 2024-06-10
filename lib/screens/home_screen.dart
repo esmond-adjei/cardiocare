@@ -1,7 +1,13 @@
+import 'dart:developer';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:xmonapp/services/models/db_helper.dart';
+import 'package:xmonapp/services/models/db_model.dart';
 import 'package:xmonapp/widgets/list_container.dart';
 import 'package:xmonapp/screens/pages/signal_screen.dart';
 import 'package:xmonapp/services/dummy_data.dart';
+// import 'package:xmonapp/services/models/db.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,6 +17,62 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeState extends State<HomeScreen> {
+  late DatabaseHelper _dbhelper;
+
+  @override
+  void initState() {
+    super.initState();
+    _dbhelper = DatabaseHelper();
+  }
+
+  void _create() async {
+    // final ecgData = Uint8List.fromList([0, 1, 2, 3, 4, 5]);
+    // final ecgSignal = EcgModel(
+    //   userId: 1,
+    //   startTime: DateTime.now(),
+    //   stopTime: DateTime.now().add(const Duration(minutes: 5)),
+    //   ecg: ecgData,
+    // );
+
+    // var ecg = await _dbhelper.createEcgData(ecgSignal);
+    // log('ecg data: $ecg');
+
+    final signal = BpModel(
+      userId: 1,
+      startTime: DateTime.now(),
+      stopTime: DateTime.now().add(const Duration(minutes: 3)),
+      bpDiastolic: 120,
+      bpSystolic: 60,
+    );
+
+    var id = await _dbhelper.createBpData(signal);
+    log('data id: $id');
+
+    // var user = const CardioUser(email: 'esmond@cardioplus.com');
+    // var user2 = const CardioUser(email: 'adjei@cardioplus.com');
+    // var user3 = const CardioUser(email: 'xmon@cardioplus.com');
+    // await _dbhelper.createUser(user: user);
+    // await _dbhelper.createUser(user: user2);
+    // await _dbhelper.createUser(user: user3);
+  }
+
+  void _get() async {
+    // TO BE IMPLEMENTED
+    // List<EcgModel> ecgSignals = await _dbhelper.getEcgData(1);
+    // for (var ecg in ecgSignals) {
+    //   log('ecg: $ecg');
+    // }
+    // List<BpModel> bpSignals = await _dbhelper.getBpData(1);
+    // for (var bp in bpSignals) {
+    //   log('bp: $bp data: ${bp.bpSystolic}/${bp.bpDiastolic}');
+    // }
+
+    // var users = await _dbhelper.getAllUsers();
+    // for (var user in users) {
+    //   log('user: $user');
+    // }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,20 +124,36 @@ class _HomeState extends State<HomeScreen> {
               margin: const EdgeInsets.all(10),
               child: Column(
                 children: [
-                  ListContainer(
-                    listHeading: 'ECG | last 3 days',
-                    listData: getECGData().sublist(0, 3),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _create();
+                      },
+                      child: const Text('Create'),
+                    ),
                   ),
-                  const SizedBox(height: 40),
-                  ListContainer(
-                    listHeading: 'PPPG | last 3 days',
-                    listData: getBloodPressureData().sublist(0, 3),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _get();
+                      },
+                      child: const Text('Get'),
+                    ),
                   ),
-                  const SizedBox(height: 40),
-                  ListContainer(
-                    listHeading: 'Body Temperature | last 3 days',
-                    listData: getBodyTemperatureData().sublist(0, 3),
-                  ),
+                  // ListContainer(
+                  //   listHeading: 'ECG | last 3 days',
+                  //   listData: getECGData().sublist(0, 3),
+                  // ),
+                  // const SizedBox(height: 40),
+                  // ListContainer(
+                  //   listHeading: 'PPPG | last 3 days',
+                  //   listData: getBloodPressureData().sublist(0, 3),
+                  // ),
+                  // const SizedBox(height: 40),
+                  // ListContainer(
+                  //   listHeading: 'Body Temperature | last 3 days',
+                  //   listData: getBodyTemperatureData().sublist(0, 3),
+                  // ),
                 ],
               ),
             ),
@@ -90,8 +168,6 @@ class _HomeState extends State<HomeScreen> {
                 builder: (context) => const VitalSignalsScreen(userId: 1)),
           );
         },
-        backgroundColor: Colors.redAccent,
-        foregroundColor: Colors.white,
         child: const Icon(Icons.devices),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:xmonapp/screens/login_screen.dart';
+import 'package:xmonapp/screens/register_screen.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/theme.dart';
 import 'package:xmonapp/screens/history_screen.dart';
@@ -8,7 +10,6 @@ import 'package:xmonapp/screens/settings_screen.dart';
 import 'package:xmonapp/screens/pages/connect_device.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -28,6 +29,8 @@ class MyApp extends StatelessWidget {
           '/history': (context) => const HistoryScreen(),
           '/setting': (context) => const SettingsScreen(),
           '/device': (context) => const ConnectDevice(),
+          '/login': (context) => const LoginScreen(),
+          '/register': (context) => const RegisterScreen(),
         });
   }
 }

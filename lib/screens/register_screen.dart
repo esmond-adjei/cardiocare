@@ -1,8 +1,12 @@
 // screens/register_screen.dart
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:xmonapp/services/dummy_user_data.dart';
+import 'package:xmonapp/services/models/db_helper.dart';
+import 'package:xmonapp/services/models/db_model.dart';
 import 'package:xmonapp/widgets/custom_text_field.dart';
 import 'package:xmonapp/widgets/custom_button.dart';
 import 'login_screen.dart';
@@ -18,21 +22,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
+  final DatabaseHelper _dbHelper = DatabaseHelper();
 
   void _register() async {
-    final email = _emailController.text;
     final password = _passwordController.text;
 
-    final success = await _authService.register(email, password);
-    if (success) {
+    try {
+      _dbHelper.createUser(user: CardioUser(email: _emailController.text));
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registration failed')),
-      );
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Registration failed')));
+      log('Registration Error: $e');
     }
   }
 

@@ -1,39 +1,41 @@
 // ------ CONSTANTS --------
-const createUserTable = '''CREATE TABLE IF NOT EXISTS cardio_user (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT NOT NULL UNIQUE
+const createUserTable = '''CREATE TABLE IF NOT EXISTS $userTable (
+    $idColumn INTEGER PRIMARY KEY AUTOINCREMENT,
+    $emailColumn TEXT NOT NULL UNIQUE
   );''';
 
-const createSignalTable = '''CREATE TABLE IF NOT EXISTS cardio_signal (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    start_time DATETIME NOT NULL,
-    stop_time DATETIME NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    signal_type TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES cardio_user (id)
+const createSignalTable = '''CREATE TABLE IF NOT EXISTS $signalTable (
+    $idColumn INTEGER PRIMARY KEY AUTOINCREMENT,
+    $userIdColumn INTEGER NOT NULL,
+    $nameColumn TEXT NOT NULL,
+    $startTimeColumn DATETIME NOT NULL,
+    $stopTimeColumn DATETIME NOT NULL,
+    $createdAtColumn DATETIME DEFAULT CURRENT_TIMESTAMP,
+    $signalTypeColumn TEXT NOT NULL,
+    FOREIGN KEY ($userIdColumn) REFERENCES $userTable ($idColumn)
 );''';
 
-const createECGTable = '''CREATE TABLE IF NOT EXISTS cardio_ecg (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    signal_id INTEGER NOT NULL,
+const createECGTable = '''CREATE TABLE IF NOT EXISTS $ecgTable (
+    $idColumn INTEGER PRIMARY KEY AUTOINCREMENT,
+    $nameColumn TEXT NOT NULL,
+    $signalIdColumn INTEGER NOT NULL,
     ecg BLOB NOT NULL,
-    FOREIGN KEY (signal_id) REFERENCES cardio_signal (id)
+    FOREIGN KEY ($signalIdColumn) REFERENCES $signalTable ($idColumn)
 );''';
 
-const createBPTable = '''CREATE TABLE IF NOT EXISTS cardio_bp (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    signal_id INTEGER NOT NULL,
+const createBPTable = '''CREATE TABLE IF NOT EXISTS $bpTable (
+    $idColumn INTEGER PRIMARY KEY AUTOINCREMENT,
+    $signalIdColumn INTEGER NOT NULL,
     bp_systolic INTEGER NOT NULL,
     bp_diastolic INTEGER NOT NULL,
-    FOREIGN KEY (signal_id) REFERENCES cardio_signal (id)
+    FOREIGN KEY ($signalIdColumn) REFERENCES $signalTable ($idColumn)
 );''';
 
-const createBTempTable = '''CREATE TABLE IF NOT EXISTS cardio_btemp (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    signal_id INTEGER NOT NULL,
+const createBTempTable = '''CREATE TABLE IF NOT EXISTS $btempTable (
+    $idColumn INTEGER PRIMARY KEY AUTOINCREMENT,
+    $signalIdColumn INTEGER NOT NULL,
     body_temp REAL NOT NULL,
-    FOREIGN KEY (signal_id) REFERENCES cardio_signal (id)
+    FOREIGN KEY ($signalIdColumn) REFERENCES $signalTable ($idColumn)
 );''';
 
 // ------ CONSTANTS --------
@@ -45,6 +47,7 @@ const bpTable = 'cardio_bp';
 const btempTable = 'cardio_btemp';
 
 const idColumn = 'id';
+const nameColumn = 'signal_name';
 const emailColumn = 'email';
 const userIdColumn = 'user_id';
 const startTimeColumn = 'start_time';

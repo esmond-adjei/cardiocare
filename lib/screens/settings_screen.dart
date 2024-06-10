@@ -76,10 +76,13 @@ class SettingsScreen extends StatelessWidget {
               title: Text('Help & Support'),
               trailing: Icon(Icons.arrow_forward_ios),
             ),
-            const ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Logout'),
-              trailing: Icon(Icons.arrow_forward_ios),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.pushNamed(context, '/login');
+              },
             ),
           ],
         ),

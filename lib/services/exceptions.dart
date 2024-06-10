@@ -1,14 +1,86 @@
-// exceptions
-class DatabaseRunningException implements Exception {}
+import 'dart:developer';
 
-class UnableToGetDocumentsDirectory implements Exception {}
+class DatabaseRunningException implements Exception {
+  final String message;
+  DatabaseRunningException([this.message = 'Database is already running.']);
 
-class DatabaseNotRunningException implements Exception {}
+  @override
+  String toString() {
+    final logMessage = 'DatabaseRunningException: $message';
+    log(logMessage);
+    return logMessage;
+  }
+}
 
-class DatabaseIsNotOpen implements Exception {}
+class UnableToGetDocumentsDirectory implements Exception {
+  final String message;
+  UnableToGetDocumentsDirectory(
+      [this.message = 'Unable to get documents directory.']);
 
-class UserAlreadyExists implements Exception {}
+  @override
+  String toString() {
+    final logMessage = 'UnableToGetDocumentsDirectory: $message';
+    log(logMessage);
+    return logMessage;
+  }
+}
 
-class UserDoesNotExist implements Exception {}
+class DatabaseNotRunningException implements Exception {
+  final String message;
+  DatabaseNotRunningException([this.message = 'Database is not running.']);
 
-class UserAccessDenied implements Exception {}
+  @override
+  String toString() {
+    final logMessage = 'DatabaseNotRunningException: $message';
+    log(logMessage);
+    return logMessage;
+  }
+}
+
+class DatabaseIsNotOpen implements Exception {
+  final String message;
+  DatabaseIsNotOpen([this.message = 'Database is not open.']);
+
+  @override
+  String toString() {
+    final logMessage = 'DatabaseIsNotOpen: $message';
+    log(logMessage);
+    return logMessage;
+  }
+}
+
+class UserAlreadyExists implements Exception {
+  final String message;
+  UserAlreadyExists([this.message = 'User already exists.']);
+
+  @override
+  String toString() {
+    final logMessage = 'UserAlreadyExists: $message';
+    log(logMessage);
+    return logMessage;
+  }
+}
+
+class UserDoesNotExist implements Exception {
+  final String message;
+  UserDoesNotExist([this.message = 'User does not exist.']);
+
+  @override
+  String toString() {
+    final logMessage = 'UserDoesNotExist: $message';
+    log(logMessage);
+    return logMessage;
+  }
+}
+
+class UserAccessDenied implements Exception {
+  final String message;
+  UserAccessDenied([this.message = 'User access denied.']);
+
+  @override
+  String toString() {
+    final logMessage = 'UserAccessDenied: $message';
+    log(logMessage);
+    return logMessage;
+  }
+}

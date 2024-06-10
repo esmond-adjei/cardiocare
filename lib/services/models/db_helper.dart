@@ -12,10 +12,11 @@ class DatabaseHelper {
   static Database? _db;
   static const int _v = 1;
   static const List dbs = [
+    createUserTable,
+    createSignalTable,
     createECGTable,
     createBPTable,
     createBTempTable,
-    createUserTable
   ];
 
   factory DatabaseHelper() {
@@ -24,11 +25,49 @@ class DatabaseHelper {
 
   DatabaseHelper._internal();
 
-  // ======== MANAGE DATABASE ===========
+  // =========== MANAGE DATABASE: create tables, open db, close db ===========
+  Future<void> onInitCreate() async {
+    if (_db != null) {
+      return;
+    }
+    await _open();
+  }
+
+  Future<void> _open() async {
+    try {
+      String path = join(await getDatabasesPath(), dbName);
+      log('dbPath: $path');
+      _db = await openDatabase(
+        path,
+        version: _v,
+        onCreate: (db, version) async {
+          log('>> Creating tables..');
+          db.execute('PRAGMA foreign_keys = ON;');
+          for (var database in dbs) {
+            await db.execute(database);
+          }
+        },
+      );
+    } on MissingPlatformDirectoryException {
+      throw UnableToGetDocumentsDirectory();
+    }
+  }
+
+  Future<void> close() async {
+    final db = _db;
+    if (db == null) {
+      throw DatabaseNotRunningException();
+    } else {
+      await db.close();
+      _db = null;
+    }
+  }
+
+  // =========== DB UTILS ===========
   // get db or open if closed
   Future<Database> get database async {
     if (_db != null) return _db!;
-    _db = await _open();
+    await _open();
     return _db!;
   }
 
@@ -42,95 +81,33 @@ class DatabaseHelper {
     }
   }
 
-  // version 1: open db
-  Future<Database> _open() async {
-    try {
-      String path = join(await getDatabasesPath(), dbName);
-      return await openDatabase(
-        path,
-        version: 1,
-        onCreate: _onCreate,
-      );
-    } on MissingPlatformDirectoryException {
-      throw UnableToGetDocumentsDirectory();
-    }
-  }
-
-  Future<void> _onCreate(Database db, int version) async {
-    await db.execute(createUserTable);
-    await db.execute(createSignalTable);
-    await db.execute(createECGTable);
-    await db.execute(createBPTable);
-    await db.execute(createBTempTable);
-  }
-
-  // version 2: open db
-  Future<void> open() async {
-    if (_db != null) {
-      throw DatabaseRunningException();
-    }
-    try {
-      final docsPath = await getApplicationDocumentsDirectory();
-      final String dbPath = join(docsPath.path, dbName);
-      _db = await openDatabase(dbPath);
-    } on MissingPlatformDirectoryException {
-      throw UnableToGetDocumentsDirectory();
-    }
-  }
-
-  // close db
-  Future<void> close() async {
-    final db = _db;
-    if (db == null) {
-      throw DatabaseNotRunningException();
-    } else {
-      await db.close();
-      _db = null;
-    }
-  }
-
-//Initialize all databases at once.
-  Future<void> onInitCreate() async {
-    if (_db != null) {
-      return;
-    }
-    try {
-      String dbPath = "${await getDatabasesPath()}$dbName";
-
-      _db = await openDatabase(
-        dbPath,
-        version: _v,
-        onCreate: (db, version) {
-          for (var database in dbs) {
-            db.execute(database);
-          }
-        },
-      );
-    } on Exception catch (e) {
-      log('db:  ${e.toString()}');
-    }
-  }
-//
-
-  // ======== MANAGE USER TABLES ===========
+  // =========== MANAGE USER TABLES ===========
   // manage user table
-  Future<CardioUser> createUser({required String email}) async {
-    final db = _getDatabaseOrThrow();
+  Future<CardioUser> createUser({required CardioUser user}) async {
+    final db = await database;
     final results = await db.query(
       userTable,
       limit: 1,
       where: 'email = ?',
-      whereArgs: [email.toLowerCase()],
+      whereArgs: [user.email.toLowerCase()],
     );
     if (results.isNotEmpty) {
       throw UserAlreadyExists();
     }
 
-    final userId = await db.insert(userTable, {
-      emailColumn: email.toLowerCase(),
-    });
-    // create and return a new cardio user object
-    return CardioUser(id: userId, email: email);
+    final userId = await db.insert(
+      userTable,
+      {
+        emailColumn: user.email.toLowerCase(),
+      },
+    );
+    return user.copyWith(id: userId);
+  }
+
+  Future<List<CardioUser>> getAllUsers() async {
+    final db = _getDatabaseOrThrow();
+    final List<Map<String, dynamic>> results = await db.query(userTable);
+    return results.map((map) => CardioUser.fromRow(map)).toList();
   }
 
   Future<CardioUser> getUser({required String email}) async {
@@ -139,7 +116,7 @@ class DatabaseHelper {
       userTable,
       limit: 1,
       where: 'email = ?',
-      whereArgs: [email.toLowerCase()],
+      whereArgs: [email],
     );
     if (results.isEmpty) {
       throw UserDoesNotExist();
@@ -166,23 +143,22 @@ class DatabaseHelper {
     return response;
   }
 
-  // ======== MANAGE SIGNAL TABLE ===========
+  // =========== MANAGE SIGNAL TABLE ===========
   // manage signal table
   Future<int> createSignal(Signal signal) async {
-    final db = _getDatabaseOrThrow();
-    final signalId = await db.insert(signalTable, {
+    // final db = _getDatabaseOrThrow();
+    return await _db!.insert(signalTable, {
       userIdColumn: signal.userId,
       startTimeColumn: signal.startTime.toIso8601String(),
       stopTimeColumn: signal.stopTime.toIso8601String(),
       signalTypeColumn: signal.signalType,
     });
-    return signalId;
   }
 
   // manage ecg table
   Future<int> createEcgData(EcgModel ecgData) async {
-    final signalId = await createSignal(ecgData);
     final db = _getDatabaseOrThrow();
+    final signalId = await createSignal(ecgData);
     return await db.insert(ecgTable, {
       signalIdColumn: signalId,
       'ecg': ecgData.ecg,
