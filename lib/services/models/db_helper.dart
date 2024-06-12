@@ -36,7 +36,7 @@ class DatabaseHelper {
   Future<void> _open() async {
     try {
       String path = join(await getDatabasesPath(), dbName);
-      log('dbPath: $path');
+      log('Opening database at path $path');
       _db = await openDatabase(
         path,
         version: _v,

@@ -1,12 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:xmonapp/screens/pages/create_signal.dart';
+import 'package:xmonapp/screens/pages/ecg_renderer.dart';
+import 'package:xmonapp/screens/single_monitoring_layout.dart';
 import 'package:xmonapp/services/enums.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/models/db_model.dart';
 import 'package:xmonapp/widgets/list_container.dart';
 
-class HistoryScreen extends StatelessWidget {
+class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
+
+  @override
+  State<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, initialIndex: 0, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,20 +37,22 @@ class HistoryScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('History'),
-          bottom: const TabBar(
-            dividerColor: Colors.transparent,
+          bottom: TabBar(
+            dividerHeight: 0,
             indicatorColor: Colors.white,
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white70,
-            tabs: [
+            controller: _tabController,
+            tabs: const [
               Tab(text: 'ECG'),
               Tab(text: 'Blood Pressure'),
               Tab(text: 'Body Temperature'),
             ],
           ),
         ),
-        body: const TabBarView(
-          children: [
+        body: TabBarView(
+          controller: _tabController,
+          children: const [
             DataTab(dataType: DataType.ECG),
             DataTab(dataType: DataType.BloodPressure),
             DataTab(dataType: DataType.BodyTemperature),
@@ -38,18 +62,16 @@ class HistoryScreen extends StatelessWidget {
           builder: (context) {
             final tabController = DefaultTabController.of(context);
             return FloatingActionButton(
+              heroTag: 'fab-${tabController.index}',
               onPressed: () {
-                final currentIndex = tabController.index;
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AddSignalScreen(
-                      dataType: DataType.values[currentIndex],
-                    ),
+                    builder: (context) => const SingleMonitorLayout(),
                   ),
                 );
               },
-              child: const Icon(Icons.add),
+              child: const Icon(Icons.play_circle),
             );
           },
         ),
