@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:xmonapp/screens/pages/ecg_renderer.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/models/db_model.dart';
 import 'package:xmonapp/utils/ecg_generator.dart';
@@ -180,19 +181,19 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
             child: TabBarView(
               controller: _tabController,
               children: [
-                RecordingScreen(
+                ECGRenderer(
                   isRecording: isRecording,
                   ecgValues: _ecgValues,
                   title: 'ECG Graph Placeholder',
                   scrollController: _scrollController,
                 ),
-                RecordingScreen(
+                BPRenderer(
                   isRecording: false,
                   ecgValues: _ecgValues,
                   title: 'Blood Pressure Graph Placeholder',
                   scrollController: _scrollController,
                 ),
-                RecordingScreen(
+                BtempRenderer(
                   isRecording: false,
                   ecgValues: _ecgValues,
                   title: 'Body Temperature Graph Placeholder',
@@ -292,13 +293,13 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   }
 }
 
-class RecordingScreen extends StatelessWidget {
+class ECGRenderer extends StatelessWidget {
   final bool isRecording;
   final String title;
   final List<int> ecgValues;
   final ScrollController scrollController;
 
-  const RecordingScreen({
+  const ECGRenderer({
     super.key,
     required this.isRecording,
     required this.title,
@@ -312,9 +313,10 @@ class RecordingScreen extends StatelessWidget {
       children: [
         Expanded(
           child: Container(
-            color: Colors.grey[300],
-            child: Center(
-              child: Text(
+            color: Colors.grey.shade100,
+            child: Column(children: [
+              const SizedBox(height: 50),
+              Text(
                 title,
                 style: TextStyle(
                   color: Colors.grey.shade500,
@@ -322,35 +324,192 @@ class RecordingScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
+              const ECGChart(),
+              Container(
+                height: 50,
+                color: Colors.grey.shade300,
+                child: Center(
+                  child: ListView.builder(
+                    controller: scrollController,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: ecgValues.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          ' ${ecgValues[index]} ',
+                          style: TextStyle(
+                            color: Colors.grey.shade800,
+                            fontSize: 16,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ]),
           ),
         ),
-        if (isRecording)
+      ],
+    );
+  }
+}
+
+class BPRenderer extends StatelessWidget {
+  final bool isRecording;
+  final String title;
+  final List<int> ecgValues;
+  final ScrollController scrollController;
+
+  const BPRenderer({
+    super.key,
+    required this.isRecording,
+    required this.title,
+    required this.ecgValues,
+    required this.scrollController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(30),
+      color: Colors.grey.shade100,
+      child: Column(
+        children: [
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey.shade500,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 50),
+          const Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text('Systolic'),
+              Text(
+                '80 mmHg',
+                style: TextStyle(
+                  fontSize: 42.0,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 30),
+          const Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text('Diastolic'),
+              Text(
+                '60 mmHg',
+                style: TextStyle(
+                  fontSize: 42.0,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class BtempRenderer extends StatelessWidget {
+  final bool isRecording;
+  final String title;
+  final List<int> ecgValues;
+  final ScrollController scrollController;
+
+  const BtempRenderer({
+    super.key,
+    required this.isRecording,
+    required this.title,
+    required this.ecgValues,
+    required this.scrollController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey.shade500,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 20),
           Container(
-            height: 100,
-            color: Colors.grey[400],
-            child: Center(
-              child: ListView.builder(
-                controller: scrollController,
-                scrollDirection: Axis.horizontal,
-                itemCount: ecgValues.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: Text(
-                      ' ${ecgValues[index]} ',
-                      style: TextStyle(
-                        color: Colors.grey.shade800,
-                        fontSize: 24,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  );
-                },
+            height: 180.0,
+            width: 180.0,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: Text(
+                '36.1 °C',
+                style: TextStyle(
+                  fontSize: 36.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
-      ],
+          const SizedBox(height: 30),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 10.0,
+                  horizontal: 30.0,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text(
+                  'min 32.9 °C',
+                  style: TextStyle(
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 10.0,
+                  horizontal: 30.0,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text(
+                  'min 32.9 °C',
+                  style: TextStyle(
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
