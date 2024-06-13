@@ -7,7 +7,7 @@ const createUserTable = '''CREATE TABLE IF NOT EXISTS $userTable (
 const createSignalTable = '''CREATE TABLE IF NOT EXISTS $signalTable (
     $idColumn INTEGER PRIMARY KEY AUTOINCREMENT,
     $userIdColumn INTEGER NOT NULL,
-    $nameColumn TEXT NOT NULL,
+    $nameColumn TEXT,
     $startTimeColumn DATETIME NOT NULL,
     $stopTimeColumn DATETIME NOT NULL,
     $createdAtColumn DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -17,7 +17,6 @@ const createSignalTable = '''CREATE TABLE IF NOT EXISTS $signalTable (
 
 const createECGTable = '''CREATE TABLE IF NOT EXISTS $ecgTable (
     $idColumn INTEGER PRIMARY KEY AUTOINCREMENT,
-    $nameColumn TEXT NOT NULL,
     $signalIdColumn INTEGER NOT NULL,
     ecg BLOB NOT NULL,
     FOREIGN KEY ($signalIdColumn) REFERENCES $signalTable ($idColumn)

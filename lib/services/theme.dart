@@ -28,4 +28,9 @@ final ThemeData customRedTheme = ThemeData(
     backgroundColor: Colors.redAccent,
     foregroundColor: Colors.white,
   ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      foregroundColor: Colors.redAccent,
+    ),
+  ),
 );

@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-// import 'package:xmonapp/screens/pages/create_signal.dart';
-// import 'package:xmonapp/screens/pages/ecg_renderer.dart';
 import 'package:xmonapp/screens/single_monitoring_layout.dart';
 import 'package:xmonapp/services/enums.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
@@ -94,19 +92,7 @@ class DataTab extends StatefulWidget {
 }
 
 class _DataTabState extends State<DataTab> {
-  late Future<List<Signal>> _dataFuture;
   static final DatabaseHelper _dbhelper = DatabaseHelper();
-
-  @override
-  void initState() {
-    super.initState();
-    _dataFuture = _fetchData();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   Future<List<Signal>> _fetchData() async {
     try {
@@ -129,7 +115,7 @@ class _DataTabState extends State<DataTab> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Signal>>(
-      future: _dataFuture,
+      future: _fetchData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());

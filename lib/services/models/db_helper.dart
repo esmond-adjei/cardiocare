@@ -149,6 +149,7 @@ class DatabaseHelper {
     // final db = _getDatabaseOrThrow();
     return await _db!.insert(signalTable, {
       userIdColumn: signal.userId,
+      nameColumn: signal.name,
       startTimeColumn: signal.startTime.toIso8601String(),
       stopTimeColumn: signal.stopTime.toIso8601String(),
       signalTypeColumn: signal.signalType,

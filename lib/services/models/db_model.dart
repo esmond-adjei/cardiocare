@@ -45,9 +45,9 @@ class CardioUser {
 abstract class Signal {
   final int? id;
   final int userId;
-  final String? signalName;
+  String? signalName;
   final DateTime startTime;
-  final DateTime stopTime;
+  DateTime stopTime;
   final String signalType;
 
   Signal({
@@ -61,6 +61,14 @@ abstract class Signal {
 
   String get name => signalName ?? '$signalType $id';
 
+  void setName(String name) {
+    signalName = name;
+  }
+
+  void setStopTime(DateTime time) {
+    stopTime = time;
+  }
+
   Signal.fromRow(Map<String, Object?> map)
       : id = map[idColumn] as int,
         signalName = map[nameColumn] as String,
@@ -72,7 +80,8 @@ abstract class Signal {
   Map<String, dynamic> toMap();
 
   @override
-  String toString() => 'Signal: ID = $id, userID = $userId, type = $signalType';
+  String toString() =>
+      'Signal: ID = $id, SN:$signalName, userID = $userId, type = $signalType';
 
   @override
   bool operator ==(covariant Signal other) {
@@ -87,18 +96,24 @@ abstract class Signal {
 class EcgModel extends Signal {
   static String tableName = ecgTable;
   static const String sType = 'ECG';
-  final Uint8List ecg;
+  late Uint8List? ecg = Uint8List(0);
 
   EcgModel({
     super.id,
+    super.signalName,
     required super.userId,
     required super.startTime,
     required super.stopTime,
-    required this.ecg,
+    this.ecg,
   }) : super(signalType: sType);
 
   void write(int value) {
-    ecg.add(value);
+    ecg?.add(value);
+  }
+
+  // set ecg
+  void setEcg(List<int> data) {
+    ecg = Uint8List.fromList(data);
   }
 
   @override
@@ -106,6 +121,7 @@ class EcgModel extends Signal {
     return {
       idColumn: id,
       userIdColumn: userId,
+      nameColumn: signalName,
       startTimeColumn: startTime.toIso8601String(),
       stopTimeColumn: stopTime.toIso8601String(),
       signalTypeColumn: signalType,
@@ -117,6 +133,7 @@ class EcgModel extends Signal {
     return EcgModel(
       id: map[idColumn],
       userId: map[userIdColumn],
+      signalName: map[nameColumn],
       startTime: DateTime.parse(map[startTimeColumn]),
       stopTime: DateTime.parse(map[stopTimeColumn]),
       ecg: map['ecg'],

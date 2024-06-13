@@ -35,11 +35,14 @@ class ECGGenerator {
       }
     }
 
+    // Normalize the ecg values to be within 0-255 range
+    double minValue = ecg.reduce(min);
+    double maxValue = ecg.reduce(max);
+    double range = maxValue - minValue;
+
     for (int i = 0; i < t.length; i++) {
       await Future.delayed(Duration(milliseconds: (1000 / fs).round()));
-      final d = (ecg[i] * 1000).round(); // scale to int for simplicity
-      // print(d);
-      yield d;
+      yield ((ecg[i] - minValue) / range * 255).round();
     }
   }
 

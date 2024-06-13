@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:xmonapp/services/models/db_helper.dart';
+import 'package:xmonapp/services/models/db_model.dart';
 import 'package:xmonapp/utils/ecg_generator.dart';
 import 'package:xmonapp/widgets/timer.dart';
 
@@ -20,6 +23,8 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   final ECGGenerator _ecgGenerator = ECGGenerator();
   final ScrollController _scrollController = ScrollController();
   final Stopwatch _stopwatch = Stopwatch();
+  late EcgModel _ecgSignal;
+  final DatabaseHelper _dbhelper = DatabaseHelper();
 
   @override
   void initState() {
@@ -33,11 +38,19 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
       _ecgSubscription?.cancel();
     }
     _scrollController.dispose();
-    _stopwatch.stop();
+    _stopwatch.reset();
+    _tabController.dispose();
+    _ecgGenerator.dispose();
     super.dispose();
   }
 
   void _startRecording() {
+    _ecgSignal = EcgModel(
+      userId: 1,
+      startTime: DateTime.now(),
+      stopTime: DateTime.now(),
+      ecg: Uint8List.fromList([]),
+    );
     setState(() {
       isRecording = true;
       isPaused = false;
@@ -79,6 +92,8 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
 
   void _saveRecording() {
     _pauseRecording();
+    _ecgSignal.stopTime =
+        DateTime.now(); // change to use duration (same as timer's)
     _showSaveDialog();
   }
 
@@ -90,13 +105,14 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
 
   void _showSaveDialog() {
     TextEditingController textFieldController = TextEditingController();
-    textFieldController.text = 'ECG ${DateTime.now().millisecondsSinceEpoch}';
+    textFieldController.text =
+        'ECG ${_ecgSignal.stopTime.day}-${_ecgSignal.stopTime.month}-${_ecgSignal.stopTime.year} ${_ecgSignal.stopTime.hour}:${_ecgSignal.stopTime.minute}';
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Save Recording'),
+          title: Text(_ecgSignal.name),
           content: TextField(
             controller: textFieldController,
             decoration: const InputDecoration(hintText: "Enter recording name"),
@@ -109,13 +125,17 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
-                String recordName = textFieldController.text;
+              onPressed: () async {
+                _ecgSignal.signalName = textFieldController.text;
+                _ecgSignal.setEcg(_ecgValues);
                 // Here you would save the recording with the given name
 
                 Navigator.pop(context);
+
+                int ecgID = await _dbhelper.createEcgData(_ecgSignal);
                 // You can add logic here to actually save the data to the database or any other storage
-                print("Recording saved as: $recordName");
+                print(
+                    "Recording saved as: ID-$ecgID, SN-${_ecgSignal.name} $_ecgSignal, ${_ecgSignal.ecg}");
               },
               child: const Text('Save'),
             ),
@@ -128,17 +148,20 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text('Recorder', style: TextStyle(color: Colors.black)),
+        // title: const Text('Recorder', style: TextStyle(color: Colors.black)),
         iconTheme: const IconThemeData(color: Colors.black),
         actions: [
           TextButton(
-            onPressed: () {},
-            child: const Text('List', style: TextStyle(color: Colors.black)),
+            onPressed: () {
+              Navigator.pushNamed(context, '/history');
+            },
+            child: const Text('List'),
           ),
           IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.black),
+            icon: const Icon(Icons.more_vert),
             onPressed: () {},
           ),
         ],
@@ -146,7 +169,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20.0),
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
             child: TimerWidget(
               isRecording: isRecording,
               isPaused: isPaused,
@@ -179,15 +202,21 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 30),
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(40),
+            ),
+            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
+            padding: const EdgeInsets.all(4),
             child: TabBar(
               indicator: BoxDecoration(
-                color: Colors.grey[300],
+                color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(40),
               ),
+              indicatorSize: TabBarIndicatorSize.tab,
               dividerHeight: 0,
-              labelColor: Colors.black87,
-              unselectedLabelColor: Colors.grey,
+              labelColor: Colors.redAccent,
+              unselectedLabelColor: Colors.grey[600],
               controller: _tabController,
               tabs: [
                 _buildTab('ECG'),
@@ -203,16 +232,15 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                 ? ElevatedButton(
                     onPressed: _startRecording,
                     style: ElevatedButton.styleFrom(
-                      elevation: 4,
+                      elevation: 2,
                       shape: CircleBorder(
                         side: BorderSide(color: Colors.red.shade200, width: 4),
                       ),
                       padding: const EdgeInsets.all(16),
                     ),
                     child: const Icon(
-                      Icons.record_voice_over_rounded,
-                      color: Colors.white,
-                      size: 28,
+                      Icons.fiber_manual_record,
+                      color: Colors.redAccent,
                     ),
                   )
                 : Row(
@@ -223,10 +251,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.grey.shade400,
                         ),
-                        child: const Text(
-                          'discard',
-                          style: TextStyle(color: Colors.black),
-                        ),
+                        child: const Icon(Icons.restart_alt_rounded),
                       ),
                       const SizedBox(width: 16),
                       isPaused
@@ -235,25 +260,19 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.amberAccent,
                               ),
-                              child: const Text(
-                                'resume',
-                                style: TextStyle(color: Colors.black),
-                              ),
+                              child: const Icon(Icons.play_arrow),
                             )
                           : ElevatedButton(
                               onPressed: _pauseRecording,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.amberAccent,
                               ),
-                              child: const Text(
-                                'pause',
-                                style: TextStyle(color: Colors.black),
-                              ),
+                              child: const Icon(Icons.pause),
                             ),
                       const SizedBox(width: 16),
                       ElevatedButton(
                         onPressed: _saveRecording,
-                        child: const Text('save'),
+                        child: const Icon(Icons.stop),
                       ),
                     ],
                   ),

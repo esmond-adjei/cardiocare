@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/models/db_model.dart';
 // import 'package:xmonapp/widgets/list_container.dart';
-import 'package:xmonapp/screens/pages/signal_screen.dart';
 // import 'package:xmonapp/services/dummy_data.dart';
 // import 'package:xmonapp/services/models/db.dart';
 
@@ -64,10 +63,12 @@ class _HomeState extends State<HomeScreen> {
 
   void _get() async {
     // TO BE IMPLEMENTED
-    // List<EcgModel> ecgSignals = await _dbhelper.getEcgData(1);
-    // for (var ecg in ecgSignals) {
-    //   log('ecg: $ecg');
-    // }
+    List<EcgModel> ecgSignals = await _dbhelper.getEcgData(1);
+    print('getting ecg data');
+    for (var ecg in ecgSignals) {
+      log('ecg: $ecg');
+    }
+
     // List<BpModel> bpSignals = await _dbhelper.getBpData(1);
     // for (var bp in bpSignals) {
     //   log('bp: $bp data: ${bp.bpSystolic}/${bp.bpDiastolic}');
@@ -168,11 +169,11 @@ class _HomeState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const VitalSignalsScreen(userId: 1)),
-          );
+          // Navigator.push(
+          // context,
+          // MaterialPageRoute(
+          // builder: (context) => const VitalSignalsScreen(userId: 1)),
+          // );
         },
         child: const Icon(Icons.devices),
       ),

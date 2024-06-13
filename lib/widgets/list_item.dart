@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:xmonapp/services/models/db_model.dart';
 import 'package:xmonapp/utils/format_datetime.dart';
 
 class ListItem extends StatelessWidget {
-  final String name;
-  final String startTime;
-  final String endTime;
+  // final String name;
+  // final String startTime;
+  // final String endTime;
+
+  final Signal signal;
 
   const ListItem({
     super.key,
-    required this.name,
-    required this.startTime,
-    required this.endTime,
+    required this.signal,
   });
 
   @override
@@ -23,8 +24,11 @@ class ListItem extends StatelessWidget {
           Icons.favorite,
           color: Colors.red,
         ),
+        onTap: () {
+          print('Tapped ${signal.id} - ${signal.name}');
+        },
         title: Text(
-          name,
+          signal.name,
           style: const TextStyle(
             fontSize: 16,
           ),
@@ -33,7 +37,8 @@ class ListItem extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                formatDuration(startTime, endTime),
+                formatDuration(signal.startTime.toIso8601String(),
+                    signal.stopTime.toIso8601String()),
                 style: const TextStyle(
                   fontSize: 12,
                   color: Colors.grey,
@@ -41,7 +46,7 @@ class ListItem extends StatelessWidget {
               ),
             ),
             Text(
-              formatDateTime(startTime),
+              formatDateTime(signal.startTime.toIso8601String()),
               style: const TextStyle(
                 fontSize: 12,
                 color: Colors.grey,

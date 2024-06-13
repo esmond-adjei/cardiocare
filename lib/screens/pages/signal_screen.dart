@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:xmonapp/services/models/db_model.dart';
-import 'package:xmonapp/utils/create_dummy_data.dart';
 
 class VitalSignalsScreen extends StatefulWidget {
   final int userId;
@@ -15,7 +14,6 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
   late Future<List<EcgModel>> _ecgDataFuture;
   late Future<List<BpModel>> _bpDataFuture;
   late Future<List<BtempModel>> _btempFuture;
-  final DummyDataGenerator _dummyDataGenerator = DummyDataGenerator();
 
   @override
   void initState() {
@@ -27,11 +25,7 @@ class _VitalSignalsScreenState extends State<VitalSignalsScreen> {
     setState(() {});
   }
 
-  void _insertDummyData() async {
-    List<int> ecgData = _dummyDataGenerator.generateEcgData();
-    Map<String, int> bpData = _dummyDataGenerator.generateBpData();
-    double btemp = _dummyDataGenerator.generateBtempData();
-  }
+  void _insertDummyData() async {}
 
   @override
   Widget build(BuildContext context) {
