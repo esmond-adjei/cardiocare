@@ -13,7 +13,8 @@ class ECGScreen extends StatelessWidget {
           left: 0,
           right: 0,
           child: Center(
-            child: TimerWidget(),
+            child: Text(''),
+            // TimerWidget(isRecording: false),
           ),
         ),
         Center(

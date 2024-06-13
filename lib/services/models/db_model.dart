@@ -97,6 +97,10 @@ class EcgModel extends Signal {
     required this.ecg,
   }) : super(signalType: sType);
 
+  void write(int value) {
+    ecg.add(value);
+  }
+
   @override
   Map<String, dynamic> toMap() {
     return {

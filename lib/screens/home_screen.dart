@@ -1,12 +1,12 @@
 import 'dart:developer';
-import 'dart:typed_data';
+// import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/models/db_model.dart';
-import 'package:xmonapp/widgets/list_container.dart';
+// import 'package:xmonapp/widgets/list_container.dart';
 import 'package:xmonapp/screens/pages/signal_screen.dart';
-import 'package:xmonapp/services/dummy_data.dart';
+// import 'package:xmonapp/services/dummy_data.dart';
 // import 'package:xmonapp/services/models/db.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -23,6 +23,12 @@ class _HomeState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _dbhelper = DatabaseHelper();
+  }
+
+  @override
+  void dispose() {
+    _dbhelper.close();
+    super.dispose();
   }
 
   void _create() async {

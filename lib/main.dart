@@ -13,6 +13,7 @@ void main() {
   runApp(const MyApp());
 }
 
+// record yourself
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -53,10 +54,8 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-// initialize db here
   @override
   void initState() {
-    // initialize screens here
     _screens = [
       const HomeScreen(),
       const RecordScreen(),
