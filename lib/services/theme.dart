@@ -10,7 +10,7 @@ final ThemeData customRedTheme = ThemeData(
     backgroundColor: Colors.redAccent,
     titleTextStyle: TextStyle(
       color: Colors.white,
-      fontSize: 24,
+      // fontSize: 18,
     ),
     iconTheme: IconThemeData(color: Colors.white),
   ),

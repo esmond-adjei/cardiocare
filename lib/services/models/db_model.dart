@@ -77,7 +77,16 @@ abstract class Signal {
         stopTime = map[stopTimeColumn] as DateTime,
         signalType = map[signalTypeColumn] as String;
 
-  Map<String, dynamic> toMap();
+  Map<String, dynamic> toMap() {
+    return {
+      idColumn: id,
+      userIdColumn: userId,
+      nameColumn: signalName,
+      startTimeColumn: startTime.toIso8601String(),
+      stopTimeColumn: stopTime.toIso8601String(),
+      signalTypeColumn: signalType,
+    };
+  }
 
   @override
   String toString() =>
@@ -107,10 +116,6 @@ class EcgModel extends Signal {
     this.ecg,
   }) : super(signalType: sType);
 
-  void write(int value) {
-    ecg?.add(value);
-  }
-
   // set ecg
   void setEcg(List<int> data) {
     ecg = Uint8List.fromList(data);
@@ -118,15 +123,9 @@ class EcgModel extends Signal {
 
   @override
   Map<String, dynamic> toMap() {
-    return {
-      idColumn: id,
-      userIdColumn: userId,
-      nameColumn: signalName,
-      startTimeColumn: startTime.toIso8601String(),
-      stopTimeColumn: stopTime.toIso8601String(),
-      signalTypeColumn: signalType,
-      'ecg': ecg,
-    };
+    final map = super.toMap();
+    map['ecg'] = ecg;
+    return map;
   }
 
   factory EcgModel.fromMap(Map<String, dynamic> map) {
@@ -145,11 +144,12 @@ class EcgModel extends Signal {
 class BpModel extends Signal {
   static String tableName = bpTable;
   static String sType = 'BP';
-  final int bpSystolic;
-  final int bpDiastolic;
+  late int bpSystolic;
+  late int bpDiastolic;
 
   BpModel({
     super.id,
+    super.signalName,
     required super.userId,
     required super.startTime,
     required super.stopTime,
@@ -157,23 +157,24 @@ class BpModel extends Signal {
     required this.bpDiastolic,
   }) : super(signalType: sType);
 
+  void setBp({required int systolic, required int diastolic}) {
+    bpSystolic = systolic;
+    bpDiastolic = diastolic;
+  }
+
   @override
   Map<String, dynamic> toMap() {
-    return {
-      idColumn: id,
-      userIdColumn: userId,
-      startTimeColumn: startTime.toIso8601String(),
-      stopTimeColumn: stopTime.toIso8601String(),
-      signalTypeColumn: signalType,
-      'bp_systolic': bpSystolic,
-      'bp_diastolic': bpDiastolic,
-    };
+    final map = super.toMap();
+    map['bp_systolic'] = bpSystolic;
+    map['bp_diastolic'] = bpDiastolic;
+    return map;
   }
 
   factory BpModel.fromMap(Map<String, dynamic> map) {
     return BpModel(
       id: map[idColumn],
       userId: map[userIdColumn],
+      signalName: map[nameColumn],
       startTime: DateTime.parse(map[startTimeColumn]),
       stopTime: DateTime.parse(map[stopTimeColumn]),
       bpSystolic: map['bp_systolic'],
@@ -186,32 +187,33 @@ class BpModel extends Signal {
 class BtempModel extends Signal {
   static String tableName = btempTable;
   static String sType = 'BTEMP';
-  final double bodyTemp;
+  double bodyTemp;
 
   BtempModel({
     super.id,
+    super.signalName,
     required super.userId,
     required super.startTime,
     required super.stopTime,
     required this.bodyTemp,
   }) : super(signalType: sType);
 
+  void setBodyTemp(double temp) {
+    bodyTemp = temp;
+  }
+
   @override
   Map<String, dynamic> toMap() {
-    return {
-      idColumn: id,
-      userIdColumn: userId,
-      startTimeColumn: startTime.toIso8601String(),
-      stopTimeColumn: stopTime.toIso8601String(),
-      signalTypeColumn: signalType,
-      'body_temp': bodyTemp,
-    };
+    final map = super.toMap();
+    map['body_temp'] = bodyTemp;
+    return map;
   }
 
   factory BtempModel.fromMap(Map<String, dynamic> map) {
     return BtempModel(
       id: map[idColumn],
       userId: map[userIdColumn],
+      signalName: map[nameColumn],
       startTime: DateTime.parse(map[startTimeColumn]),
       stopTime: DateTime.parse(map[stopTimeColumn]),
       bodyTemp: map['body_temp'],

@@ -2,6 +2,7 @@ import 'dart:developer';
 // import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:xmonapp/screens/single_monitoring_layout.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/models/db_model.dart';
 // import 'package:xmonapp/widgets/list_container.dart';
@@ -169,11 +170,12 @@ class _HomeState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigator.push(
-          // context,
-          // MaterialPageRoute(
-          // builder: (context) => const VitalSignalsScreen(userId: 1)),
-          // );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const SingleMonitorLayout(),
+            ),
+          );
         },
         child: const Icon(Icons.devices),
       ),

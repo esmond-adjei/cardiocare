@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:xmonapp/screens/single_monitoring_layout.dart';
 import 'package:xmonapp/services/enums.dart';
@@ -107,7 +108,7 @@ class _DataTabState extends State<DataTab> {
           return [];
       }
     } catch (e) {
-      print(e.toString());
+      log(e.toString());
       return [];
     }
   }
@@ -125,20 +126,21 @@ class _DataTabState extends State<DataTab> {
           return const Center(child: Text('No data available'));
         } else {
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(10),
             child: Column(
               children: [
+                // HISTORY SNAPSHOT VIEW
                 Container(
                   height: 180,
-                  margin: const EdgeInsets.symmetric(vertical: 20),
+                  margin: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
+                // HISTORY DATA VIEW
                 ListContainer(
                   listHeading:
-                      '${widget.dataType.toString().split('.').last} Data',
+                      '${widget.dataType.toString().split('.').last} History',
                   listData: snapshot.data!,
                 ),
               ],

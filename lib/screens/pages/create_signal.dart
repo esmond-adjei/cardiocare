@@ -61,7 +61,7 @@ class _AddSignalScreenState extends State<AddSignalScreen> {
           break;
       }
 
-      Navigator.pop(context); // Close the form screen
+      Navigator.pop(context);
     }
   }
 
