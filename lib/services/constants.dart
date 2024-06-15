@@ -55,3 +55,8 @@ const signalTypeColumn = 'signal_type';
 const signalIdColumn = 'signal_id';
 
 const createdAtColumn = 'created_at';
+
+// signal types
+const ecgType = 'ECG';
+const bpType = 'BP';
+const btempType = 'BTEMP';

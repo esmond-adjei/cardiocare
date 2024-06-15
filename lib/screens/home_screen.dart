@@ -1,13 +1,8 @@
-import 'dart:developer';
-// import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:xmonapp/screens/single_monitoring_layout.dart';
+import 'package:xmonapp/services/constants.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/models/db_model.dart';
-// import 'package:xmonapp/widgets/list_container.dart';
-// import 'package:xmonapp/services/dummy_data.dart';
-// import 'package:xmonapp/services/models/db.dart';
+import 'package:xmonapp/widgets/list_container.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,67 +20,24 @@ class _HomeState extends State<HomeScreen> {
     _dbhelper = DatabaseHelper();
   }
 
-  @override
-  void dispose() {
-    _dbhelper.close();
-    super.dispose();
-  }
-
-  void _create() async {
-    // final ecgData = Uint8List.fromList([0, 1, 2, 3, 4, 5]);
-    // final ecgSignal = EcgModel(
-    //   userId: 1,
-    //   startTime: DateTime.now(),
-    //   stopTime: DateTime.now().add(const Duration(minutes: 5)),
-    //   ecg: ecgData,
-    // );
-
-    // var ecg = await _dbhelper.createEcgData(ecgSignal);
-    // log('ecg data: $ecg');
-
-    final signal = BpModel(
-      userId: 1,
-      startTime: DateTime.now(),
-      stopTime: DateTime.now().add(const Duration(minutes: 3)),
-      bpDiastolic: 120,
-      bpSystolic: 60,
-    );
-
-    var id = await _dbhelper.createBpData(signal);
-    log('data id: $id');
-
-    // var user = const CardioUser(email: 'esmond@cardioplus.com');
-    // var user2 = const CardioUser(email: 'adjei@cardioplus.com');
-    // var user3 = const CardioUser(email: 'xmon@cardioplus.com');
-    // await _dbhelper.createUser(user: user);
-    // await _dbhelper.createUser(user: user2);
-    // await _dbhelper.createUser(user: user3);
-  }
-
-  void _get() async {
-    // TO BE IMPLEMENTED
-    List<EcgModel> ecgSignals = await _dbhelper.getEcgData(1);
-    print('getting ecg data');
-    for (var ecg in ecgSignals) {
-      log('ecg: $ecg');
-    }
-
-    // List<BpModel> bpSignals = await _dbhelper.getBpData(1);
-    // for (var bp in bpSignals) {
-    //   log('bp: $bp data: ${bp.bpSystolic}/${bp.bpDiastolic}');
-    // }
-
-    // var users = await _dbhelper.getAllUsers();
-    // for (var user in users) {
-    //   log('user: $user');
-    // }
+  Future<Map<String, List<Signal>>> _getRecent() async {
+    return await _dbhelper.getRecentRecords(1, limit: 3);
+    // log(results.toString());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: const Text('Hi, Esmond!'),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.0),
+            child: CircleAvatar(
+              backgroundImage: AssetImage('assets/images/profile.jpg'),
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -128,54 +80,53 @@ class _HomeState extends State<HomeScreen> {
                 ),
               ],
             ),
-            Container(
-              margin: const EdgeInsets.all(10),
-              child: Column(
-                children: [
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _create();
-                      },
-                      child: const Text('Create'),
-                    ),
-                  ),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _get();
-                      },
-                      child: const Text('Get'),
-                    ),
-                  ),
-                  // ListContainer(
-                  //   listHeading: 'ECG | last 3 days',
-                  //   listData: getECGData().sublist(0, 3),
-                  // ),
-                  // const SizedBox(height: 40),
-                  // ListContainer(
-                  //   listHeading: 'PPPG | last 3 days',
-                  //   listData: getBloodPressureData().sublist(0, 3),
-                  // ),
-                  // const SizedBox(height: 40),
-                  // ListContainer(
-                  //   listHeading: 'Body Temperature | last 3 days',
-                  //   listData: getBodyTemperatureData().sublist(0, 3),
-                  // ),
-                ],
-              ),
+
+            // LIST OF RECENT RECORDS
+            FutureBuilder<Map<String, List<Signal>>>(
+              future: _getRecent(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No data available'));
+                } else {
+                  Map<String, List<Signal>> results;
+                  results = snapshot.data!;
+
+                  return Column(
+                    children: [
+                      ...results.entries.map(
+                        (entry) => ListContainer(
+                          listHeading: entry.key == ecgType
+                              ? 'ECG Signal'
+                              : entry.key == bpType
+                                  ? 'Blood Pressure'
+                                  : entry.key == btempType
+                                      ? 'Body Temperature'
+                                      : 'Unknown',
+                          listData: entry.value,
+                          routeToHistoryScreen: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/history',
+                              // arguments: entry.key,
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                }
+              },
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const SingleMonitorLayout(),
-            ),
-          );
+          Navigator.pushNamed(context, '/device');
         },
         child: const Icon(Icons.devices),
       ),

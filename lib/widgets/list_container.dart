@@ -4,11 +4,13 @@ import 'package:xmonapp/widgets/list_item.dart';
 class ListContainer extends StatelessWidget {
   final List<dynamic> listData;
   final String listHeading;
+  final VoidCallback? routeToHistoryScreen;
 
   const ListContainer({
     super.key,
     required this.listHeading,
     required this.listData,
+    this.routeToHistoryScreen,
   });
 
   @override
@@ -20,13 +22,23 @@ class ListContainer extends StatelessWidget {
           width: double.infinity,
           color: Colors.grey.shade200,
           padding: const EdgeInsets.all(10),
-          child: Text(
-            listHeading,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black54,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                listHeading,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54,
+                ),
+              ),
+              if (listData.isNotEmpty || routeToHistoryScreen != null)
+                TextButton(
+                  onPressed: routeToHistoryScreen,
+                  child: const Text('View all'),
+                ),
+            ],
           ),
         ),
         ListView.separated(
@@ -41,6 +53,7 @@ class ListContainer extends StatelessWidget {
             return ListItem(signal: listData[index]);
           },
         ),
+        const SizedBox(height: 20),
       ],
     );
   }

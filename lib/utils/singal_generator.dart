@@ -52,90 +52,6 @@ class ECGGenerator {
   }
 }
 
-class BPGenerator {
-  final int durationSeconds;
-  final int samplingRate;
-  final int initialSystolic;
-  final int initialDiastolic;
-  final int noiseAmplitude;
-  final StreamController<int> _controller = StreamController<int>();
-
-  BPGenerator({
-    this.durationSeconds = 1000,
-    this.samplingRate = 2,
-    this.initialSystolic = 120,
-    this.initialDiastolic = 80,
-    this.noiseAmplitude = 5,
-  });
-
-  Stream<Map<String, int>> get bpStream async* {
-    final numSamples = durationSeconds * samplingRate;
-    var systolic = initialSystolic;
-    var diastolic = initialDiastolic;
-    final random = Random();
-
-    for (int i = 0; i < numSamples; i++) {
-      // Simulate slight variations in BP over time
-      systolic += random.nextInt(2 * noiseAmplitude + 1) - noiseAmplitude;
-      diastolic += random.nextInt(2 * noiseAmplitude + 1) - noiseAmplitude;
-
-      // Ensure BP values stay within reasonable bounds
-      systolic = systolic.clamp(90, 180);
-      diastolic = diastolic.clamp(60, 110);
-
-      dev.log('Systolic: $systolic, Diastolic: $diastolic');
-
-      yield {'systolic': systolic, 'diastolic': diastolic};
-      await Future.delayed(
-          Duration(milliseconds: (1000 / samplingRate).round()));
-    }
-  }
-
-  void dispose() {
-    _controller.close();
-  }
-}
-
-// let's create a TempGenerator
-class TempGenerator {
-  final int durationSeconds;
-  final int samplingRate;
-  final double initialTemp;
-  final double noiseAmplitude;
-  final StreamController<double> _controller = StreamController<double>();
-
-  TempGenerator({
-    this.durationSeconds = 1000,
-    this.samplingRate = 2,
-    this.initialTemp = 37.0,
-    this.noiseAmplitude = 0.5,
-  });
-
-  Stream<double> get tempStream async* {
-    final numSamples = durationSeconds * samplingRate;
-    var temp = initialTemp;
-    final random = Random();
-
-    for (int i = 0; i < numSamples; i++) {
-      // Simulate slight variations in temperature over time
-      temp += random.nextDouble() * 2 * noiseAmplitude - noiseAmplitude;
-
-      // Ensure temperature values stay within reasonable bounds
-      temp = temp.clamp(35.0, 40.0);
-
-      dev.log('Temperature: $temp');
-
-      yield temp;
-      await Future.delayed(
-          Duration(milliseconds: (1000 / samplingRate).round()));
-    }
-  }
-
-  void dispose() {
-    _controller.close();
-  }
-}
-
 // ------------------------------------------------
 class SignalGenerator {
   final int durationSeconds;
@@ -155,7 +71,7 @@ class SignalGenerator {
   static const int fs = 500;
 
   SignalGenerator({
-    this.durationSeconds = 1000,
+    this.durationSeconds = 100,
     this.samplingRate = 2,
   });
 
@@ -183,13 +99,20 @@ class SignalGenerator {
       }
     }
 
+    // Normalize the ecg values to be within 0-255 range
     double minValue = ecg.reduce(min);
     double maxValue = ecg.reduce(max);
     double range = maxValue - minValue;
 
+    int ecgdata = 0;
+
     for (int i = 0; i < t.length; i++) {
       await Future.delayed(Duration(milliseconds: (1000 / fs).round()));
-      yield ((ecg[i] - minValue) / range * 255).round();
+      ecgdata = ((ecg[i] - minValue) / range * 255).round();
+
+      dev.log('ECG: $ecgdata', name: 'ECG');
+
+      yield ecgdata;
     }
   }
 

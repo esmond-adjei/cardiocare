@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:xmonapp/screens/pages/ecg_renderer.dart';
+import 'package:xmonapp/main.dart';
+import 'package:xmonapp/widgets/ecg_renderer.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/models/db_model.dart';
 import 'package:xmonapp/utils/singal_generator.dart';
@@ -44,7 +45,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
 
   @override
   void dispose() {
-    _stopAllSubscriptions();
+    _subscription?.cancel();
 
     _scrollController.dispose();
     _stopwatch.reset();
@@ -127,7 +128,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
       _btempValue = 36.1;
       _stopwatch.reset();
     });
-    _stopAllSubscriptions();
+    _subscription?.cancel();
   }
 
   void _pauseRecording() {
@@ -181,7 +182,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
               },
               child: const Text('Cancel'),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () async {
                 try {
                   _currentSignal.setName(textFieldController.text);
@@ -221,10 +222,6 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
     );
   }
 
-  void _stopAllSubscriptions() {
-    _subscription?.cancel();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -235,7 +232,13 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/history');
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MainScreen(selectedIndex: 1),
+                ),
+                (route) => false,
+              );
             },
             child: const Text('List'),
           ),
@@ -282,7 +285,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
           // TAB BARS
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: Colors.grey[300],
               borderRadius: BorderRadius.circular(40),
             ),
             margin: const EdgeInsets.all(10),
@@ -295,7 +298,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
               indicatorSize: TabBarIndicatorSize.tab,
               dividerHeight: 0,
               labelColor: Colors.redAccent,
-              unselectedLabelColor: Colors.grey[400],
+              unselectedLabelColor: Colors.grey[500],
               controller: _tabController,
               indicatorWeight: 0.0,
               labelPadding: const EdgeInsets.symmetric(
@@ -316,7 +319,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                       elevation: 2,
                       shape: CircleBorder(
                         side: BorderSide(
-                          color: Colors.red.shade200,
+                          color: Colors.redAccent.shade100,
                           width: 4,
                         ),
                       ),

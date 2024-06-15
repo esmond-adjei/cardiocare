@@ -105,7 +105,8 @@ class DatabaseHelper {
   }
 
   Future<List<CardioUser>> getAllUsers() async {
-    final db = _getDatabaseOrThrow();
+    // final db = _getDatabaseOrThrow();
+    final db = await database;
     final List<Map<String, dynamic>> results = await db.query(userTable);
     return results.map((map) => CardioUser.fromRow(map)).toList();
   }
@@ -146,7 +147,6 @@ class DatabaseHelper {
   // =========== MANAGE SIGNAL TABLE ===========
   // manage signal table
   Future<int> createSignal(Signal signal) async {
-    // final db = _getDatabaseOrThrow();
     return await _db!.insert(signalTable, {
       userIdColumn: signal.userId,
       nameColumn: signal.name,
@@ -166,14 +166,15 @@ class DatabaseHelper {
     });
   }
 
-  Future<List<EcgModel>> getEcgData(int userId) async {
-    final db = _getDatabaseOrThrow();
+  Future<List<EcgModel>> getEcgData(int userId, {int? limit}) async {
+    final db = await database;
     final List<Map<String, dynamic>> results = await db.query(
       '$signalTable INNER JOIN $ecgTable ON $signalTable.$idColumn = $ecgTable.$signalIdColumn',
       where:
           '$signalTable.$userIdColumn = ? AND $signalTable.$signalTypeColumn = ?',
       whereArgs: [userId, 'ECG'],
       orderBy: '$signalTable.$createdAtColumn DESC',
+      limit: limit,
     );
     return results.map((map) => EcgModel.fromMap(map)).toList();
   }
@@ -189,14 +190,15 @@ class DatabaseHelper {
     });
   }
 
-  Future<List<BpModel>> getBpData(int userId) async {
-    final db = _getDatabaseOrThrow();
+  Future<List<BpModel>> getBpData(int userId, {int? limit}) async {
+    final db = await database;
     final List<Map<String, dynamic>> results = await db.query(
       '$signalTable INNER JOIN $bpTable ON $signalTable.$idColumn = $bpTable.$signalIdColumn',
       where:
           '$signalTable.$userIdColumn = ? AND $signalTable.$signalTypeColumn = ?',
       whereArgs: [userId, 'BP'],
       orderBy: '$signalTable.$createdAtColumn DESC',
+      limit: limit,
     );
     return results.map((map) => BpModel.fromMap(map)).toList();
   }
@@ -211,15 +213,35 @@ class DatabaseHelper {
     });
   }
 
-  Future<List<BtempModel>> getBtempData(int userId) async {
-    final db = _getDatabaseOrThrow();
+  Future<List<BtempModel>> getBtempData(int userId, {int? limit}) async {
+    final db = await database;
     final List<Map<String, dynamic>> results = await db.query(
       '$signalTable INNER JOIN $btempTable ON $signalTable.$idColumn = $btempTable.$signalIdColumn',
       where:
           '$signalTable.$userIdColumn = ? AND $signalTable.$signalTypeColumn = ?',
       whereArgs: [userId, 'BTEMP'],
       orderBy: '$signalTable.$createdAtColumn DESC',
+      limit: limit,
     );
     return results.map((map) => BtempModel.fromMap(map)).toList();
+  }
+
+  // DASHBOARD
+  Future<Map<String, List<Signal>>> getRecentRecords(
+    int userId, {
+    int limit = 3,
+  }) async {
+    final List<EcgModel> recentEcgRecords =
+        await getEcgData(userId, limit: limit);
+    final List<BpModel> recentBpRecords = await getBpData(userId, limit: limit);
+    final List<BtempModel> recentBtempRecords =
+        await getBtempData(userId, limit: limit);
+
+    Map<String, List<Signal>> groupedResults = {
+      ecgType: recentEcgRecords,
+      bpType: recentBpRecords,
+      btempType: recentBtempRecords,
+    };
+    return groupedResults;
   }
 }
