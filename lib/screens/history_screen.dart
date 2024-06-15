@@ -71,7 +71,7 @@ class _HistoryScreenState extends State<HistoryScreen>
                   ),
                 );
               },
-              child: const Icon(Icons.play_circle),
+              child: const Icon(Icons.add_outlined),
             );
           },
         ),

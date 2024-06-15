@@ -111,7 +111,6 @@ class _HomeState extends State<HomeScreen> {
                             Navigator.pushNamed(
                               context,
                               '/history',
-                              // arguments: entry.key,
                             );
                           },
                         ),

@@ -5,7 +5,7 @@ import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/theme.dart';
 import 'package:xmonapp/screens/history_screen.dart';
 import 'package:xmonapp/screens/home_screen.dart';
-import 'package:xmonapp/screens/record_screen.dart';
+import 'package:xmonapp/screens/health_blog_screen.dart';
 import 'package:xmonapp/screens/settings_screen.dart';
 import 'package:xmonapp/screens/drawers/connect_device.dart';
 
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         home: const MainScreen(),
         routes: {
           '/home': (context) => const HomeScreen(),
-          '/record': (context) => const RecordScreen(),
+          '/record': (context) => const HealthBlogScreen(),
           '/history': (context) => const HistoryScreen(),
           '/setting': (context) => const SettingsScreen(),
           '/device': (context) => const ConnectDevice(),
@@ -54,7 +54,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const HistoryScreen(),
-    // const RecordScreen(),
+    const HealthBlogScreen(),
     const SettingsScreen(),
   ];
 
@@ -89,10 +89,8 @@ class _MainScreenState extends State<MainScreen> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
-          // BottomNavigationBarItem(
-          //   icon: Icon(Icons.analytics),
-          //   label: 'Record',
-          // ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.health_and_safety), label: 'Health'),
           BottomNavigationBarItem(icon: Icon(Icons.menu), label: 'More'),
         ],
         currentIndex: _selectedIndex,

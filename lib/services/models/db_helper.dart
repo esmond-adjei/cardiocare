@@ -237,11 +237,10 @@ class DatabaseHelper {
     final List<BtempModel> recentBtempRecords =
         await getBtempData(userId, limit: limit);
 
-    Map<String, List<Signal>> groupedResults = {
+    return {
       ecgType: recentEcgRecords,
       bpType: recentBpRecords,
       btempType: recentBtempRecords,
     };
-    return groupedResults;
   }
 }

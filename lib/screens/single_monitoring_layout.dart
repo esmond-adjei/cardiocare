@@ -164,7 +164,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
 
     _currentSignal.stopTime = DateTime.now().add(_stopwatch.elapsed);
     textFieldController.text =
-        '${_currentSignal.signalType} ${_currentSignal.stopTime}';
+        '${_currentSignal.signalType} ${_currentSignal.stopTime.day}-${_currentSignal.stopTime.month}-${_currentSignal.stopTime.year} ${_currentSignal.stopTime.hour}:${_currentSignal.stopTime.minute}';
 
     showDialog(
       context: context,
@@ -310,54 +310,81 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
           ),
           // RECORDING CONTROL BUTTONS
           Container(
+            height: 100,
             padding: const EdgeInsets.all(16.0),
-            height: 100.0,
-            child: !isRecording
-                ? ElevatedButton(
-                    onPressed: _startRecording,
-                    style: ElevatedButton.styleFrom(
-                      elevation: 2,
-                      shape: CircleBorder(
-                        side: BorderSide(
-                          color: Colors.redAccent.shade100,
-                          width: 4,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              child: !isRecording
+                  ? ElevatedButton(
+                      key: const ValueKey("start"),
+                      onPressed: _startRecording,
+                      style: ElevatedButton.styleFrom(
+                        elevation: 2,
+                        shape: CircleBorder(
+                          side: BorderSide(
+                            color: Colors.redAccent.shade100,
+                            width: 4,
+                          ),
                         ),
+                        padding: const EdgeInsets.all(20),
                       ),
-                      padding: const EdgeInsets.all(16),
+                      child: const Icon(
+                        Icons.fiber_manual_record,
+                        color: Colors.redAccent,
+                      ))
+                  : Row(
+                      key: const ValueKey("recording"),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: _stopRecording,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey.shade400,
+                          ),
+                          icon: const Icon(Icons.restart_alt_outlined),
+                          label: const Text("Restart"),
+                        ),
+                        const SizedBox(width: 16),
+                        ElevatedButton.icon(
+                          onPressed:
+                              isPaused ? _resumeRecording : _pauseRecording,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amberAccent,
+                          ),
+                          icon: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            transitionBuilder:
+                                (Widget child, Animation<double> animation) {
+                              return ScaleTransition(
+                                scale: animation,
+                                child: child,
+                              );
+                            },
+                            child: isPaused
+                                ? const Icon(Icons.play_arrow,
+                                    key: ValueKey("play"))
+                                : const Icon(Icons.pause,
+                                    key: ValueKey("pause")),
+                          ),
+                          label: isPaused
+                              ? const Text("Resume")
+                              : const Text("Pause"),
+                        ),
+                        const SizedBox(width: 16),
+                        ElevatedButton.icon(
+                          onPressed: _saveRecording,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey.shade400,
+                          ),
+                          icon: const Icon(Icons.done),
+                          label: const Text("Done"),
+                        ),
+                      ],
                     ),
-                    child: const Icon(
-                      Icons.fiber_manual_record,
-                      color: Colors.redAccent,
-                    ),
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                        onPressed: _stopRecording,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey.shade400,
-                        ),
-                        child: const Icon(Icons.restart_alt_rounded),
-                      ),
-                      const SizedBox(width: 16),
-                      ElevatedButton(
-                        onPressed:
-                            isPaused ? _resumeRecording : _pauseRecording,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.amberAccent,
-                        ),
-                        child: isPaused
-                            ? const Icon(Icons.play_arrow)
-                            : const Icon(Icons.pause),
-                      ),
-                      const SizedBox(width: 16),
-                      ElevatedButton(
-                        onPressed: _saveRecording,
-                        child: const Icon(Icons.stop),
-                      ),
-                    ],
-                  ),
+            ),
           ),
         ],
       ),

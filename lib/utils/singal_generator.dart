@@ -57,27 +57,16 @@ class SignalGenerator {
   final int durationSeconds;
   final int samplingRate;
 
-  // Constants for BP
-  static const int initialSystolic = 120;
-  static const int initialDiastolic = 80;
-  static const int bpNoiseAmplitude = 5;
-
-  // Constants for Temperature
-  static const double initialTemp = 37.0;
-  static const double tempNoiseAmplitude = 0.5;
-
-  // Constants for ECG
-  static const double heartRate = 60.0;
-  static const int fs = 500;
-
   SignalGenerator({
-    this.durationSeconds = 100,
+    this.durationSeconds = 10,
     this.samplingRate = 2,
   });
 
   Stream<int> generateECG() async* {
-    const rrInterval = 60 / heartRate;
+    const int fs = 500;
+    const double heartRate = 60.0;
     final numBeats = (durationSeconds / (60 / heartRate)).floor();
+    const rrInterval = 60 / heartRate;
     List<double> t = List.generate(durationSeconds * fs, (i) => i / fs);
     List<double> ecg = List.filled(t.length, 0.0);
 
@@ -104,22 +93,17 @@ class SignalGenerator {
     double maxValue = ecg.reduce(max);
     double range = maxValue - minValue;
 
-    int ecgdata = 0;
-
     for (int i = 0; i < t.length; i++) {
       await Future.delayed(Duration(milliseconds: (1000 / fs).round()));
-      ecgdata = ((ecg[i] - minValue) / range * 255).round();
-
-      dev.log('ECG: $ecgdata', name: 'ECG');
-
-      yield ecgdata;
+      yield ((ecg[i] - minValue) / range * 255).round();
     }
   }
 
   Stream<Map<String, int>> generateBP() async* {
+    const int bpNoiseAmplitude = 5;
     final numSamples = durationSeconds * samplingRate;
-    var systolic = initialSystolic;
-    var diastolic = initialDiastolic;
+    var systolic = 120;
+    var diastolic = 80;
     final random = Random();
 
     for (int i = 0; i < numSamples; i++) {
@@ -138,8 +122,9 @@ class SignalGenerator {
   }
 
   Stream<double> generateBtemp() async* {
+    const double tempNoiseAmplitude = 0.5;
     final numSamples = durationSeconds * samplingRate;
-    var temp = initialTemp;
+    var temp = 37.0;
     final random = Random();
 
     for (int i = 0; i < numSamples; i++) {
