@@ -29,11 +29,10 @@ class ListContainer extends StatelessWidget {
                 listHeading,
                 style: const TextStyle(
                   fontSize: 18,
-                  fontWeight: FontWeight.bold,
                   color: Colors.black54,
                 ),
               ),
-              if (listData.isNotEmpty || routeToHistoryScreen != null)
+              if (listData.isNotEmpty)
                 TextButton(
                   onPressed: routeToHistoryScreen,
                   child: const Text('View all'),
@@ -41,6 +40,7 @@ class ListContainer extends StatelessWidget {
             ],
           ),
         ),
+        if (listData.isEmpty) const Center(child: Text('No data yet')),
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:xmonapp/screens/login_screen.dart';
 import 'package:xmonapp/screens/register_screen.dart';
+import 'package:xmonapp/screens/single_monitoring_layout.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/theme.dart';
 import 'package:xmonapp/screens/history_screen.dart';
@@ -27,10 +28,11 @@ class MyApp extends StatelessWidget {
         home: const MainScreen(),
         routes: {
           '/home': (context) => const HomeScreen(),
-          '/record': (context) => const HealthBlogScreen(),
+          '/blog': (context) => const HealthBlogScreen(),
           '/history': (context) => const HistoryScreen(),
           '/setting': (context) => const SettingsScreen(),
           '/device': (context) => const ConnectDevice(),
+          '/record': (context) => const SingleMonitorLayout(),
           '/login': (context) => const LoginScreen(),
           '/register': (context) => const RegisterScreen(),
         });
@@ -86,7 +88,7 @@ class _MainScreenState extends State<MainScreen> {
         unselectedItemColor: Colors.grey,
         selectedFontSize: 14.0,
         unselectedFontSize: 12.0,
-        items: const <BottomNavigationBarItem>[
+        items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
           BottomNavigationBarItem(

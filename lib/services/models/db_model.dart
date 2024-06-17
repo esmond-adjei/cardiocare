@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:xmonapp/services/constants.dart';
@@ -46,6 +47,7 @@ abstract class Signal {
   final int? id;
   final int userId;
   String? signalName;
+  final int? signalId;
   final DateTime startTime;
   DateTime stopTime;
   final String signalType;
@@ -53,6 +55,7 @@ abstract class Signal {
   Signal({
     this.id,
     this.signalName,
+    this.signalId,
     required this.userId,
     required this.startTime,
     required this.stopTime,
@@ -69,8 +72,9 @@ abstract class Signal {
     stopTime = time;
   }
 
-  Signal.fromRow(Map<String, Object?> map)
+  Signal.fromRow(Map<String, Object?> map) // from database to application
       : id = map[idColumn] as int,
+        signalId = map[signalIdColumn] as int,
         signalName = map[nameColumn] as String,
         userId = map[userIdColumn] as int,
         startTime = map[startTimeColumn] as DateTime,
@@ -78,8 +82,10 @@ abstract class Signal {
         signalType = map[signalTypeColumn] as String;
 
   Map<String, dynamic> toMap() {
+    // from application to database
     return {
       idColumn: id,
+      signalIdColumn: signalId,
       userIdColumn: userId,
       nameColumn: signalName,
       startTimeColumn: startTime.toIso8601String(),
@@ -110,6 +116,7 @@ class EcgModel extends Signal {
   EcgModel({
     super.id,
     super.signalName,
+    super.signalId,
     required super.userId,
     required super.startTime,
     required super.stopTime,
@@ -133,6 +140,7 @@ class EcgModel extends Signal {
       id: map[idColumn],
       userId: map[userIdColumn],
       signalName: map[nameColumn],
+      signalId: map[signalIdColumn],
       startTime: DateTime.parse(map[startTimeColumn]),
       stopTime: DateTime.parse(map[stopTimeColumn]),
       ecg: map['ecg'],
@@ -150,6 +158,7 @@ class BpModel extends Signal {
   BpModel({
     super.id,
     super.signalName,
+    super.signalId,
     required super.userId,
     required super.startTime,
     required super.stopTime,
@@ -171,15 +180,21 @@ class BpModel extends Signal {
   }
 
   factory BpModel.fromMap(Map<String, dynamic> map) {
-    return BpModel(
-      id: map[idColumn],
-      userId: map[userIdColumn],
-      signalName: map[nameColumn],
-      startTime: DateTime.parse(map[startTimeColumn]),
-      stopTime: DateTime.parse(map[stopTimeColumn]),
-      bpSystolic: map['bp_systolic'],
-      bpDiastolic: map['bp_diastolic'],
-    );
+    try {
+      return BpModel(
+        id: map[idColumn],
+        userId: map[userIdColumn],
+        signalId: map[signalIdColumn],
+        signalName: map[nameColumn],
+        startTime: DateTime.parse(map[startTimeColumn]),
+        stopTime: DateTime.parse(map[stopTimeColumn]),
+        bpSystolic: map['bp_systolic'],
+        bpDiastolic: map['bp_diastolic'],
+      );
+    } catch (e) {
+      log('$e \n$map');
+      rethrow;
+    }
   }
 }
 
@@ -192,6 +207,7 @@ class BtempModel extends Signal {
   BtempModel({
     super.id,
     super.signalName,
+    super.signalId,
     required super.userId,
     required super.startTime,
     required super.stopTime,
@@ -213,6 +229,7 @@ class BtempModel extends Signal {
     return BtempModel(
       id: map[idColumn],
       userId: map[userIdColumn],
+      signalId: map[signalIdColumn],
       signalName: map[nameColumn],
       startTime: DateTime.parse(map[startTimeColumn]),
       stopTime: DateTime.parse(map[stopTimeColumn]),

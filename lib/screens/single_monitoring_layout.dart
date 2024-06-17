@@ -2,14 +2,19 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:xmonapp/main.dart';
-import 'package:xmonapp/widgets/ecg_renderer.dart';
+import 'package:xmonapp/screens/drawers/signal_renderers.dart';
+
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/models/db_model.dart';
 import 'package:xmonapp/utils/singal_generator.dart';
 import 'package:xmonapp/widgets/timer.dart';
 
 class SingleMonitorLayout extends StatefulWidget {
-  const SingleMonitorLayout({super.key});
+  final int initialScreen;
+  const SingleMonitorLayout({
+    super.key,
+    this.initialScreen = 1,
+  });
 
   @override
   State<SingleMonitorLayout> createState() => _SingleMonitorLayoutState();
@@ -26,12 +31,8 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   double _btempValue = 36.1;
 
   StreamSubscription<dynamic>? _subscription;
-
   final SignalGenerator _signalGenerator = SignalGenerator();
-
-  final ScrollController _scrollController = ScrollController();
   final Stopwatch _stopwatch = Stopwatch();
-
   final DatabaseHelper _dbhelper = DatabaseHelper();
 
   dynamic _currentSignal;
@@ -39,15 +40,15 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, initialIndex: 0, vsync: this);
+    _tabController = TabController(
+        length: 3, initialIndex: widget.initialScreen, vsync: this);
+    print(widget.initialScreen);
     // _tabController.addListener(_handleTabSelection);
   }
 
   @override
   void dispose() {
     _subscription?.cancel();
-
-    _scrollController.dispose();
     _stopwatch.reset();
 
     // _tabController.removeListener(_handleTabSelection);
@@ -83,7 +84,6 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
         _subscription = _signalGenerator.generateECG().listen((value) {
           setState(() {
             _ecgValues.add(value);
-            _scrollToEnd();
           });
         });
         break;
@@ -98,7 +98,6 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
         _subscription = _signalGenerator.generateBP().listen((value) {
           setState(() {
             _bpValues = value;
-            _scrollToEnd();
           });
         });
         break;
@@ -112,7 +111,6 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
         _subscription = _signalGenerator.generateBtemp().listen((value) {
           setState(() {
             _btempValue = value;
-            _scrollToEnd();
           });
         });
         break;
@@ -150,13 +148,6 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   void _saveRecording() {
     _pauseRecording();
     _showSaveDialog();
-  }
-
-  void _scrollToEnd() {
-    if (_scrollController.hasClients) {
-      _scrollController
-          .jumpTo(_scrollController.position.maxScrollExtent - 100);
-    }
   }
 
   void _showSaveDialog() {
@@ -267,7 +258,6 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                   isRecording: isRecording,
                   ecgValues: _ecgValues,
                   title: 'Monitor Your ECG',
-                  scrollController: _scrollController,
                 ),
                 BPRenderer(
                   isRecording: isRecording,
@@ -387,297 +377,6 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class ECGRenderer extends StatelessWidget {
-  final bool isRecording;
-  final String title;
-  final List<int> ecgValues;
-  final ScrollController scrollController;
-
-  const ECGRenderer({
-    super.key,
-    required this.isRecording,
-    required this.title,
-    required this.ecgValues,
-    required this.scrollController,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (!isRecording) {
-      return Center(
-        child: Text(
-          title,
-          style: TextStyle(
-            color: Colors.grey.shade500,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-    }
-    return Column(
-      children: [
-        Expanded(
-          child: Container(
-            color: Colors.grey.shade100,
-            child: Column(children: [
-              const ECGChart(),
-              Container(
-                height: 50,
-                color: Colors.grey.shade300,
-                child: Center(
-                  child: ListView.builder(
-                    controller: scrollController,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: ecgValues.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text(
-                          ' ${ecgValues[index]} ',
-                          style: TextStyle(
-                            color: Colors.grey.shade800,
-                            fontSize: 16,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ]),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class BPRenderer extends StatelessWidget {
-  final bool isRecording;
-  final String title;
-  final Map<String, int> bpValues;
-
-  const BPRenderer({
-    super.key,
-    required this.isRecording,
-    required this.title,
-    required this.bpValues,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (!isRecording) {
-      return Center(
-        child: Text(
-          title,
-          style: TextStyle(
-            color: Colors.grey.shade500,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-    }
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _buildBloodPressureRow('systolic', bpValues['systolic']!),
-          const SizedBox(height: 20),
-          _buildBloodPressureRow('diastolic', bpValues['diastolic']!,
-              color: Colors.redAccent[100]!),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBloodPressureRow(String label, int value,
-      {Color color = Colors.redAccent}) {
-    return Row(
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: Colors.grey.shade700,
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              'mmHg',
-              style: TextStyle(
-                color: Colors.grey.shade700,
-                fontSize: 14.0,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(width: 20),
-        Text(
-          '$value',
-          style: TextStyle(
-            color: color,
-            fontSize: 72.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class BtempRenderer extends StatefulWidget {
-  final bool isRecording;
-  final String title;
-  final double btempValue;
-
-  const BtempRenderer({
-    super.key,
-    required this.isRecording,
-    required this.title,
-    required this.btempValue,
-  });
-
-  @override
-  State<BtempRenderer> createState() => _BtempRendererState();
-}
-
-class _BtempRendererState extends State<BtempRenderer> {
-  late double minBtemp;
-  late double maxBtemp;
-
-  @override
-  void initState() {
-    super.initState();
-    minBtemp = widget.btempValue;
-    maxBtemp = widget.btempValue;
-  }
-
-  @override
-  void didUpdateWidget(covariant BtempRenderer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.btempValue != widget.btempValue) {
-      updateMinMaxTemperatures(widget.btempValue);
-    }
-  }
-
-  void updateMinMaxTemperatures(double newValue) {
-    setState(() {
-      if (newValue < minBtemp) {
-        minBtemp = newValue;
-      }
-      if (newValue > maxBtemp) {
-        maxBtemp = newValue;
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!widget.isRecording) {
-      return Center(
-        child: Text(
-          widget.title,
-          style: TextStyle(
-            color: Colors.grey.shade500,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-    }
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // temperature monitor screen
-          Container(
-            height: 180.0,
-            width: 180.0,
-            decoration: BoxDecoration(
-              color: Colors.amber.shade300,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.amber.shade100,
-                width: 8,
-                style: BorderStyle.solid,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                '${widget.btempValue.toStringAsFixed(1)} °C',
-                style: const TextStyle(
-                  fontSize: 36.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          // MIN MAX TEMPERATURE
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildContainer(
-                color: Colors.blue.shade100,
-                textColor: Colors.blue,
-                labelText: 'lowest',
-                valueText: '${minBtemp.toStringAsFixed(1)} °C',
-              ),
-              _buildContainer(
-                color: Colors.red.shade100,
-                textColor: Colors.red,
-                labelText: 'highest',
-                valueText: '${maxBtemp.toStringAsFixed(1)} °C',
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContainer({
-    required Color color,
-    required Color textColor,
-    required String labelText,
-    required String valueText,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(10.0),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: DefaultTextStyle(
-        style: TextStyle(
-          overflow: TextOverflow.fade,
-          color: textColor,
-          fontSize: 12.0,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(labelText),
-            Text(
-              valueText,
-              style: const TextStyle(fontSize: 18.0),
-            ),
-          ],
-        ),
       ),
     );
   }

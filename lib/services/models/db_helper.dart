@@ -105,7 +105,6 @@ class DatabaseHelper {
   }
 
   Future<List<CardioUser>> getAllUsers() async {
-    // final db = _getDatabaseOrThrow();
     final db = await database;
     final List<Map<String, dynamic>> results = await db.query(userTable);
     return results.map((map) => CardioUser.fromRow(map)).toList();
@@ -122,13 +121,20 @@ class DatabaseHelper {
     if (results.isEmpty) {
       throw UserDoesNotExist();
     }
-    // return a new cardio user object
     return CardioUser.fromRow(results.first);
   }
 
-  Future<int> updateUser({required String email}) async {
+  Future<int> updateUser(CardioUser user) async {
     // yet to implement
-    return 0;
+    await getUser(email: user.email);
+    final db = await database;
+    return db.update(
+      userTable,
+      user.toMap(),
+      where: 'email = ?',
+      whereArgs: [user.email],
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<int> deleteUser({required String email}) async {
@@ -154,6 +160,51 @@ class DatabaseHelper {
       stopTimeColumn: signal.stopTime.toIso8601String(),
       signalTypeColumn: signal.signalType,
     });
+  }
+
+  Future<List<Map<String, dynamic>>> getAllSignals() async {
+    final db = await database;
+    final List<Map<String, dynamic>> results = await db.query(signalTable);
+    return results;
+  }
+
+  Future<Map<String, dynamic>> getSignal(int id) async {
+    final db = await database;
+    final results = await db.query(
+      signalTable,
+      limit: 1,
+      where: '$idColumn = ?',
+      whereArgs: [id],
+    );
+    if (results.isEmpty) {
+      throw SignalDoesNotExist();
+    }
+    return results.first;
+  }
+
+  Future<int> deleteSignal(Signal signal) async {
+    final db = await database;
+    String table;
+
+    switch (signal.signalType) {
+      case ecgType:
+        table = ecgTable;
+        break;
+      case bpType:
+        table = bpTable;
+        break;
+      case btempType:
+        table = btempTable;
+        break;
+      default:
+        throw UnknownSignalType;
+    }
+
+    final signalId =
+        await db.delete(table, where: '$idColumn=?', whereArgs: [signal.id]);
+    await db.delete(signalTable,
+        where: '$idColumn=?', whereArgs: [signal.signalId]);
+    return signalId;
   }
 
   // manage ecg table
@@ -227,10 +278,8 @@ class DatabaseHelper {
   }
 
   // DASHBOARD
-  Future<Map<String, List<Signal>>> getRecentRecords(
-    int userId, {
-    int limit = 3,
-  }) async {
+  Future<Map<String, List<Signal>>> getRecentRecords(int userId,
+      {int limit = 3}) async {
     final List<EcgModel> recentEcgRecords =
         await getEcgData(userId, limit: limit);
     final List<BpModel> recentBpRecords = await getBpData(userId, limit: limit);

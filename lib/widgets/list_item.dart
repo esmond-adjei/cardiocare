@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:xmonapp/main.dart';
+import 'package:xmonapp/screens/drawers/signal_renderers.dart';
+import 'package:xmonapp/screens/single_monitoring_layout.dart';
+import 'package:xmonapp/services/constants.dart';
+import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/models/db_model.dart';
 import 'package:xmonapp/utils/format_datetime.dart';
 
 class ListItem extends StatelessWidget {
   final Signal signal;
+  final DatabaseHelper _dbhelper = DatabaseHelper();
 
-  const ListItem({
+  ListItem({
     super.key,
     required this.signal,
   });
@@ -13,7 +19,7 @@ class ListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      key: Key(signal.id.toString()), // Provide a unique key for each item
+      key: Key(signal.id.toString()),
       direction: DismissDirection.endToStart,
       background: Container(
         color: Colors.red,
@@ -21,22 +27,26 @@ class ListItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: const Icon(Icons.delete, color: Colors.white),
       ),
-      onDismissed: (direction) {
+      onDismissed: (direction) async {
         // Handle item deletion here
+        int success = await _dbhelper.deleteSignal(signal);
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("${signal.name} dismissed")),
+          SnackBar(
+            content: Text("${signal.name} ID: $success deleted successfully"),
+          ),
         );
       },
       confirmDismiss: (direction) async {
-        // You can show a confirmation dialog here
         return await showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
+              insetPadding: const EdgeInsets.symmetric(horizontal: 20.0),
               title: Text("Delete ${signal.name}?"),
               content: const Text("Are you sure you want to delete this item?"),
               actions: <Widget>[
-                TextButton(
+                ElevatedButton(
                   onPressed: () => Navigator.of(context).pop(false),
                   child: const Text("CANCEL"),
                 ),
@@ -55,7 +65,6 @@ class ListItem extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
         leading: const Icon(Icons.favorite),
         onTap: () {
-          // Navigate to detail screen or perform any action on tap
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -97,28 +106,156 @@ class ListItem extends StatelessWidget {
 }
 
 class DetailScreen extends StatelessWidget {
-  final Signal signal;
+  final dynamic signal;
 
-  const DetailScreen({Key? key, required this.signal}) : super(key: key);
+  const DetailScreen({super.key, required this.signal});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(signal.name),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'Signal Name: ${signal.name}',
-              style: const TextStyle(fontSize: 20),
+    switch (signal.signalType) {
+      case ecgType:
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(signal.name),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const MainScreen(selectedIndex: 1),
+                      ),
+                      (route) => false);
+                },
+                child: const Text(
+                  'List',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const SingleMonitorLayout(initialScreen: 0),
+                      ));
+                },
+              ),
+            ],
+          ),
+          body: Center(
+            child: ECGRenderer(
+              isRecording: true,
+              ecgValues: signal.ecg,
+              title: 'okay...',
             ),
-            // Display other details of the signal as needed
-          ],
-        ),
-      ),
-    );
+          ),
+        );
+      case bpType:
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(signal.name),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const MainScreen(selectedIndex: 1),
+                      ),
+                      (route) => false);
+                },
+                child: const Text(
+                  'List',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const SingleMonitorLayout(initialScreen: 1),
+                      ));
+                },
+              ),
+            ],
+          ),
+          body: Center(
+            child: BPRenderer(
+              isRecording: true,
+              bpValues: {
+                'systolic': signal.bpSystolic,
+                'diastolic': signal.bpDiastolic
+              },
+              title: 'okay...',
+            ),
+          ),
+        );
+      case btempType:
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(signal.name),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const MainScreen(selectedIndex: 1),
+                      ),
+                      (route) => false);
+                },
+                child: const Text(
+                  'List',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const SingleMonitorLayout(initialScreen: 2),
+                      ));
+                },
+              ),
+            ],
+          ),
+          body: Center(
+            child: BtempRenderer(
+              isRecording: true,
+              btempValue: signal.bodyTemp,
+              title: 'okay...',
+            ),
+          ),
+        );
+      default:
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(signal.toString()),
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'Signal Name: $signal',
+                  style: const TextStyle(fontSize: 20),
+                ),
+              ],
+            ),
+          ),
+        );
+    }
   }
 }

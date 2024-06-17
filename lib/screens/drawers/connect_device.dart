@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:xmonapp/screens/single_monitoring_layout.dart';
 
 class ConnectDevice extends StatelessWidget {
   const ConnectDevice({super.key});
@@ -21,14 +22,31 @@ class ConnectDevice extends StatelessWidget {
             stops: [0.1, 0.9],
           ),
         ),
-        child: const Center(
-          child: Text(
-            'Connect Device',
-            style: TextStyle(
-              fontSize: 24,
-              color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Text(
+              'Ensure you are connected to the cardiocare device with bluetooth',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SingleMonitorLayout(),
+                  ),
+                );
+              },
+              child: const Text('Start Monitoring'),
+            ),
+          ],
         ),
       ),
     );

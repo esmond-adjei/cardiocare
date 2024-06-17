@@ -84,3 +84,27 @@ class UserAccessDenied implements Exception {
     return logMessage;
   }
 }
+
+class UnknownSignalType implements Exception {
+  final String message;
+  UnknownSignalType([this.message = 'Signal type unknown']);
+
+  @override
+  String toString() {
+    final logMessage = 'UnknownSignalType: $message';
+    log(logMessage);
+    return logMessage;
+  }
+}
+
+class SignalDoesNotExist implements Exception {
+  final String message;
+  SignalDoesNotExist([this.message = 'Signal does not exist']);
+
+  @override
+  String toString() {
+    final logMessage = 'SignalDoesNotExist: $message';
+    log(logMessage);
+    return logMessage;
+  }
+}

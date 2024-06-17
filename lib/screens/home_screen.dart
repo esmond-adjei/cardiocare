@@ -1,3 +1,4 @@
+import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:xmonapp/services/constants.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
@@ -20,9 +21,31 @@ class _HomeState extends State<HomeScreen> {
     _dbhelper = DatabaseHelper();
   }
 
+  // void _loadSignalsTable() async {
+  //   List<Map<String, dynamic>> signals = await _dbhelper.getAllSignals();
+  //   dev.log('\n>> ALL SIGNALS (length): ${signals.length}');
+  //   for (var s in signals) {
+  //     dev.log('>> DATA: $s');
+  //   }
+  //   List<EcgModel> ecg = await _dbhelper.getEcgData(1);
+  //   dev.log('\n>> ALL ECG (length): ${ecg.length}');
+  //   for (var s in ecg) {
+  //     dev.log('>> DATA: ${s.toMap()}');
+  //   }
+  //   List<BpModel> bp = await _dbhelper.getBpData(1);
+  //   dev.log('\n>> ALL BP (length): ${bp.length}');
+  //   for (var s in bp) {
+  //     dev.log('>> DATA: ${s.toMap()}');
+  //   }
+  //   List<BtempModel> btemp = await _dbhelper.getBtempData(1);
+  //   dev.log('\n>> ALL BTEMP (length): ${btemp.length}');
+  //   for (var s in btemp) {
+  //     dev.log('>> DATA: ${s.toMap()}');
+  //   }
+  // }
+
   Future<Map<String, List<Signal>>> _getRecent() async {
     return await _dbhelper.getRecentRecords(1, limit: 3);
-    // log(results.toString());
   }
 
   @override
@@ -56,6 +79,7 @@ class _HomeState extends State<HomeScreen> {
                 ),
               ),
             ),
+
             Row(
               children: [
                 Expanded(
@@ -80,6 +104,11 @@ class _HomeState extends State<HomeScreen> {
                 ),
               ],
             ),
+
+            // ElevatedButton(
+            //   onPressed: _loadSignalsTable,
+            //   child: const Text('load signals'),
+            // ),
 
             // LIST OF RECENT RECORDS
             FutureBuilder<Map<String, List<Signal>>>(

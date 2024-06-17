@@ -37,6 +37,14 @@ class _HistoryScreenState extends State<HistoryScreen>
       child: Scaffold(
         appBar: AppBar(
           title: const Text('History'),
+          actions: const [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.0),
+              child: CircleAvatar(
+                backgroundImage: AssetImage('assets/images/profile.jpg'),
+              ),
+            ),
+          ],
           bottom: TabBar(
             dividerHeight: 0,
             indicatorColor: Colors.white,
@@ -67,7 +75,9 @@ class _HistoryScreenState extends State<HistoryScreen>
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const SingleMonitorLayout(),
+                    builder: (context) => SingleMonitorLayout(
+                      initialScreen: _tabController.index,
+                    ),
                   ),
                 );
               },
