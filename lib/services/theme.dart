@@ -38,7 +38,7 @@ final ThemeData customRedTheme = ThemeData(
   ),
   progressIndicatorTheme: const ProgressIndicatorThemeData(
     color: Colors.redAccent,
-    linearTrackColor: Colors.redAccent,
+    // linearTrackColor: Colors.redAccent,
     circularTrackColor: Colors.redAccent,
   ),
 );

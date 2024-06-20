@@ -11,7 +11,6 @@ class ECGRenderer extends StatefulWidget {
     required this.isRecording,
     required this.title,
     required this.ecgValues,
-    // required this.scrollController,
   });
 
   @override
@@ -19,28 +18,6 @@ class ECGRenderer extends StatefulWidget {
 }
 
 class _ECGRendererState extends State<ECGRenderer> {
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _scrollToEnd() {
-    if (_scrollController.hasClients) {
-      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant ECGRenderer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _scrollToEnd();
-    // if (oldWidget.ecgValues != widget.ecgValues) {
-    // }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (!widget.isRecording) {
@@ -57,38 +34,7 @@ class _ECGRendererState extends State<ECGRenderer> {
     }
     return Column(
       children: [
-        Expanded(
-          child: Container(
-            color: Colors.grey.shade100,
-            child: Column(children: [
-              const ECGChart(),
-              Container(
-                height: 50,
-                color: Colors.grey.shade300,
-                child: Center(
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: widget.ecgValues.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text(
-                          ' ${widget.ecgValues[index]} ',
-                          style: TextStyle(
-                            color: Colors.grey.shade800,
-                            fontSize: 16,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ]),
-          ),
-        ),
+        ECGChart(ecgValues: widget.ecgValues),
       ],
     );
   }
@@ -137,9 +83,7 @@ class BPRenderer extends StatelessWidget {
       {Color color = Colors.redAccent}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 50.0),
-      // margin: EdgeInsets.fromViewPadding(padding: , devicePixelRatio), // will get back to this later
       child: Row(
-        // mainAxisAlignment: MainAxisAlignment.,
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,

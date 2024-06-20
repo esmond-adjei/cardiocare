@@ -41,9 +41,10 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   void initState() {
     super.initState();
     _tabController = TabController(
-        length: 3, initialIndex: widget.initialScreen, vsync: this);
-    print(widget.initialScreen);
-    // _tabController.addListener(_handleTabSelection);
+      length: 3,
+      initialIndex: widget.initialScreen,
+      vsync: this,
+    );
   }
 
   @override
@@ -51,20 +52,10 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
     _subscription?.cancel();
     _stopwatch.reset();
 
-    // _tabController.removeListener(_handleTabSelection);
     _tabController.dispose();
 
     super.dispose();
   }
-
-  // void _handleTabSelection() {
-  //   if (isRecording && _tabController.indexIsChanging) {
-  //     _tabController.index = _tabController.previousIndex;
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text('You cannot switch tabs while recording')),
-  //     );
-  //   }
-  // }
 
   void _startRecording() {
     setState(() {
@@ -367,7 +358,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                         ElevatedButton.icon(
                           onPressed: _saveRecording,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey.shade400,
+                            backgroundColor: Colors.green,
                           ),
                           icon: const Icon(Icons.done),
                           label: const Text("Done"),

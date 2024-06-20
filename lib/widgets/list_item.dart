@@ -65,10 +65,10 @@ class ListItem extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
         leading: const Icon(Icons.favorite),
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => DetailScreen(signal: signal)),
+          showModalBottomSheet(
+            isScrollControlled: true,
+            context: context,
+            builder: (context) => PeakItemDrawer(signal: signal),
           );
         },
         title: Text(
@@ -105,156 +105,119 @@ class ListItem extends StatelessWidget {
   }
 }
 
-class DetailScreen extends StatelessWidget {
+class PeakItemDrawer extends StatelessWidget {
   final dynamic signal;
 
-  const DetailScreen({super.key, required this.signal});
+  const PeakItemDrawer({super.key, required this.signal});
 
   @override
   Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Wrap(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 20.0),
+            child: _buildContent(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     switch (signal.signalType) {
       case ecgType:
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(signal.name),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const MainScreen(selectedIndex: 1),
-                      ),
-                      (route) => false);
-                },
-                child: const Text(
-                  'List',
-                  style: TextStyle(color: Colors.white),
-                ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              signal.name,
+              style: const TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
               ),
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const SingleMonitorLayout(initialScreen: 0),
-                      ));
-                },
-              ),
-            ],
-          ),
-          body: Center(
-            child: ECGRenderer(
+            ),
+            const SizedBox(height: 16.0),
+            const Text(
+              'ECG Signal Details',
+              style: TextStyle(fontSize: 18.0),
+            ),
+            const SizedBox(height: 10.0),
+            ECGRenderer(
               isRecording: true,
               ecgValues: signal.ecg,
-              title: 'okay...',
+              title: 'ECG Signal',
             ),
-          ),
+          ],
         );
       case bpType:
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(signal.name),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const MainScreen(selectedIndex: 1),
-                      ),
-                      (route) => false);
-                },
-                child: const Text(
-                  'List',
-                  style: TextStyle(color: Colors.white),
-                ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              signal.name,
+              style: const TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
               ),
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const SingleMonitorLayout(initialScreen: 1),
-                      ));
-                },
-              ),
-            ],
-          ),
-          body: Center(
-            child: BPRenderer(
+            ),
+            const SizedBox(height: 16.0),
+            const Text(
+              'Blood Pressure Details',
+              style: TextStyle(fontSize: 18.0),
+            ),
+            const SizedBox(height: 10.0),
+            BPRenderer(
               isRecording: true,
               bpValues: {
                 'systolic': signal.bpSystolic,
                 'diastolic': signal.bpDiastolic
               },
-              title: 'okay...',
+              title: 'BP Signal',
             ),
-          ),
+          ],
         );
       case btempType:
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(signal.name),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const MainScreen(selectedIndex: 1),
-                      ),
-                      (route) => false);
-                },
-                child: const Text(
-                  'List',
-                  style: TextStyle(color: Colors.white),
-                ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              signal.name,
+              style: const TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
               ),
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const SingleMonitorLayout(initialScreen: 2),
-                      ));
-                },
-              ),
-            ],
-          ),
-          body: Center(
-            child: BtempRenderer(
+            ),
+            const SizedBox(height: 16.0),
+            const Text(
+              'Body Temperature Details',
+              style: TextStyle(fontSize: 18.0),
+            ),
+            const SizedBox(height: 10.0),
+            BtempRenderer(
               isRecording: true,
               btempValue: signal.bodyTemp,
-              title: 'okay...',
+              title: 'Body Temperature Signal',
             ),
-          ),
+          ],
         );
       default:
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(signal.toString()),
-          ),
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  'Signal Name: $signal',
-                  style: const TextStyle(fontSize: 20),
-                ),
-              ],
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            const Text(
+              'Unknown Signal Type',
+              style: TextStyle(fontSize: 20),
             ),
-          ),
+            const SizedBox(height: 16.0),
+            Text(
+              signal.toString(),
+              style: const TextStyle(fontSize: 16),
+            ),
+          ],
         );
     }
   }

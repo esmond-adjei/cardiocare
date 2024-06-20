@@ -94,7 +94,7 @@ class SignalGenerator {
     double range = maxValue - minValue;
 
     for (int i = 0; i < t.length; i++) {
-      await Future.delayed(Duration(milliseconds: (1000 / fs).round()));
+      await Future.delayed(Duration(milliseconds: (1 / fs).round()));
       yield ((ecg[i] - minValue) / range * 255).round();
     }
   }
