@@ -185,7 +185,7 @@ class _BtempRendererState extends State<BtempRenderer> {
       );
     }
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30),
+      padding: const EdgeInsets.all(30),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

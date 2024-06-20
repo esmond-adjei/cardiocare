@@ -118,107 +118,67 @@ class PeakItemDrawer extends StatelessWidget {
       ),
       child: Wrap(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 20.0),
-            child: _buildContent(context),
-          ),
+          // Container(
+          //   padding: const EdgeInsets.symmetric(vertical: 20.0),
+          //   child:
+          // ),
+          _buildContent(context),
         ],
       ),
     );
   }
 
   Widget _buildContent(BuildContext context) {
-    switch (signal.signalType) {
-      case ecgType:
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              signal.name,
-              style: const TextStyle(
-                fontSize: 24.0,
-                fontWeight: FontWeight.bold,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: const EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 20.0,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                signal.name,
+                style: const TextStyle(
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 16.0),
-            const Text(
-              'ECG Signal Details',
-              style: TextStyle(fontSize: 18.0),
-            ),
-            const SizedBox(height: 10.0),
-            ECGRenderer(
-              isRecording: true,
-              ecgValues: signal.ecg,
-              title: 'ECG Signal',
-            ),
-          ],
-        );
-      case bpType:
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              signal.name,
-              style: const TextStyle(
-                fontSize: 24.0,
-                fontWeight: FontWeight.bold,
+              Text(
+                '${signal.description} Details',
+                style: const TextStyle(color: Colors.grey),
               ),
-            ),
-            const SizedBox(height: 16.0),
-            const Text(
-              'Blood Pressure Details',
-              style: TextStyle(fontSize: 18.0),
-            ),
-            const SizedBox(height: 10.0),
-            BPRenderer(
-              isRecording: true,
-              bpValues: {
-                'systolic': signal.bpSystolic,
-                'diastolic': signal.bpDiastolic
-              },
-              title: 'BP Signal',
-            ),
-          ],
-        );
-      case btempType:
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              signal.name,
-              style: const TextStyle(
-                fontSize: 24.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            const Text(
-              'Body Temperature Details',
-              style: TextStyle(fontSize: 18.0),
-            ),
-            const SizedBox(height: 10.0),
-            BtempRenderer(
-              isRecording: true,
-              btempValue: signal.bodyTemp,
-              title: 'Body Temperature Signal',
-            ),
-          ],
-        );
-      default:
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const Text(
-              'Unknown Signal Type',
-              style: TextStyle(fontSize: 20),
-            ),
-            const SizedBox(height: 16.0),
-            Text(
-              signal.toString(),
-              style: const TextStyle(fontSize: 16),
-            ),
-          ],
-        );
-    }
+            ],
+          ),
+        ),
+        signal.signalType == ecgType
+            ? ECGRenderer(
+                isRecording: true,
+                ecgValues: signal.ecg,
+                title: signal.description,
+              )
+            : signal.signalType == bpType
+                ? BPRenderer(
+                    isRecording: true,
+                    bpValues: {
+                      'systolic': signal.bpSystolic,
+                      'diastolic': signal.bpDiastolic
+                    },
+                    title: signal.description,
+                  )
+                : signal.signalType == btempType
+                    ? BtempRenderer(
+                        isRecording: true,
+                        btempValue: signal.bodyTemp,
+                        title: signal.description,
+                      )
+                    : const Center(
+                        child: Text("Cannot find what you're looking for"),
+                      )
+      ],
+    );
   }
 }

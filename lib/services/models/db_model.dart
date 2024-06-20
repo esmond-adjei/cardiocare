@@ -109,8 +109,9 @@ abstract class Signal {
 
 // ECG table
 class EcgModel extends Signal {
-  static String tableName = ecgTable;
+  static const String tableName = ecgTable;
   static const String sType = 'ECG';
+  String description = 'ECG Signal';
   late Uint8List? ecg = Uint8List(0);
 
   EcgModel({
@@ -150,8 +151,10 @@ class EcgModel extends Signal {
 
 // BP table
 class BpModel extends Signal {
-  static String tableName = bpTable;
-  static String sType = 'BP';
+  static const String tableName = bpTable;
+  static const String sType = 'BP';
+  String description = 'Blood Pressure Signal';
+
   late int bpSystolic;
   late int bpDiastolic;
 
@@ -200,8 +203,10 @@ class BpModel extends Signal {
 
 // body temperature table
 class BtempModel extends Signal {
-  static String tableName = btempTable;
-  static String sType = 'BTEMP';
+  static const String tableName = btempTable;
+  static const String sType = 'BTEMP';
+  String description = 'Body Temperature Signal';
+
   double bodyTemp;
 
   BtempModel({
