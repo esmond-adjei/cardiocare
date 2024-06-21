@@ -182,6 +182,17 @@ class DatabaseHelper {
     return results.first;
   }
 
+  Future<int> updateSignal(Signal signal) async {
+    final db = await database;
+    final result = await db.update(
+      signalTable,
+      {nameColumn: signal.name},
+      where: 'id=?',
+      whereArgs: [signal.signalId],
+    );
+    return result;
+  }
+
   Future<int> deleteSignal(Signal signal) async {
     final db = await database;
     String table;

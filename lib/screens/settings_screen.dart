@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:xmonapp/screens/update_profile_screen.dart';
+import 'package:xmonapp/user/update_profile_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});

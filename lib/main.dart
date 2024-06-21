@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:xmonapp/screens/login_screen.dart';
-import 'package:xmonapp/screens/register_screen.dart';
-import 'package:xmonapp/screens/single_monitoring_layout.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:xmonapp/user/login_screen.dart';
+import 'package:xmonapp/user/register_screen.dart';
+import 'package:xmonapp/screens/drawers/monitoring_screen.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/theme.dart';
 import 'package:xmonapp/screens/history_screen.dart';
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'X-Monitoring App',
         theme: customRedTheme,
-        darkTheme: ThemeData.dark(),
+        darkTheme: customRedDarkTheme, //ThemeData.dark(),
         themeMode: ThemeMode.system,
         home: const MainScreen(),
         routes: {
@@ -78,6 +79,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
@@ -86,14 +88,23 @@ class _MainScreenState extends State<MainScreen> {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.redAccent,
         unselectedItemColor: Colors.grey,
-        selectedFontSize: 14.0,
-        unselectedFontSize: 12.0,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.health_and_safety), label: 'Health'),
-          BottomNavigationBarItem(icon: Icon(Icons.menu), label: 'More'),
+            icon: FaIcon(FontAwesomeIcons.house, size: 20),
+            label: 'home',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.list, size: 20),
+            label: 'history',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.newspaper, size: 20),
+            label: 'health',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.gear, size: 20),
+            label: 'settings',
+          ),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

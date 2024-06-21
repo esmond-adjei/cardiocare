@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:xmonapp/screens/single_monitoring_layout.dart';
-import 'package:xmonapp/services/enums.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:xmonapp/screens/drawers/monitoring_screen.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/models/db_model.dart';
 import 'package:xmonapp/widgets/list_container.dart';
+
+// ignore: constant_identifier_names
+enum DataType { ECG, BloodPressure, BodyTemperature }
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -81,7 +84,8 @@ class _HistoryScreenState extends State<HistoryScreen>
                   ),
                 );
               },
-              child: const Icon(Icons.add_outlined),
+              child: const FaIcon(FontAwesomeIcons.recordVinyl),
+              // const Icon(Icons.add_outlined),
             );
           },
         ),

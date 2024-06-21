@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:xmonapp/widgets/list_item.dart';
 
 class ListContainer extends StatelessWidget {
@@ -20,8 +21,7 @@ class ListContainer extends StatelessWidget {
       children: [
         Container(
           width: double.infinity,
-          color: Colors.grey.shade200,
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -29,13 +29,17 @@ class ListContainer extends StatelessWidget {
                 listHeading,
                 style: const TextStyle(
                   fontSize: 18,
-                  color: Colors.black54,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              if (listData.isNotEmpty)
-                TextButton(
-                  onPressed: routeToHistoryScreen,
-                  child: const Text('View all'),
+              if (listData.isNotEmpty && routeToHistoryScreen != null)
+                GestureDetector(
+                  onTap: routeToHistoryScreen,
+                  child: const FaIcon(
+                    FontAwesomeIcons.arrowRight,
+                    size: 20,
+                    color: Colors.grey,
+                  ),
                 ),
             ],
           ),
@@ -47,7 +51,7 @@ class ListContainer extends StatelessWidget {
           itemCount: listData.length,
           separatorBuilder: (BuildContext context, int index) => Divider(
             height: 1,
-            color: Colors.grey.shade200,
+            color: Colors.grey.withOpacity(0.1),
           ),
           itemBuilder: (BuildContext context, int index) {
             return ListItem(signal: listData[index]);

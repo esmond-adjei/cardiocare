@@ -62,13 +62,15 @@ abstract class Signal {
     required this.signalType,
   });
 
-  String get name => signalName ?? '$signalType $id';
+  String get name =>
+      signalName ??
+      '$signalType ${stopTime.day}-${stopTime.month}-${stopTime.year} ${stopTime.hour}:${stopTime.minute}';
 
-  void setName(String name) {
-    signalName = name;
+  set name(String newName) {
+    signalName = newName;
   }
 
-  void setStopTime(DateTime time) {
+  set stoptime(DateTime time) {
     stopTime = time;
   }
 

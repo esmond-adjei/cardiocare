@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:xmonapp/main.dart';
 import 'package:xmonapp/screens/drawers/signal_renderers.dart';
-
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/models/db_model.dart';
 import 'package:xmonapp/utils/singal_generator.dart';
@@ -145,8 +144,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
     TextEditingController textFieldController = TextEditingController();
 
     _currentSignal.stopTime = DateTime.now().add(_stopwatch.elapsed);
-    textFieldController.text =
-        '${_currentSignal.signalType} ${_currentSignal.stopTime.day}-${_currentSignal.stopTime.month}-${_currentSignal.stopTime.year} ${_currentSignal.stopTime.hour}:${_currentSignal.stopTime.minute}';
+    textFieldController.text = _currentSignal.name;
 
     showDialog(
       context: context,
@@ -167,7 +165,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
             ElevatedButton(
               onPressed: () async {
                 try {
-                  _currentSignal.setName(textFieldController.text);
+                  _currentSignal.name = textFieldController.text;
                   switch (_tabController.index) {
                     case 0:
                       _currentSignal.setEcg(_ecgValues);

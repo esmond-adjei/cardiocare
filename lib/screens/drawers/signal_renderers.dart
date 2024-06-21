@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:xmonapp/widgets/ecg_renderer.dart';
+import 'package:xmonapp/widgets/line_chart.dart';
 
 class ECGRenderer extends StatefulWidget {
   final bool isRecording;
@@ -32,16 +32,12 @@ class _ECGRendererState extends State<ECGRenderer> {
         ),
       );
     }
-    return Column(
-      children: [
-        ECGChart(ecgValues: widget.ecgValues),
-      ],
-    );
+    return ScrollableLineChart(ecgValues: widget.ecgValues);
   }
 }
 
 // ======== BLOOD PRESSURE RENDERER ========
-class BPRenderer extends StatelessWidget {
+class BPRenderer extends StatefulWidget {
   final bool isRecording;
   final String title;
   final Map<String, int> bpValues;
@@ -54,11 +50,24 @@ class BPRenderer extends StatelessWidget {
   });
 
   @override
+  State<BPRenderer> createState() => _BPRendererState();
+}
+
+class _BPRendererState extends State<BPRenderer> {
+  late Color color;
+
+  @override
+  void initState() {
+    super.initState();
+    color = widget.bpValues['systolic']! > 120 ? Colors.red : Colors.purple;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (!isRecording) {
+    if (!widget.isRecording) {
       return Center(
         child: Text(
-          title,
+          widget.title,
           style: TextStyle(
             color: Colors.grey.shade500,
             fontSize: 24,
@@ -71,16 +80,26 @@ class BPRenderer extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _buildBloodPressureRow('systolic', bpValues['systolic']!),
+        _buildBloodPressureRow(
+          'systolic',
+          widget.bpValues['systolic']!,
+          color,
+        ),
         const SizedBox(height: 20),
-        _buildBloodPressureRow('diastolic', bpValues['diastolic']!,
-            color: Colors.redAccent[100]!),
+        _buildBloodPressureRow(
+          'diastolic',
+          widget.bpValues['diastolic']!,
+          color.withOpacity(0.6),
+        ),
       ],
     );
   }
 
-  Widget _buildBloodPressureRow(String label, int value,
-      {Color color = Colors.redAccent}) {
+  Widget _buildBloodPressureRow(
+    String label,
+    int value,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 50.0),
       child: Row(

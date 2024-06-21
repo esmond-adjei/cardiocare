@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:xmonapp/services/dummy_user_data.dart';
+import 'package:xmonapp/user/dummy_user_data.dart';
 // import 'package:xmonapp/widgets/custom_button.dart';
-import 'home_screen.dart';
+import '../screens/home_screen.dart';
 
 class UpdateProfileScreen extends StatefulWidget {
   const UpdateProfileScreen({super.key});

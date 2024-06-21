@@ -1,5 +1,6 @@
 // import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:xmonapp/services/constants.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/models/db_model.dart';
@@ -51,6 +52,7 @@ class _HomeState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('Hi, Esmond!'),
         actions: const [
@@ -156,7 +158,8 @@ class _HomeState extends State<HomeScreen> {
         onPressed: () {
           Navigator.pushNamed(context, '/device');
         },
-        child: const Icon(Icons.devices),
+        child: const FaIcon(FontAwesomeIcons.personRays),
+        // const Icon(Icons.bluetooth),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );

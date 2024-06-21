@@ -2,7 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-class ECGChart extends StatefulWidget {
+class ScrollableLineChart extends StatefulWidget {
   final List<int> ecgValues;
   final Color lineColor;
   final double stretchFactor;
@@ -10,7 +10,7 @@ class ECGChart extends StatefulWidget {
 
   static const sampleData = [1, 2, 3, 4, 5, 5, 6, 5, 7, 8, 7, 6, 5, 4, 3, 3, 3];
 
-  const ECGChart({
+  const ScrollableLineChart({
     super.key,
     this.ecgValues = sampleData,
     this.lineColor = Colors.blueAccent,
@@ -19,10 +19,10 @@ class ECGChart extends StatefulWidget {
   });
 
   @override
-  State<ECGChart> createState() => _ECGChartState();
+  State<ScrollableLineChart> createState() => _ScrollableLineChartState();
 }
 
-class _ECGChartState extends State<ECGChart> {
+class _ScrollableLineChartState extends State<ScrollableLineChart> {
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -38,7 +38,7 @@ class _ECGChartState extends State<ECGChart> {
   }
 
   @override
-  void didUpdateWidget(covariant ECGChart oldWidget) {
+  void didUpdateWidget(covariant ScrollableLineChart oldWidget) {
     super.didUpdateWidget(oldWidget);
     // scroll to the end
     if (widget.ecgValues.isNotEmpty) {
@@ -56,7 +56,7 @@ class _ECGChartState extends State<ECGChart> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 0),
-      color: Colors.grey.shade200,
+      color: Colors.grey.withOpacity(0.2),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         controller: _scrollController,
@@ -118,7 +118,7 @@ class _ECGChartState extends State<ECGChart> {
         drawHorizontalLine: false,
         getDrawingVerticalLine: (value) {
           return FlLine(
-            color: Colors.grey.shade300,
+            color: Colors.grey.withOpacity(0.3),
             strokeWidth: 2.0,
             dashArray: [8, 4],
           );

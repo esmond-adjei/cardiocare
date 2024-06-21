@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:xmonapp/main.dart';
 import 'package:xmonapp/screens/drawers/signal_renderers.dart';
-import 'package:xmonapp/screens/single_monitoring_layout.dart';
 import 'package:xmonapp/services/constants.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/models/db_model.dart';
+import 'package:xmonapp/services/theme.dart';
 import 'package:xmonapp/utils/format_datetime.dart';
 
 class ListItem extends StatelessWidget {
@@ -16,26 +15,38 @@ class ListItem extends StatelessWidget {
     required this.signal,
   });
 
+  void Function() _showPeakDrawer(BuildContext context) {
+    return () {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return PeakItemDrawer(signal: signal);
+        },
+      );
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dismissible(
       key: Key(signal.id.toString()),
       direction: DismissDirection.endToStart,
       background: Container(
-        color: Colors.red,
+        color: getSignalColor(signal.signalType),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: const Icon(Icons.delete, color: Colors.white),
       ),
       onDismissed: (direction) async {
-        // Handle item deletion here
         int success = await _dbhelper.deleteSignal(signal);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("${signal.name} ID: $success deleted successfully"),
-          ),
-        );
+        if (success == 1) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("${signal.name} deleted successfully"),
+            ),
+          );
+        }
       },
       confirmDismiss: (direction) async {
         return await showDialog(
@@ -60,17 +71,21 @@ class ListItem extends StatelessWidget {
         );
       },
       child: ListTile(
-        iconColor: Colors.redAccent,
+        iconColor: Colors.white,
         splashColor: Colors.grey.shade100,
         contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-        leading: const Icon(Icons.favorite),
-        onTap: () {
-          showModalBottomSheet(
-            isScrollControlled: true,
-            context: context,
-            builder: (context) => PeakItemDrawer(signal: signal),
-          );
-        },
+        leading: Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            color: getSignalColor(signal.signalType),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: getSignalIcon(signal.signalType),
+          ),
+        ),
+        onTap: _showPeakDrawer(context),
         title: Text(
           signal.name,
           style: const TextStyle(
@@ -105,80 +120,156 @@ class ListItem extends StatelessWidget {
   }
 }
 
-class PeakItemDrawer extends StatelessWidget {
+class PeakItemDrawer extends StatefulWidget {
   final dynamic signal;
 
   const PeakItemDrawer({super.key, required this.signal});
 
   @override
+  State<PeakItemDrawer> createState() => _PeakItemDrawerState();
+}
+
+class _PeakItemDrawerState extends State<PeakItemDrawer> {
+  final TextEditingController _controller = TextEditingController();
+  bool _isEditing = false;
+  final DatabaseHelper _dbhelper = DatabaseHelper();
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  void _init() {
+    _isEditing = false;
+    _controller.text = widget.signal.name;
+  }
+
+  Future<void> _saveName() async {
+    widget.signal.name = _controller.text;
+    final success = await _dbhelper.updateSignal(widget.signal);
+    if (success == 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("${widget.signal.name} updated successfully"),
+        ),
+      );
+    }
+    setState(() {
+      _init();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Padding(
+    return SingleChildScrollView(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      child: Wrap(
-        children: [
-          // Container(
-          //   padding: const EdgeInsets.symmetric(vertical: 20.0),
-          //   child:
-          // ),
-          _buildContent(context),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _isEditing
+                          ? Expanded(
+                              child: TextField(
+                                controller: _controller,
+                                decoration: const InputDecoration(
+                                  labelText: "Signal Name",
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.all(4),
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 24.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                autofocus: true,
+                              ),
+                            )
+                          : Expanded(
+                              child: Text(
+                                widget.signal.name,
+                                style: const TextStyle(
+                                  fontSize: 24.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                      IconButton(
+                        icon: Icon(_isEditing ? Icons.done : Icons.edit),
+                        onPressed: () {
+                          if (_isEditing) {
+                            _saveName();
+                          } else {
+                            setState(() {
+                              _isEditing = true;
+                            });
+                          }
+                        },
+                      ),
+                      if (_isEditing)
+                        IconButton(
+                          icon: const Icon(Icons.close_sharp),
+                          onPressed: () {
+                            if (_isEditing) {
+                              setState(() {
+                                _init();
+                              });
+                            }
+                          },
+                        ),
+                    ],
+                  ),
+                  Text(
+                    widget.signal.description,
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+            _buildSignalContent(),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          margin: const EdgeInsets.symmetric(
-            horizontal: 16.0,
-            vertical: 20.0,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                signal.name,
-                style: const TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                '${signal.description} Details',
-                style: const TextStyle(color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-        signal.signalType == ecgType
-            ? ECGRenderer(
-                isRecording: true,
-                ecgValues: signal.ecg,
-                title: signal.description,
-              )
-            : signal.signalType == bpType
-                ? BPRenderer(
-                    isRecording: true,
-                    bpValues: {
-                      'systolic': signal.bpSystolic,
-                      'diastolic': signal.bpDiastolic
-                    },
-                    title: signal.description,
-                  )
-                : signal.signalType == btempType
-                    ? BtempRenderer(
-                        isRecording: true,
-                        btempValue: signal.bodyTemp,
-                        title: signal.description,
-                      )
-                    : const Center(
-                        child: Text("Cannot find what you're looking for"),
-                      )
-      ],
-    );
+  Widget _buildSignalContent() {
+    switch (widget.signal.signalType) {
+      case ecgType:
+        return ECGRenderer(
+          isRecording: true,
+          ecgValues: widget.signal.ecg,
+          title: widget.signal.description,
+        );
+      case bpType:
+        return BPRenderer(
+          isRecording: true,
+          bpValues: {
+            'systolic': widget.signal.bpSystolic,
+            'diastolic': widget.signal.bpDiastolic
+          },
+          title: widget.signal.description,
+        );
+      case btempType:
+        return BtempRenderer(
+          isRecording: true,
+          btempValue: widget.signal.bodyTemp,
+          title: widget.signal.description,
+        );
+      default:
+        return const Center(
+          child: Text("Cannot find what you're looking for"),
+        );
+    }
   }
 }
