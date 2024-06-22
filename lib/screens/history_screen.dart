@@ -1,14 +1,13 @@
 import 'dart:async';
-import 'dart:developer';
+import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:xmonapp/screens/drawers/monitoring_screen.dart';
+import 'package:xmonapp/services/constants.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/models/db_model.dart';
 import 'package:xmonapp/widgets/list_container.dart';
-
-// ignore: constant_identifier_names
-enum DataType { ECG, BloodPressure, BodyTemperature }
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -64,9 +63,9 @@ class _HistoryScreenState extends State<HistoryScreen>
         body: TabBarView(
           controller: _tabController,
           children: const [
-            DataTab(dataType: DataType.ECG),
-            DataTab(dataType: DataType.BloodPressure),
-            DataTab(dataType: DataType.BodyTemperature),
+            DataTab(dataType: ecgType),
+            DataTab(dataType: bpType),
+            DataTab(dataType: btempType),
           ],
         ),
         floatingActionButton: Builder(
@@ -79,13 +78,11 @@ class _HistoryScreenState extends State<HistoryScreen>
                   context,
                   MaterialPageRoute(
                     builder: (context) => SingleMonitorLayout(
-                      initialScreen: _tabController.index,
-                    ),
+                        initialScreen: _tabController.index),
                   ),
                 );
               },
               child: const FaIcon(FontAwesomeIcons.recordVinyl),
-              // const Icon(Icons.add_outlined),
             );
           },
         ),
@@ -95,7 +92,7 @@ class _HistoryScreenState extends State<HistoryScreen>
 }
 
 class DataTab extends StatefulWidget {
-  final DataType dataType;
+  final String dataType;
 
   const DataTab({
     super.key,
@@ -107,30 +104,35 @@ class DataTab extends StatefulWidget {
 }
 
 class _DataTabState extends State<DataTab> {
-  static final DatabaseHelper _dbhelper = DatabaseHelper();
+  late String tabTitle;
 
-  Future<List<Signal>> _fetchData() async {
+  Future<List<Signal>> _fetchData(DatabaseHelper dbhelper) async {
     try {
       switch (widget.dataType) {
-        case DataType.ECG:
-          return await _dbhelper.getEcgData(1);
-        case DataType.BloodPressure:
-          return await _dbhelper.getBpData(1);
-        case DataType.BodyTemperature:
-          return await _dbhelper.getBtempData(1);
+        case ecgType:
+          tabTitle = 'Ecg History';
+          return await dbhelper.getEcgData(1);
+        case bpType:
+          tabTitle = 'Blood Pressure History';
+          return await dbhelper.getBpData(1);
+        case btempType:
+          tabTitle = 'Body Temperature History';
+          return await dbhelper.getBtempData(1);
         default:
           return [];
       }
     } catch (e) {
-      log(e.toString());
+      dev.log(e.toString());
       return [];
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final db = Provider.of<DatabaseHelper>(context);
+
     return FutureBuilder<List<Signal>>(
-      future: _fetchData(),
+      future: _fetchData(db),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -153,8 +155,7 @@ class _DataTabState extends State<DataTab> {
                 ),
                 // HISTORY DATA VIEW
                 ListContainer(
-                  listHeading:
-                      '${widget.dataType.toString().split('.').last} History',
+                  listHeading: tabTitle,
                   listData: snapshot.data!,
                 ),
               ],

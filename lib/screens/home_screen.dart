@@ -1,6 +1,7 @@
 // import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:xmonapp/services/constants.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/models/db_model.dart';
@@ -14,60 +15,86 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeState extends State<HomeScreen> {
-  late DatabaseHelper _dbhelper;
+  late DatabaseHelper dbhelper;
 
   @override
   void initState() {
     super.initState();
-    _dbhelper = DatabaseHelper();
+    dbhelper = DatabaseHelper();
   }
 
   // void _loadSignalsTable() async {
-  //   List<Map<String, dynamic>> signals = await _dbhelper.getAllSignals();
+  //   List<Map<String, dynamic>> signals = await dbhelper.getAllSignals();
   //   dev.log('\n>> ALL SIGNALS (length): ${signals.length}');
   //   for (var s in signals) {
   //     dev.log('>> DATA: $s');
   //   }
-  //   List<EcgModel> ecg = await _dbhelper.getEcgData(1);
+  //   List<EcgModel> ecg = await dbhelper.getEcgData(1);
   //   dev.log('\n>> ALL ECG (length): ${ecg.length}');
   //   for (var s in ecg) {
   //     dev.log('>> DATA: ${s.toMap()}');
   //   }
-  //   List<BpModel> bp = await _dbhelper.getBpData(1);
+  //   List<BpModel> bp = await dbhelper.getBpData(1);
   //   dev.log('\n>> ALL BP (length): ${bp.length}');
   //   for (var s in bp) {
   //     dev.log('>> DATA: ${s.toMap()}');
   //   }
-  //   List<BtempModel> btemp = await _dbhelper.getBtempData(1);
+  //   List<BtempModel> btemp = await dbhelper.getBtempData(1);
   //   dev.log('\n>> ALL BTEMP (length): ${btemp.length}');
   //   for (var s in btemp) {
   //     dev.log('>> DATA: ${s.toMap()}');
   //   }
   // }
 
-  Future<Map<String, List<Signal>>> _getRecent() async {
-    return await _dbhelper.getRecentRecords(1, limit: 3);
+  Future<Map<String, List<Signal>>> _getRecent(DatabaseHelper dbhelper) async {
+    return await dbhelper.getRecentRecords(1, limit: 3);
   }
 
   @override
   Widget build(BuildContext context) {
+    final DatabaseHelper dbhelper = Provider.of<DatabaseHelper>(context);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('Hi, Esmond!'),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.0),
-            child: CircleAvatar(
-              backgroundImage: AssetImage('assets/images/profile.jpg'),
-            ),
-          ),
-        ],
+        backgroundColor: Colors.white,
+        toolbarHeight: 20,
+        scrolledUnderElevation: 0,
+        // title: const Text('Hi, Esmond!'),
+        // actions: const [
+        //   Padding(
+        //     padding: EdgeInsets.symmetric(horizontal: 20.0),
+        //     child: CircleAvatar(
+        //       backgroundImage: AssetImage('assets/images/profile.jpg'),
+        //     ),
+        //   ),
+        // ],
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Hi, Esmond!',
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.0),
+                    child: CircleAvatar(
+                      backgroundImage: AssetImage('assets/images/profile.jpg'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             Container(
               height: 200,
               margin: const EdgeInsets.all(10),
@@ -114,7 +141,7 @@ class _HomeState extends State<HomeScreen> {
 
             // LIST OF RECENT RECORDS
             FutureBuilder<Map<String, List<Signal>>>(
-              future: _getRecent(),
+              future: _getRecent(dbhelper),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());

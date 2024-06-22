@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:xmonapp/widgets/line_chart.dart';
 
-class ECGRenderer extends StatefulWidget {
+class ECGRenderer extends StatelessWidget {
   final bool isRecording;
   final String title;
   final List<int> ecgValues;
@@ -14,16 +14,11 @@ class ECGRenderer extends StatefulWidget {
   });
 
   @override
-  State<ECGRenderer> createState() => _ECGRendererState();
-}
-
-class _ECGRendererState extends State<ECGRenderer> {
-  @override
   Widget build(BuildContext context) {
-    if (!widget.isRecording) {
+    if (!isRecording) {
       return Center(
         child: Text(
-          widget.title,
+          title,
           style: TextStyle(
             color: Colors.grey.shade500,
             fontSize: 24,
@@ -32,7 +27,7 @@ class _ECGRendererState extends State<ECGRenderer> {
         ),
       );
     }
-    return ScrollableLineChart(ecgValues: widget.ecgValues);
+    return ScrollableLineChart(dataList: ecgValues);
   }
 }
 

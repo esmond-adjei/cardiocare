@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
@@ -7,7 +8,7 @@ import 'package:xmonapp/services/constants.dart';
 import 'package:xmonapp/services/exceptions.dart';
 
 // databseService
-class DatabaseHelper {
+class DatabaseHelper extends ChangeNotifier {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _db;
   static const int _v = 1;
@@ -153,13 +154,17 @@ class DatabaseHelper {
   // =========== MANAGE SIGNAL TABLE ===========
   // manage signal table
   Future<int> createSignal(Signal signal) async {
-    return await _db!.insert(signalTable, {
+    final status = await _db!.insert(signalTable, {
       userIdColumn: signal.userId,
       nameColumn: signal.name,
       startTimeColumn: signal.startTime.toIso8601String(),
       stopTimeColumn: signal.stopTime.toIso8601String(),
       signalTypeColumn: signal.signalType,
     });
+
+    notifyListeners();
+
+    return status;
   }
 
   Future<List<Map<String, dynamic>>> getAllSignals() async {
@@ -190,6 +195,7 @@ class DatabaseHelper {
       where: 'id=?',
       whereArgs: [signal.signalId],
     );
+    notifyListeners();
     return result;
   }
 
@@ -215,6 +221,8 @@ class DatabaseHelper {
         await db.delete(table, where: '$idColumn=?', whereArgs: [signal.id]);
     await db.delete(signalTable,
         where: '$idColumn=?', whereArgs: [signal.signalId]);
+
+    notifyListeners();
     return signalId;
   }
 

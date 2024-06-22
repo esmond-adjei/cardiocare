@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:xmonapp/screens/drawers/signal_renderers.dart';
 import 'package:xmonapp/services/constants.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
 import 'package:xmonapp/services/models/db_model.dart';
 import 'package:xmonapp/services/theme.dart';
 import 'package:xmonapp/utils/format_datetime.dart';
+import 'package:xmonapp/widgets/line_chart.dart';
 
 class ListItem extends StatelessWidget {
   final Signal signal;
-  final DatabaseHelper _dbhelper = DatabaseHelper();
 
   ListItem({
     super.key,
@@ -29,6 +30,8 @@ class ListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final DatabaseHelper dbhelper = Provider.of<DatabaseHelper>(context);
+
     return Dismissible(
       key: Key(signal.id.toString()),
       direction: DismissDirection.endToStart,
@@ -39,7 +42,7 @@ class ListItem extends StatelessWidget {
         child: const Icon(Icons.delete, color: Colors.white),
       ),
       onDismissed: (direction) async {
-        int success = await _dbhelper.deleteSignal(signal);
+        int success = await dbhelper.deleteSignal(signal);
         if (success == 1) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -132,7 +135,7 @@ class PeakItemDrawer extends StatefulWidget {
 class _PeakItemDrawerState extends State<PeakItemDrawer> {
   final TextEditingController _controller = TextEditingController();
   bool _isEditing = false;
-  final DatabaseHelper _dbhelper = DatabaseHelper();
+  final DatabaseHelper dbhelper = DatabaseHelper();
 
   @override
   void initState() {
@@ -145,13 +148,15 @@ class _PeakItemDrawerState extends State<PeakItemDrawer> {
     _controller.text = widget.signal.name;
   }
 
-  Future<void> _saveName() async {
+  Future<void> _updateSignalName(DatabaseHelper dbhelper) async {
+    String prevSignalName = widget.signal.name;
     widget.signal.name = _controller.text;
-    final success = await _dbhelper.updateSignal(widget.signal);
+    final success = await dbhelper.updateSignal(widget.signal);
     if (success == 1) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("${widget.signal.name} updated successfully"),
+          content: Text(
+              "$prevSignalName updated to ${widget.signal.name} successfully"),
         ),
       );
     }
@@ -162,6 +167,8 @@ class _PeakItemDrawerState extends State<PeakItemDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final DatabaseHelper dbhelper = Provider.of<DatabaseHelper>(context);
+
     return SingleChildScrollView(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -208,7 +215,7 @@ class _PeakItemDrawerState extends State<PeakItemDrawer> {
                         icon: Icon(_isEditing ? Icons.done : Icons.edit),
                         onPressed: () {
                           if (_isEditing) {
-                            _saveName();
+                            _updateSignalName(dbhelper);
                           } else {
                             setState(() {
                               _isEditing = true;
@@ -246,10 +253,10 @@ class _PeakItemDrawerState extends State<PeakItemDrawer> {
   Widget _buildSignalContent() {
     switch (widget.signal.signalType) {
       case ecgType:
-        return ECGRenderer(
-          isRecording: true,
-          ecgValues: widget.signal.ecg,
-          title: widget.signal.description,
+        return ScrollableLineChart(
+          dataList: widget.signal.ecg,
+          lineColor: getSignalColor(widget.signal.signalType),
+          maxY: 500,
         );
       case bpType:
         return BPRenderer(

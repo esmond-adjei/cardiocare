@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:xmonapp/main.dart';
 import 'package:xmonapp/screens/drawers/signal_renderers.dart';
 import 'package:xmonapp/services/models/db_helper.dart';
@@ -32,7 +33,6 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   StreamSubscription<dynamic>? _subscription;
   final SignalGenerator _signalGenerator = SignalGenerator();
   final Stopwatch _stopwatch = Stopwatch();
-  final DatabaseHelper _dbhelper = DatabaseHelper();
 
   dynamic _currentSignal;
 
@@ -149,6 +149,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
     showDialog(
       context: context,
       builder: (context) {
+        final DatabaseHelper dbhelper = Provider.of<DatabaseHelper>(context);
         return AlertDialog(
           title: Text('Save ${_currentSignal.signalType} Data'),
           content: TextField(
@@ -169,18 +170,18 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                   switch (_tabController.index) {
                     case 0:
                       _currentSignal.setEcg(_ecgValues);
-                      await _dbhelper.createEcgData(_currentSignal);
+                      await dbhelper.createEcgData(_currentSignal);
                       break;
                     case 1:
                       _currentSignal.setBp(
                         systolic: _bpValues['systolic']!,
                         diastolic: _bpValues['diastolic']!,
                       );
-                      await _dbhelper.createBpData(_currentSignal);
+                      await dbhelper.createBpData(_currentSignal);
                       break;
                     case 2:
                       _currentSignal.setBodyTemp(_btempValue);
-                      await _dbhelper.createBtempData(_currentSignal);
+                      await dbhelper.createBtempData(_currentSignal);
                       break;
                   }
 
@@ -205,7 +206,6 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.black),

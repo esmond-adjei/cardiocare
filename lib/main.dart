@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:xmonapp/user/login_screen.dart';
 import 'package:xmonapp/user/register_screen.dart';
@@ -12,7 +13,12 @@ import 'package:xmonapp/screens/settings_screen.dart';
 import 'package:xmonapp/screens/drawers/connect_device.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => DatabaseHelper(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -21,22 +27,23 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'X-Monitoring App',
-        theme: customRedTheme,
-        darkTheme: customRedDarkTheme, //ThemeData.dark(),
-        themeMode: ThemeMode.system,
-        home: const MainScreen(),
-        routes: {
-          '/home': (context) => const HomeScreen(),
-          '/blog': (context) => const HealthBlogScreen(),
-          '/history': (context) => const HistoryScreen(),
-          '/setting': (context) => const SettingsScreen(),
-          '/device': (context) => const ConnectDevice(),
-          '/record': (context) => const SingleMonitorLayout(),
-          '/login': (context) => const LoginScreen(),
-          '/register': (context) => const RegisterScreen(),
-        });
+      debugShowCheckedModeBanner: false,
+      title: 'X-Monitoring App',
+      theme: customRedTheme,
+      darkTheme: customRedDarkTheme, //ThemeData.dark(),
+      themeMode: ThemeMode.system,
+      home: const MainScreen(),
+      routes: {
+        '/home': (context) => const HomeScreen(),
+        '/blog': (context) => const HealthBlogScreen(),
+        '/history': (context) => const HistoryScreen(),
+        '/setting': (context) => const SettingsScreen(),
+        '/device': (context) => const ConnectDevice(),
+        '/record': (context) => const SingleMonitorLayout(),
+        '/login': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
+      },
+    );
   }
 }
 
@@ -53,7 +60,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
   final List<Widget> _screens = [
     const HomeScreen(),
     const HistoryScreen(),
@@ -70,11 +77,11 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     _selectedIndex = widget.selectedIndex;
-    init();
+    // init();
     super.initState();
   }
 
-  init() async => await DatabaseHelper().onInitCreate();
+  // init() async => await DatabaseHelper().onInitCreate();
 
   @override
   Widget build(BuildContext context) {

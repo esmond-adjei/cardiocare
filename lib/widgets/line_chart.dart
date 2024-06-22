@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 class ScrollableLineChart extends StatefulWidget {
-  final List<int> ecgValues;
+  final List<int> dataList;
   final Color lineColor;
   final double stretchFactor;
   final double maxY;
@@ -12,8 +12,8 @@ class ScrollableLineChart extends StatefulWidget {
 
   const ScrollableLineChart({
     super.key,
-    this.ecgValues = sampleData,
-    this.lineColor = Colors.blueAccent,
+    this.dataList = sampleData,
+    this.lineColor = Colors.redAccent,
     this.stretchFactor = 1.0,
     this.maxY = 300.0,
   });
@@ -41,13 +41,13 @@ class _ScrollableLineChartState extends State<ScrollableLineChart> {
   void didUpdateWidget(covariant ScrollableLineChart oldWidget) {
     super.didUpdateWidget(oldWidget);
     // scroll to the end
-    if (widget.ecgValues.isNotEmpty) {
+    if (widget.dataList.isNotEmpty) {
       SchedulerBinding.instance.addPostFrameCallback((_) => _scrollToEnd());
     }
   }
 
   List<FlSpot> ecgData() {
-    return widget.ecgValues.asMap().entries.map((entry) {
+    return widget.dataList.asMap().entries.map((entry) {
       return FlSpot(entry.key.toDouble() * 0.01, entry.value.toDouble());
     }).toList();
   }
@@ -62,9 +62,9 @@ class _ScrollableLineChartState extends State<ScrollableLineChart> {
         controller: _scrollController,
         physics: const BouncingScrollPhysics(),
         child: SizedBox(
-          width: widget.ecgValues.length * widget.stretchFactor >
+          width: widget.dataList.length * widget.stretchFactor >
                   MediaQuery.of(context).size.width
-              ? widget.ecgValues.length * widget.stretchFactor
+              ? widget.dataList.length * widget.stretchFactor
               : MediaQuery.of(context).size.width,
           height: 300,
           child: LayoutBuilder(
@@ -85,6 +85,8 @@ class _ScrollableLineChartState extends State<ScrollableLineChart> {
           color: widget.lineColor,
           show: true,
           isCurved: true,
+          curveSmoothness: 0.3,
+          preventCurveOverShooting: true,
           belowBarData: BarAreaData(
             show: true,
             gradient: LinearGradient(
