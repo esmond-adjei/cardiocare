@@ -9,7 +9,7 @@ final ThemeData customRedTheme = ThemeData(
   ),
   primaryColor: Colors.redAccent,
   primarySwatch: Colors.red,
-  hintColor: Colors.redAccent,
+  hintColor: Colors.grey.shade700,
   scaffoldBackgroundColor: Colors.white,
   appBarTheme: const AppBarTheme(
     backgroundColor: Colors.redAccent,

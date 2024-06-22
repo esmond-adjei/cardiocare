@@ -37,6 +37,7 @@ class _HistoryScreenState extends State<HistoryScreen>
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: const Text('History'),
           actions: const [

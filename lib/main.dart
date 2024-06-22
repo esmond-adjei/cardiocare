@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:xmonapp/screens/drawers/blog_detail_screen.dart';
+import 'package:xmonapp/screens/drawers/chat_screen.dart';
 import 'package:xmonapp/user/login_screen.dart';
 import 'package:xmonapp/user/register_screen.dart';
 import 'package:xmonapp/screens/drawers/monitoring_screen.dart';
@@ -35,13 +37,15 @@ class MyApp extends StatelessWidget {
       home: const MainScreen(),
       routes: {
         '/home': (context) => const HomeScreen(),
-        '/blog': (context) => const HealthBlogScreen(),
+        '/health': (context) => const HealthBlogScreen(),
         '/history': (context) => const HistoryScreen(),
         '/setting': (context) => const SettingsScreen(),
         '/device': (context) => const ConnectDevice(),
         '/record': (context) => const SingleMonitorLayout(),
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
+        '/chat': (context) => const ChatScreen(),
+        '/blog': (context) => const BlogDetail(),
       },
     );
   }
