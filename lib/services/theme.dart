@@ -6,6 +6,8 @@ final ThemeData customRedTheme = ThemeData(
   useMaterial3: true,
   colorScheme: ColorScheme.fromSeed(
     seedColor: Colors.redAccent,
+    primary: Colors.redAccent,
+    secondary: Colors.white,
   ),
   primaryColor: Colors.redAccent,
   primarySwatch: Colors.red,
@@ -40,10 +42,10 @@ final ThemeData customRedTheme = ThemeData(
     ),
   ),
   progressIndicatorTheme: const ProgressIndicatorThemeData(
-    color: Colors.redAccent,
-    // linearTrackColor: Colors.redAccent,
-    circularTrackColor: Colors.redAccent,
-  ),
+      // color: Colors.redAccent,
+      // linearTrackColor: Colors.redAccent,
+      // circularTrackColor: Colors.redAccent,
+      ),
 );
 
 final ThemeData customRedDarkTheme = customRedTheme.copyWith(
