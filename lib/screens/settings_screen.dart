@@ -9,9 +9,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _isProfileExpanded = true;
-  bool _isMedicalExpanded = true;
-  bool _isEmergencyExpanded = true;
+  bool _isProfileExpanded = false;
+  bool _isMedicalExpanded = false;
+  bool _isEmergencyExpanded = false;
 
   // Sample data
   Map<String, String> profileInfo = {
