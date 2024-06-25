@@ -126,9 +126,11 @@ class HealthBlogScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 16.0,
-                    horizontal: 10.0,
+                  padding: EdgeInsets.only(
+                    top: 24.0,
+                    left: 16.0,
+                    right: 16.0,
+                    bottom: 16.0,
                   ),
                   child: Text(
                     'Learn about keeping your heart healthy!',
@@ -200,10 +202,7 @@ class HealthBlogScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 const Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 16.0,
-                    horizontal: 10.0,
-                  ),
+                  padding: EdgeInsets.all(16.0),
                   child: Text(
                     'Available Articiles!',
                     style: TextStyle(

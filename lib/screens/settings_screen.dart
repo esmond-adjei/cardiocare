@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:xmonapp/user/update_profile_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  const SettingsScreen({super.key});
 
   @override
-  _SettingsScreenState createState() => _SettingsScreenState();
+  State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
@@ -19,6 +18,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     'Last Name': 'Doe',
     'DOB': '22/02/1990',
     'Sex': 'Male',
+    'Email': 'john@cardiocare.com',
+    'Phone': '+233 245 6789',
+    'Address': '123 Main Street, Accra',
   };
 
   Map<String, dynamic> medicalInfo = {
@@ -126,9 +128,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'user@example.com',
-                    style: TextStyle(
+                  Text(
+                    "${profileInfo['Email']}",
+                    style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 14,
                     ),
@@ -136,17 +138,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ],
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const UpdateProfileScreen(),
-                ),
-              );
-            },
-            icon: const Icon(Icons.edit, color: Colors.white),
           ),
         ],
       ),
@@ -161,6 +152,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     VoidCallback? onEdit,
   }) {
     return Card(
+      elevation: 0,
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Theme(
@@ -168,7 +160,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: ExpansionTile(
           title: Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: isExpanded ? Colors.redAccent : Colors.grey.shade800,
+            ),
           ),
           initiallyExpanded: isExpanded,
           onExpansionChanged: onExpansionChanged,
