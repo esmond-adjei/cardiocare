@@ -18,15 +18,8 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
-// const String _apiKey = String.fromEnvironment('API_KEY');
-const String _apiKey = 'AIzaSyDFFinex_fsJgs5uAkXlWKkiw-EknfjHKw';
-const String _systemInstructions = '''you're an expert cardiologist. 
-    your sole purpose is to help clients by providing them with useful 
-    information about the cardiac health. In less than 3 statements, 
-    provide very detailed yet concise response to their questions. 
-    your name is cardiobot. 
-    don't answer questions not related to cardiac health 
-    and those not casual information.''';
+const String _apiKey = String.fromEnvironment('API_KEY');
+const String _systemInstructions = String.fromEnvironment('BOT_INSTRUCTIONS');
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -111,9 +104,7 @@ class _ChatWidgetState extends State<ChatWidget> {
       contentPadding: EdgeInsets.all(10),
       hintText: 'how can i help you...',
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(25),
-        ),
+        borderRadius: BorderRadius.all(Radius.circular(25)),
         borderSide: BorderSide(color: Colors.transparent),
       ),
     );

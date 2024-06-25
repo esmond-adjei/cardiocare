@@ -4,6 +4,7 @@ import 'package:xmonapp/services/constants.dart';
 
 final ThemeData customRedTheme = ThemeData(
   useMaterial3: true,
+  brightness: Brightness.light,
   colorScheme: ColorScheme.fromSeed(
     seedColor: Colors.redAccent,
     primary: Colors.redAccent,
