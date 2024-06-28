@@ -113,6 +113,8 @@ final List<BlogPost> blogData = [
 class HealthBlogScreen extends StatelessWidget {
   const HealthBlogScreen({super.key});
 
+  static const String placeholderImage =
+      'assets/images/blog-image-placeholder.png';
   static const String backgroundImage =
       'https://img.freepik.com/free-photo/people-working-out-indoors-together-with-dumbbells_23-2149175410.jpg';
 
@@ -249,11 +251,20 @@ class HealthBlogScreen extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  post.featuredImageUrl,
+                child: FadeInImage.assetNetwork(
+                  placeholder: placeholderImage,
+                  image: post.featuredImageUrl,
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
+                  imageErrorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 80,
+                      height: 80,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.error, color: Colors.red),
+                    );
+                  },
                 ),
               ),
               const SizedBox(width: 16),

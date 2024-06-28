@@ -7,6 +7,9 @@ class BlogDetail extends StatelessWidget {
 
   const BlogDetail({super.key, required this.post});
 
+  static const String placeholderImage =
+      'assets/images/blog-image-placeholder.png';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +34,22 @@ class BlogDetail extends StatelessWidget {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(post.featuredImageUrl, fit: BoxFit.cover),
+                  // Image.network(post.featuredImageUrl, fit: BoxFit.cover),
+                  FadeInImage.assetNetwork(
+                    placeholder: placeholderImage,
+                    image: post.featuredImageUrl,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                    imageErrorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 80,
+                        height: 80,
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.error, color: Colors.red),
+                      );
+                    },
+                  ),
                   const DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -56,15 +74,16 @@ class BlogDetail extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.grey[600],
-                      // fontSize: 24,
-                      // fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     children: [
                       CircleAvatar(
-                          backgroundImage: NetworkImage(post.authorImageUrl)),
+                        backgroundImage: NetworkImage(
+                          post.authorImageUrl,
+                        ),
+                      ),
                       const SizedBox(width: 8),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

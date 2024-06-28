@@ -1,22 +1,10 @@
-// source: https://github.com/google-gemini/generative-ai-dart/blob/main/samples/flutter_app/lib/main.dart
-// Copyright 2024 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const String _apiKey = String.fromEnvironment('API_KEY');
 const String _systemInstructions = String.fromEnvironment('BOT_INSTRUCTIONS');
@@ -28,27 +16,72 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
+void _buildAboutBotPage(BuildContext context) {
+  showAboutDialog(
+    context: context,
+    applicationIcon: const FaIcon(FontAwesomeIcons.userDoctor),
+    applicationName: 'CardioBot',
+    applicationVersion: '1.0.0',
+    applicationLegalese: '© 2024 CardioCare Plus Inc.',
+    children: [
+      const SizedBox(height: 16),
+      const Text(
+        'CardioBot is a personal health assistant that can help you with your health-related queries. '
+        'It uses the latest AI technology to provide you with accurate and reliable information. '
+        'Please note that CardioBot is not a substitute for professional medical advice. '
+        'Always consult a qualified healthcare provider for any health-related concerns.',
+      ),
+    ],
+  );
+}
+
 class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
       appBar: AppBar(
         title: const Row(
           children: [
-            FaIcon(FontAwesomeIcons.userDoctor),
+            CircleAvatar(
+              backgroundColor: Colors.white,
+              child: FaIcon(
+                FontAwesomeIcons.userDoctor,
+                color: Colors.redAccent,
+              ),
+            ),
             SizedBox(width: 16),
-            Text('CardioBot'),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('CardioBot'),
+                Text(
+                  'your personal health assistant',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () => _buildAboutBotPage(context),
+          ),
+        ],
       ),
-      body: const ChatWidget(apiKey: _apiKey),
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/wallpaper_doc.jpeg'),
+            opacity: 0.1,
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: const ChatWidget(apiKey: _apiKey),
+      ),
     );
   }
 }
@@ -67,119 +100,143 @@ class ChatWidget extends StatefulWidget {
 
 class _ChatWidgetState extends State<ChatWidget> {
   late final GenerativeModel _model;
-  late final ChatSession _chat;
+  late ChatSession _chat;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _textController = TextEditingController();
   final FocusNode _textFieldFocus = FocusNode();
-  final List<({Image? image, String? text, bool fromUser})>
-      _conversationContent = <({Image? image, String? text, bool fromUser})>[];
+  List<ChatMessage> _conversationHistory = [];
   bool _loading = false;
+  late SharedPreferences _prefs;
 
   @override
   void initState() {
     super.initState();
+    _initializeChat();
+  }
+
+  @override
+  void dispose() {
+    _saveConversationHistory();
+    _scrollController.dispose();
+    _textController.dispose();
+    _textFieldFocus.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initializeChat() async {
+    _prefs = await SharedPreferences.getInstance();
     _model = GenerativeModel(
       model: 'gemini-1.5-flash-latest',
       apiKey: widget.apiKey,
       systemInstruction: Content.text(_systemInstructions),
     );
-    _chat = _model.startChat(history: []);
+    _loadConversationHistory();
+    _chat = _model.startChat(
+      history: _conversationHistory.map((m) => m.toContent()).toList(),
+    );
+  }
+
+  void _loadConversationHistory() {
+    final savedHistory = _prefs.getStringList('chat_history') ?? [];
+    _conversationHistory =
+        savedHistory.map((json) => ChatMessage.fromJson(json)).toList();
+    setState(() {});
+  }
+
+  void _saveConversationHistory() {
+    _prefs.setStringList(
+      'chat_history',
+      _conversationHistory.map((m) => m.toJson()).toList(),
+    );
   }
 
   void _scrollDown() {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
-        duration: const Duration(
-          milliseconds: 750,
-        ),
+        duration: const Duration(milliseconds: 750),
         curve: Curves.easeOutCirc,
       ),
     );
   }
 
+  void _restartConversation() {
+    setState(() {
+      _conversationHistory.clear();
+      _chat = _model.startChat();
+    });
+    _saveConversationHistory();
+  }
+
   @override
   Widget build(BuildContext context) {
-    const textFieldDecoration = InputDecoration(
-      contentPadding: EdgeInsets.all(10),
-      hintText: 'how can i help you...',
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(25)),
-        borderSide: BorderSide(color: Colors.transparent),
-      ),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // LIST OF CONVERSTAION MESSAGES
-          Expanded(
-            child: _apiKey.isNotEmpty
-                ? ListView.builder(
-                    controller: _scrollController,
-                    itemBuilder: (context, index) {
-                      final content = _conversationContent[index];
-                      return MessageWidget(
-                        text: content.text,
-                        image: content.image,
-                        isFromUser: content.fromUser,
-                      );
-                    },
-                    itemCount: _conversationContent.length,
-                  )
-                : ListView(
-                    children: const [
-                      Text('No API key found. Please provide an API Key.'),
-                    ],
-                  ),
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            controller: _scrollController,
+            itemCount: _conversationHistory.length,
+            itemBuilder: (context, index) {
+              final message = _conversationHistory[index];
+              return MessageWidget(
+                text: message.text,
+                isFromUser: message.isFromUser,
+                status: message.status,
+              );
+            },
           ),
-          // TEXT INPUT ROW
-          Container(
-            padding: const EdgeInsets.all(10),
-            margin: const EdgeInsets.symmetric(vertical: 10),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.secondary,
-              borderRadius: BorderRadius.circular(40),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    autofocus: true,
-                    focusNode: _textFieldFocus,
-                    decoration: textFieldDecoration,
-                    controller: _textController,
-                    onSubmitted: _sendChatMessage,
-                  ),
+        ),
+        _buildInputRow(),
+      ],
+    );
+  }
+
+  Widget _buildInputRow() {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, -1),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _textController,
+              focusNode: _textFieldFocus,
+              decoration: const InputDecoration(
+                hintText: 'What is on your mind...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(25)),
+                  borderSide: BorderSide.none,
                 ),
-                const SizedBox.square(dimension: 15.0),
-                if (!_loading)
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: IconButton(
-                      disabledColor: Theme.of(context).colorScheme.secondary,
-                      onPressed: () async {
-                        if (_textController.text.isEmpty) return;
-                        _sendChatMessage(_textController.text);
-                      },
-                      icon: Icon(
-                        Icons.send,
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                    ),
-                  )
-                else
-                  const CircularProgressIndicator(
-                    color: Colors.white,
-                  ),
-              ],
+                filled: true,
+                fillColor: Colors.white70,
+              ),
+              onSubmitted: (text) => _sendChatMessage(text),
             ),
+          ),
+          if (!_loading)
+            IconButton(
+              icon: Icon(
+                Icons.send,
+                color: Theme.of(context).primaryColor,
+              ),
+              onPressed: () => _sendChatMessage(_textController.text),
+            ),
+          IconButton(
+            icon: Icon(
+              Icons.refresh,
+              color: Theme.of(context).primaryColor,
+            ),
+            onPressed: _restartConversation,
           ),
         ],
       ),
@@ -187,104 +244,120 @@ class _ChatWidgetState extends State<ChatWidget> {
   }
 
   Future<void> _sendChatMessage(String message) async {
+    if (message.isEmpty) return;
+    _textController.clear();
+
     setState(() {
+      _conversationHistory.add(ChatMessage(
+        text: message,
+        isFromUser: true,
+        status: MessageStatus.sent,
+      ));
       _loading = true;
     });
 
     try {
-      _conversationContent.add((image: null, text: message, fromUser: true));
       final response = await _chat.sendMessage(Content.text(message));
       final text = response.text;
-      _conversationContent.add((image: null, text: text, fromUser: false));
-
-      if (text == null) {
-        _showError('No response from API.');
-        return;
-      } else {
+      if (text != null) {
         setState(() {
-          _loading = false;
-          _scrollDown();
+          _conversationHistory.add(ChatMessage(
+            text: text,
+            isFromUser: false,
+            status: MessageStatus.sent,
+          ));
         });
       }
     } catch (e) {
-      _showError(e.toString());
       setState(() {
-        _loading = false;
+        _conversationHistory.last.status = MessageStatus.failed;
       });
     } finally {
-      _textController.clear();
       setState(() {
         _loading = false;
       });
       _textFieldFocus.requestFocus();
+      _scrollDown();
+      _saveConversationHistory();
     }
-  }
-
-  void _showError(String message) {
-    showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Something went wrong'),
-          content: SingleChildScrollView(
-            child: SelectableText(message),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            )
-          ],
-        );
-      },
-    );
   }
 }
 
 class MessageWidget extends StatelessWidget {
   const MessageWidget({
     super.key,
-    this.image,
-    this.text,
+    required this.text,
     required this.isFromUser,
+    required this.status,
   });
 
-  final Image? image;
-  final String? text;
+  final String text;
   final bool isFromUser;
+  final MessageStatus status;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment:
-          isFromUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-      children: [
-        Flexible(
-          child: Container(
-            constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.8),
-            decoration: BoxDecoration(
-              color: isFromUser
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            padding: const EdgeInsets.symmetric(
-              vertical: 15,
-              horizontal: 20,
-            ),
-            margin: const EdgeInsets.only(bottom: 8),
-            child: Column(
-              children: [
-                if (text case final text?) MarkdownBody(data: text),
-                if (image case final image?) image,
-              ],
-            ),
+    return Align(
+      alignment: isFromUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Card(
+        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+        shadowColor: Colors.black.withOpacity(0.6),
+        color: isFromUser
+            ? const Color.fromARGB(255, 245, 185, 180)
+            : Colors.white,
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: isFromUser
+                ? MediaQuery.of(context).size.width * 0.8
+                : MediaQuery.of(context).size.width,
+            minWidth: MediaQuery.of(context).size.width * 0.2,
+          ),
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              MarkdownBody(data: text),
+              if (status == MessageStatus.failed)
+                const Icon(Icons.error_outline, color: Colors.red, size: 12),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }
+
+class ChatMessage {
+  final String text;
+  final bool isFromUser;
+  MessageStatus status;
+
+  ChatMessage({
+    required this.text,
+    required this.isFromUser,
+    required this.status,
+  });
+
+  factory ChatMessage.fromJson(String json) {
+    final map = jsonDecode(json);
+    return ChatMessage(
+      text: map['text'],
+      isFromUser: map['isFromUser'],
+      status: MessageStatus.values[map['status']],
+    );
+  }
+
+  String toJson() {
+    return jsonEncode({
+      'text': text,
+      'isFromUser': isFromUser,
+      'status': status.index,
+    });
+  }
+
+  Content toContent() {
+    return Content.text(text);
+  }
+}
+
+enum MessageStatus { sent, failed }
