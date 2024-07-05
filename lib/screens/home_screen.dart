@@ -1,8 +1,8 @@
 // import 'dart:developer' as dev;
-import 'package:cardiocare/utils/enums.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:cardiocare/utils/enums.dart';
 import 'package:provider/provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cardiocare/services/models/db_helper.dart';
 import 'package:cardiocare/services/models/signal_model.dart';
 import 'package:cardiocare/widgets/list_container.dart';
@@ -60,15 +60,6 @@ class _HomeState extends State<HomeScreen> {
         backgroundColor: Colors.white,
         toolbarHeight: 20,
         scrolledUnderElevation: 0,
-        // title: const Text('Hi, Esmond!'),
-        // actions: const [
-        //   Padding(
-        //     padding: EdgeInsets.symmetric(horizontal: 20.0),
-        //     child: CircleAvatar(
-        //       backgroundImage: AssetImage('assets/images/profile.jpg'),
-        //     ),
-        //   ),
-        // ],
       ),
       body: SingleChildScrollView(
         child: Column(

@@ -50,6 +50,7 @@ final ThemeData customRedTheme = ThemeData(
   ),
   snackBarTheme: const SnackBarThemeData(
     backgroundColor: Colors.white,
+    contentTextStyle: TextStyle(color: Colors.black87),
   ),
 );
 

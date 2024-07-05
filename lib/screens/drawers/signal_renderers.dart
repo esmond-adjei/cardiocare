@@ -3,12 +3,12 @@ import 'package:cardiocare/widgets/line_chart.dart';
 
 // ========== ECG RENDERER RENDERER =========
 class ECGRenderer extends StatefulWidget {
-  final bool isRecording;
+  final bool isActive;
   final List<int> ecgValues;
 
   const ECGRenderer({
     super.key,
-    required this.isRecording,
+    required this.isActive,
     required this.ecgValues,
   });
 
@@ -53,7 +53,7 @@ class _ECGRendererState extends State<ECGRenderer> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.ecgValues.isEmpty) {
+    if (!widget.isActive) {
       return const Center(
         child: Text(
           'Start Recording Your ECG',
@@ -95,7 +95,7 @@ class _ECGRendererState extends State<ECGRenderer> {
             ),
           ],
         ),
-        // if (!widget.isRecording)
+        // if (!widget.isActive)
         //   _buildInfoCard(
         //     icon: Icons.warning,
         //     title: 'Status',
@@ -138,18 +138,18 @@ class _ECGRendererState extends State<ECGRenderer> {
 
 // ========== BLOOD PRESSURE RENDERER =========
 class BPRenderer extends StatelessWidget {
-  final bool isRecording;
-  final Map<String, int> bpValues;
+  final bool isActive;
+  final List<int> bpValues;
 
   const BPRenderer({
     super.key,
-    required this.isRecording,
+    required this.isActive,
     required this.bpValues,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (bpValues.isEmpty || !isRecording) {
+    if (!isActive) {
       return const Center(
         child: Text(
           'Start Monitoring Your BP',
@@ -162,20 +162,20 @@ class BPRenderer extends StatelessWidget {
       );
     }
 
-    final color = bpValues['systolic']! > 120 ? Colors.red : Colors.purple;
+    final color = bpValues[0] > 120 ? Colors.red : Colors.purple;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildBloodPressureRow(
           'systolic',
-          bpValues['systolic']!,
+          bpValues[0],
           color,
         ),
         const SizedBox(height: 20),
         _buildBloodPressureRow(
           'diastolic',
-          bpValues['diastolic']!,
+          bpValues[1],
           color.withOpacity(0.6),
         ),
       ],
@@ -224,12 +224,12 @@ class BPRenderer extends StatelessWidget {
 
 // ========== BODY TEMPERATURE RENDERER =========
 class BtempRenderer extends StatefulWidget {
-  final bool isRecording;
+  final bool isActive;
   final double btempValue;
 
   const BtempRenderer({
     super.key,
-    required this.isRecording,
+    required this.isActive,
     required this.btempValue,
   });
 
@@ -264,7 +264,7 @@ class _BtempRendererState extends State<BtempRenderer> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.btempValue.isNaN || !widget.isRecording) {
+    if (!widget.isActive) {
       return const Center(
         child: Text(
           'Start Monitoring Your Body Temperature',

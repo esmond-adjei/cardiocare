@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'dart:developer' as dev;
 import 'package:cardiocare/utils/enums.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
@@ -39,12 +39,12 @@ class DatabaseHelper extends ChangeNotifier {
   Future<void> _open() async {
     try {
       String path = join(await getDatabasesPath(), dbName);
-      log('Opening database at path $path');
+      dev.log('Opening database at path $path');
       _db = await openDatabase(
         path,
         version: _v,
         onCreate: (db, version) async {
-          log('>> Creating tables..');
+          dev.log('>> Creating tables..');
           db.execute('PRAGMA foreign_keys = ON;');
           for (var database in dbs) {
             await db.execute(database);
@@ -98,12 +98,9 @@ class DatabaseHelper extends ChangeNotifier {
       throw UserAlreadyExists();
     }
 
-    final userId = await db.insert(
-      userTable,
-      {
-        emailColumn: user.email.toLowerCase(),
-      },
-    );
+    final userId = await db.insert(userTable, {
+      emailColumn: user.email.toLowerCase(),
+    });
     return user.copyWith(id: userId);
   }
 
@@ -156,17 +153,11 @@ class DatabaseHelper extends ChangeNotifier {
   // =========== MANAGE SIGNAL TABLE ===========
   // manage signal table
   Future<int> createSignal(Signal signal) async {
-    final status = await _db!.insert(signalTable, {
-      userIdColumn: signal.userId,
-      nameColumn: signal.name,
-      startTimeColumn: signal.startTime.toIso8601String(),
-      stopTimeColumn: signal.stopTime.toIso8601String(),
-      signalTypeColumn: signal.signalType,
-    });
-
+    final signalId = await _db!.insert(signalTable, signal.toMap());
+    dev.log(">> DB: saving signal (ID: $signalId)");
     notifyListeners();
 
-    return status;
+    return signalId;
   }
 
   Future<List<Map<String, dynamic>>> getAllSignals() async {
@@ -205,14 +196,14 @@ class DatabaseHelper extends ChangeNotifier {
     final db = await database;
     String table;
 
-    switch (signal.signalType.name) {
-      case ecgType:
+    switch (signal.signalType) {
+      case SignalType.ecg:
         table = ecgTable;
         break;
-      case bpType:
+      case SignalType.bp:
         table = bpTable;
         break;
-      case btempType:
+      case SignalType.btemp:
         table = btempTable;
         break;
       default:
@@ -232,6 +223,7 @@ class DatabaseHelper extends ChangeNotifier {
   Future<int> createEcgData(EcgModel ecgData) async {
     final db = _getDatabaseOrThrow();
     final signalId = await createSignal(ecgData);
+    dev.log(">> DB: saving ecg (SID: $signalId)");
     return await db.insert(ecgTable, {
       signalIdColumn: signalId,
       'ecg': ecgData.ecg,
@@ -253,8 +245,9 @@ class DatabaseHelper extends ChangeNotifier {
 
   // manage bp table
   Future<int> createBpData(BpModel bpModel) async {
-    final signalId = await createSignal(bpModel);
     final db = _getDatabaseOrThrow();
+    final signalId = await createSignal(bpModel);
+    dev.log(">> DB: saving bp (SID: $signalId)");
     return await db.insert(bpTable, {
       signalIdColumn: signalId,
       'bp_systolic': bpModel.bpSystolic,
@@ -277,8 +270,9 @@ class DatabaseHelper extends ChangeNotifier {
 
   // manage btemp table
   Future<int> createBtempData(BtempModel btempModel) async {
-    final signalId = await createSignal(btempModel);
     final db = _getDatabaseOrThrow();
+    final signalId = await createSignal(btempModel);
+    dev.log(">> DB: saving db (SID: $signalId)");
     return await db.insert(btempTable, {
       signalIdColumn: signalId,
       'body_temp': btempModel.bodyTemp,

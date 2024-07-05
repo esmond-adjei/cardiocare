@@ -12,6 +12,7 @@ const createSignalTable = '''CREATE TABLE IF NOT EXISTS $signalTable (
     $stopTimeColumn DATETIME NOT NULL,
     $createdAtColumn DATETIME DEFAULT CURRENT_TIMESTAMP,
     $signalTypeColumn TEXT NOT NULL,
+    $signalInfoColumn TEXT,
     FOREIGN KEY ($userIdColumn) REFERENCES $userTable ($idColumn)
 );''';
 
@@ -19,6 +20,8 @@ const createECGTable = '''CREATE TABLE IF NOT EXISTS $ecgTable (
     $idColumn INTEGER PRIMARY KEY AUTOINCREMENT,
     $signalIdColumn INTEGER NOT NULL,
     ecg BLOB NOT NULL,
+    hrv REAL,
+    hbpm REAL,
     FOREIGN KEY ($signalIdColumn) REFERENCES $signalTable ($idColumn)
 );''';
 
@@ -34,6 +37,8 @@ const createBTempTable = '''CREATE TABLE IF NOT EXISTS $btempTable (
     $idColumn INTEGER PRIMARY KEY AUTOINCREMENT,
     $signalIdColumn INTEGER NOT NULL,
     body_temp REAL NOT NULL,
+    body_temp_min REAL,
+    body_temp_max REAL,
     FOREIGN KEY ($signalIdColumn) REFERENCES $signalTable ($idColumn)
 );''';
 
@@ -53,6 +58,7 @@ const startTimeColumn = 'start_time';
 const stopTimeColumn = 'stop_time';
 const signalTypeColumn = 'signal_type';
 const signalIdColumn = 'signal_id';
+const signalInfoColumn = 'signal_info';
 
 const createdAtColumn = 'created_at';
 

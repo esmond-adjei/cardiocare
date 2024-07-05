@@ -10,6 +10,7 @@ abstract class Signal {
   final DateTime startTime;
   DateTime stopTime;
   final SignalType signalType;
+  String? signalInfo;
 
   Signal({
     this.id,
@@ -36,12 +37,12 @@ abstract class Signal {
   Map<String, dynamic> toMap() {
     return {
       idColumn: id,
-      signalIdColumn: signalId,
       userIdColumn: userId,
       nameColumn: signalName,
       startTimeColumn: startTime.toIso8601String(),
       stopTimeColumn: stopTime.toIso8601String(),
       signalTypeColumn: signalType.name,
+      signalInfoColumn: signalInfo,
     };
   }
 
@@ -56,7 +57,6 @@ abstract class Signal {
           runtimeType == other.runtimeType &&
           id == other.id &&
           userId == other.userId &&
-          signalId == other.signalId &&
           signalType == other.signalType;
 
   @override
@@ -66,6 +66,8 @@ abstract class Signal {
 
 class EcgModel extends Signal {
   Uint8List? ecg;
+  double? hrv;
+  double? hbpm;
 
   EcgModel({
     super.id,
@@ -77,15 +79,12 @@ class EcgModel extends Signal {
     this.ecg,
   }) : super(signalType: SignalType.ecg);
 
-  void setEcg(List<int> data) {
-    ecg = Uint8List.fromList(data);
+  set ecgData(List<int> ecgValues) {
+    ecg = Uint8List.fromList(ecgValues);
   }
 
-  @override
-  Map<String, dynamic> toMap() {
-    final map = super.toMap();
-    map['ecg'] = ecg;
-    return map;
+  Uint8List get ecgData {
+    return ecg ?? Uint8List.fromList([]);
   }
 
   factory EcgModel.fromMap(Map<String, dynamic> map) {
@@ -96,14 +95,14 @@ class EcgModel extends Signal {
       signalId: map[signalIdColumn] as int?,
       startTime: DateTime.parse(map[startTimeColumn] as String),
       stopTime: DateTime.parse(map[stopTimeColumn] as String),
-      ecg: map['ecg'] as Uint8List?,
+      ecg: map['ecg'] as Uint8List,
     );
   }
 }
 
 class BpModel extends Signal {
-  final int bpSystolic;
-  final int bpDiastolic;
+  int? bpSystolic;
+  int? bpDiastolic;
 
   BpModel({
     super.id,
@@ -112,16 +111,17 @@ class BpModel extends Signal {
     required super.userId,
     required super.startTime,
     required super.stopTime,
-    required this.bpSystolic,
-    required this.bpDiastolic,
+    this.bpSystolic,
+    this.bpDiastolic,
   }) : super(signalType: SignalType.bp);
 
-  @override
-  Map<String, dynamic> toMap() {
-    final map = super.toMap();
-    map['bp_systolic'] = bpSystolic;
-    map['bp_diastolic'] = bpDiastolic;
-    return map;
+  set bpData(List<int> bpValues) {
+    bpSystolic = bpValues[0];
+    bpDiastolic = bpValues[1];
+  }
+
+  List<int> get bpData {
+    return [bpSystolic ?? 0, bpDiastolic ?? 0];
   }
 
   factory BpModel.fromMap(Map<String, dynamic> map) {
@@ -132,14 +132,16 @@ class BpModel extends Signal {
       signalName: map[nameColumn] as String?,
       startTime: DateTime.parse(map[startTimeColumn] as String),
       stopTime: DateTime.parse(map[stopTimeColumn] as String),
-      bpSystolic: map['bp_systolic'] as int,
-      bpDiastolic: map['bp_diastolic'] as int,
+      bpSystolic: map['bp_systolic'] as int?,
+      bpDiastolic: map['bp_diastolic'] as int?,
     );
   }
 }
 
 class BtempModel extends Signal {
-  final double bodyTemp;
+  double? bodyTemp;
+  double? minTemp;
+  double? maxTemp;
 
   BtempModel({
     super.id,
@@ -148,14 +150,17 @@ class BtempModel extends Signal {
     required super.userId,
     required super.startTime,
     required super.stopTime,
-    required this.bodyTemp,
+    this.bodyTemp,
+    this.minTemp,
+    this.maxTemp,
   }) : super(signalType: SignalType.btemp);
 
-  @override
-  Map<String, dynamic> toMap() {
-    final map = super.toMap();
-    map['body_temp'] = bodyTemp;
-    return map;
+  set tempData(double tempValue) {
+    bodyTemp = tempValue;
+  }
+
+  double get tempData {
+    return bodyTemp ?? 0.0;
   }
 
   factory BtempModel.fromMap(Map<String, dynamic> map) {
@@ -166,7 +171,9 @@ class BtempModel extends Signal {
       signalName: map[nameColumn] as String?,
       startTime: DateTime.parse(map[startTimeColumn] as String),
       stopTime: DateTime.parse(map[stopTimeColumn] as String),
-      bodyTemp: map['body_temp'] as double,
+      bodyTemp: map['body_temp'] as double?,
+      minTemp: map['body_temp_min'] as double?,
+      maxTemp: map['body_temp_max'] as double?,
     );
   }
 }

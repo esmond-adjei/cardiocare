@@ -99,7 +99,7 @@ class SignalGenerator {
     }
   }
 
-  Stream<Map<String, int>> generateBP() async* {
+  Stream<List<int>> generateBP() async* {
     const int bpNoiseAmplitude = 5;
     final numSamples = durationSeconds * samplingRate;
     var systolic = 120;
@@ -115,7 +115,7 @@ class SignalGenerator {
 
       dev.log('Systolic: $systolic, Diastolic: $diastolic');
 
-      yield {'systolic': systolic, 'diastolic': diastolic};
+      yield [systolic, diastolic];
       await Future.delayed(
           Duration(milliseconds: (1000 / samplingRate).round()));
     }

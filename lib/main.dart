@@ -1,3 +1,4 @@
+import 'package:cardiocare/states/monitoring_screen_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -15,8 +16,11 @@ import 'package:cardiocare/screens/drawers/connect_device.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => DatabaseHelper(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => DatabaseHelper()),
+        ChangeNotifierProvider(create: (_) => MonitorState()),
+      ],
       child: const MyApp(),
     ),
   );
@@ -31,7 +35,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'X-Monitoring App',
       theme: customRedTheme,
-      darkTheme: customRedDarkTheme, //ThemeData.dark(),
+      darkTheme: customRedDarkTheme,
       themeMode: ThemeMode.system,
       home: const MainScreen(),
       routes: {

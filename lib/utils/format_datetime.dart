@@ -48,6 +48,14 @@ String formatDateTime(String timestamp) {
   return '${dateTime.day} ${getMonthName(dateTime.month)} ${dateTime.year} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
 }
 
+String formatTime(int milliseconds) {
+  final int seconds = milliseconds ~/ 1000;
+  final int minutes = seconds ~/ 60;
+  final int remainingSeconds = seconds % 60;
+
+  return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
+}
+
 String getMonthName(int month) {
   switch (month) {
     case 1:

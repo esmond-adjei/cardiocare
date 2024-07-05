@@ -139,6 +139,12 @@ class _PeakItemDrawerState extends State<PeakItemDrawer> {
     _init();
   }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   void _init() {
     _isEditing = false;
     _controller.text = widget.signal.name;
@@ -250,25 +256,22 @@ class _PeakItemDrawerState extends State<PeakItemDrawer> {
     switch (widget.signal.signalType) {
       case SignalType.ecg:
         return ECGRenderer(
-          isRecording: true,
+          isActive: true,
           ecgValues: widget.signal.ecg,
         );
       case SignalType.bp:
         return BPRenderer(
-          isRecording: true,
-          bpValues: {
-            'systolic': widget.signal.bpSystolic,
-            'diastolic': widget.signal.bpDiastolic
-          },
+          isActive: true,
+          bpValues: widget.signal.bpData,
         );
       case SignalType.btemp:
         return BtempRenderer(
-          isRecording: true,
+          isActive: true,
           btempValue: widget.signal.bodyTemp,
         );
       default:
         return const Center(
-          child: Text("Cannot find what you're looking for"),
+          child: Text("Unable to render signal data"),
         );
     }
   }
