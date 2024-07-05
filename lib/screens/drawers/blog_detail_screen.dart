@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:xmonapp/services/blog_model.dart';
+import 'package:cardiocare/services/models/blog_model.dart';
 
 class BlogDetail extends StatelessWidget {
   final BlogPost post;
@@ -34,7 +34,6 @@ class BlogDetail extends StatelessWidget {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Image.network(post.featuredImageUrl, fit: BoxFit.cover),
                   FadeInImage.assetNetwork(
                     placeholder: placeholderImage,
                     image: post.featuredImageUrl,
@@ -55,7 +54,7 @@ class BlogDetail extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment.bottomCenter,
                         end: Alignment.topCenter,
-                        colors: [Colors.redAccent, Colors.transparent],
+                        colors: [Colors.black, Colors.transparent],
                       ),
                     ),
                   ),

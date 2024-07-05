@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:xmonapp/screens/drawers/chat_screen.dart';
-import 'package:xmonapp/user/login_screen.dart';
-import 'package:xmonapp/user/register_screen.dart';
-import 'package:xmonapp/screens/drawers/monitoring_screen.dart';
-import 'package:xmonapp/services/models/db_helper.dart';
-import 'package:xmonapp/services/theme.dart';
-import 'package:xmonapp/screens/history_screen.dart';
-import 'package:xmonapp/screens/home_screen.dart';
-import 'package:xmonapp/screens/health_blog_screen.dart';
-import 'package:xmonapp/screens/settings_screen.dart';
-import 'package:xmonapp/screens/drawers/connect_device.dart';
+import 'package:cardiocare/screens/drawers/chat_screen.dart';
+import 'package:cardiocare/user/login_screen.dart';
+import 'package:cardiocare/user/register_screen.dart';
+import 'package:cardiocare/screens/drawers/monitoring_screen.dart';
+import 'package:cardiocare/services/models/db_helper.dart';
+import 'package:cardiocare/services/customTheme.dart';
+import 'package:cardiocare/screens/history_screen.dart';
+import 'package:cardiocare/screens/home_screen.dart';
+import 'package:cardiocare/screens/health_blog_screen.dart';
+import 'package:cardiocare/screens/settings_screen.dart';
+import 'package:cardiocare/screens/drawers/connect_device.dart';
 
 void main() {
   runApp(
@@ -79,11 +79,8 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     _selectedIndex = widget.selectedIndex;
-    // init();
     super.initState();
   }
-
-  // init() async => await DatabaseHelper().onInitCreate();
 
   @override
   Widget build(BuildContext context) {

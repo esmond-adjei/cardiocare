@@ -1,17 +1,15 @@
+import 'package:cardiocare/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:xmonapp/screens/drawers/signal_renderers.dart';
-import 'package:xmonapp/services/constants.dart';
-import 'package:xmonapp/services/models/db_helper.dart';
-import 'package:xmonapp/services/models/db_model.dart';
-import 'package:xmonapp/services/theme.dart';
-import 'package:xmonapp/utils/format_datetime.dart';
-import 'package:xmonapp/widgets/line_chart.dart';
+import 'package:cardiocare/screens/drawers/signal_renderers.dart';
+import 'package:cardiocare/services/models/db_helper.dart';
+import 'package:cardiocare/services/models/signal_model.dart';
+import 'package:cardiocare/utils/format_datetime.dart';
 
 class ListItem extends StatelessWidget {
   final Signal signal;
 
-  ListItem({
+  const ListItem({
     super.key,
     required this.signal,
   });
@@ -36,7 +34,7 @@ class ListItem extends StatelessWidget {
       key: Key(signal.id.toString()),
       direction: DismissDirection.endToStart,
       background: Container(
-        color: getSignalColor(signal.signalType),
+        color: signal.signalType.color,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: const Icon(Icons.delete, color: Colors.white),
@@ -81,12 +79,10 @@ class ListItem extends StatelessWidget {
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: getSignalColor(signal.signalType),
+            color: signal.signalType.color,
             shape: BoxShape.circle,
           ),
-          child: Center(
-            child: getSignalIcon(signal.signalType),
-          ),
+          child: Center(child: signal.signalType.icon),
         ),
         onTap: _showPeakDrawer(context),
         title: Text(
@@ -237,7 +233,7 @@ class _PeakItemDrawerState extends State<PeakItemDrawer> {
                     ],
                   ),
                   Text(
-                    widget.signal.description,
+                    widget.signal.signalType.description,
                     style: const TextStyle(color: Colors.grey),
                   ),
                 ],
@@ -252,26 +248,23 @@ class _PeakItemDrawerState extends State<PeakItemDrawer> {
 
   Widget _buildSignalContent() {
     switch (widget.signal.signalType) {
-      case ecgType:
-        return ScrollableLineChart(
-          dataList: widget.signal.ecg,
-          lineColor: getSignalColor(widget.signal.signalType),
-          maxY: 500,
+      case SignalType.ecg:
+        return ECGRenderer(
+          isRecording: true,
+          ecgValues: widget.signal.ecg,
         );
-      case bpType:
+      case SignalType.bp:
         return BPRenderer(
           isRecording: true,
           bpValues: {
             'systolic': widget.signal.bpSystolic,
             'diastolic': widget.signal.bpDiastolic
           },
-          title: widget.signal.description,
         );
-      case btempType:
+      case SignalType.btemp:
         return BtempRenderer(
           isRecording: true,
           btempValue: widget.signal.bodyTemp,
-          title: widget.signal.description,
         );
       default:
         return const Center(

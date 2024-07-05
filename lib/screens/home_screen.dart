@@ -1,11 +1,11 @@
 // import 'dart:developer' as dev;
+import 'package:cardiocare/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:xmonapp/services/constants.dart';
-import 'package:xmonapp/services/models/db_helper.dart';
-import 'package:xmonapp/services/models/db_model.dart';
-import 'package:xmonapp/widgets/list_container.dart';
+import 'package:cardiocare/services/models/db_helper.dart';
+import 'package:cardiocare/services/models/signal_model.dart';
+import 'package:cardiocare/widgets/list_container.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -46,7 +46,8 @@ class _HomeState extends State<HomeScreen> {
   //   }
   // }
 
-  Future<Map<String, List<Signal>>> _getRecent(DatabaseHelper dbhelper) async {
+  Future<Map<SignalType, List<Signal>>> _getRecent(
+      DatabaseHelper dbhelper) async {
     return await dbhelper.getRecentRecords(1, limit: 3);
   }
 
@@ -140,7 +141,7 @@ class _HomeState extends State<HomeScreen> {
             // ),
 
             // LIST OF RECENT RECORDS
-            FutureBuilder<Map<String, List<Signal>>>(
+            FutureBuilder<Map<SignalType, List<Signal>>>(
               future: _getRecent(dbhelper),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -150,20 +151,14 @@ class _HomeState extends State<HomeScreen> {
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Center(child: Text('No data available'));
                 } else {
-                  Map<String, List<Signal>> results;
+                  Map<SignalType, List<Signal>> results;
                   results = snapshot.data!;
 
                   return Column(
                     children: [
                       ...results.entries.map(
                         (entry) => ListContainer(
-                          listHeading: entry.key == ecgType
-                              ? 'ECG Signal'
-                              : entry.key == bpType
-                                  ? 'Blood Pressure'
-                                  : entry.key == btempType
-                                      ? 'Body Temperature'
-                                      : 'Unknown',
+                          listHeading: entry.key.description,
                           listData: entry.value,
                           routeToHistoryScreen: () {
                             Navigator.pushNamed(

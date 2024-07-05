@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:xmonapp/screens/drawers/monitoring_screen.dart';
+import 'package:cardiocare/screens/drawers/monitoring_screen.dart';
 
 class ConnectDevice extends StatelessWidget {
   const ConnectDevice({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:xmonapp/user/dummy_user_data.dart';
-// import 'package:xmonapp/widgets/custom_button.dart';
+import 'package:cardiocare/user/dummy_user_data.dart';
+// import 'package:cardiocare/widgets/custom_button.dart';
 import '../screens/home_screen.dart';
 
 class UpdateProfileScreen extends StatefulWidget {

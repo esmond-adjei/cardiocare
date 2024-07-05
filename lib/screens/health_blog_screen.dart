@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:xmonapp/screens/drawers/blog_detail_screen.dart';
-import 'package:xmonapp/services/blog_model.dart';
+import 'package:cardiocare/screens/drawers/blog_detail_screen.dart';
+import 'package:cardiocare/services/models/blog_model.dart';
 
 final List<BlogPost> blogData = [
   BlogPost(
@@ -206,7 +206,7 @@ class HealthBlogScreen extends StatelessWidget {
                 const Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Text(
-                    'Available Articiles!',
+                    'Available Articles!',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,

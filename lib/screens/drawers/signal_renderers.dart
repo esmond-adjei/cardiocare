@@ -1,101 +1,189 @@
 import 'package:flutter/material.dart';
-import 'package:xmonapp/widgets/line_chart.dart';
+import 'package:cardiocare/widgets/line_chart.dart';
 
-class ECGRenderer extends StatelessWidget {
+// ========== ECG RENDERER RENDERER =========
+class ECGRenderer extends StatefulWidget {
   final bool isRecording;
-  final String title;
   final List<int> ecgValues;
 
   const ECGRenderer({
     super.key,
     required this.isRecording,
-    required this.title,
     required this.ecgValues,
   });
 
   @override
+  State<ECGRenderer> createState() => _ECGRendererState();
+}
+
+class _ECGRendererState extends State<ECGRenderer> {
+  // String _status = 'calibrating...';
+  int _heartRate = 72;
+  double _hrv = 42.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateMeasurements();
+  }
+
+  void _updateMeasurements() {
+    // TODO: Implement real calculations
+    setState(() {
+      _heartRate = _calcHR(widget.ecgValues);
+      _hrv = _calcHRV(widget.ecgValues).toDouble();
+      // _status = _determineStatus();
+    });
+  }
+
+  int _calcHR(List<int> ecgData) {
+    // TODO: Calculate heart rate from ecg data
+    return 72;
+  }
+
+  int _calcHRV(List<int> ecgData) {
+    // TODO: Calculate heart rate variability from ecg data
+    return 42;
+  }
+
+  String _determineStatus() {
+    // TODO: Determine status based on HR and HRV
+    return 'Normal';
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (!isRecording) {
-      return Center(
+    if (widget.ecgValues.isEmpty) {
+      return const Center(
         child: Text(
-          title,
+          'Start Recording Your ECG',
           style: TextStyle(
-            color: Colors.grey.shade500,
+            color: Colors.grey,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
       );
     }
-    return ScrollableLineChart(dataList: ecgValues);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 10),
+        ScrollableLineChart(
+          dataList: widget.ecgValues,
+          height: 200,
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _buildInfoCard(
+                icon: Icons.favorite,
+                title: 'Heart Rate',
+                value: '$_heartRate BPM',
+                color: Colors.red,
+              ),
+            ),
+            Expanded(
+              child: _buildInfoCard(
+                icon: Icons.timeline,
+                title: 'HRV',
+                value: '${_hrv.toStringAsFixed(1)} ms',
+                color: Colors.blue,
+              ),
+            ),
+          ],
+        ),
+        // if (!widget.isRecording)
+        //   _buildInfoCard(
+        //     icon: Icons.warning,
+        //     title: 'Status',
+        //     value: _status,
+        //     color: Colors.orange,
+        //   ),
+      ],
+    );
+  }
+
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String title,
+    required String value,
+    required Color color,
+  }) {
+    return Card(
+      elevation: 0,
+      color: color.withOpacity(0.2),
+      margin: const EdgeInsets.all(10.0),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+        child: Row(
+          children: [
+            Icon(icon, size: 32, color: color),
+            const SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.labelMedium),
+                Text(value, style: Theme.of(context).textTheme.bodyLarge),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
-// ======== BLOOD PRESSURE RENDERER ========
-class BPRenderer extends StatefulWidget {
+// ========== BLOOD PRESSURE RENDERER =========
+class BPRenderer extends StatelessWidget {
   final bool isRecording;
-  final String title;
   final Map<String, int> bpValues;
 
   const BPRenderer({
     super.key,
     required this.isRecording,
-    required this.title,
     required this.bpValues,
   });
 
   @override
-  State<BPRenderer> createState() => _BPRendererState();
-}
-
-class _BPRendererState extends State<BPRenderer> {
-  late Color color;
-
-  @override
-  void initState() {
-    super.initState();
-    color = widget.bpValues['systolic']! > 120 ? Colors.red : Colors.purple;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (!widget.isRecording) {
-      return Center(
+    if (bpValues.isEmpty || !isRecording) {
+      return const Center(
         child: Text(
-          widget.title,
+          'Start Monitoring Your BP',
           style: TextStyle(
-            color: Colors.grey.shade500,
+            color: Colors.grey,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
       );
     }
+
+    final color = bpValues['systolic']! > 120 ? Colors.red : Colors.purple;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _buildBloodPressureRow(
           'systolic',
-          widget.bpValues['systolic']!,
+          bpValues['systolic']!,
           color,
         ),
         const SizedBox(height: 20),
         _buildBloodPressureRow(
           'diastolic',
-          widget.bpValues['diastolic']!,
+          bpValues['diastolic']!,
           color.withOpacity(0.6),
         ),
       ],
     );
   }
 
-  Widget _buildBloodPressureRow(
-    String label,
-    int value,
-    Color color,
-  ) {
-    return Container(
+  Widget _buildBloodPressureRow(String label, int value, Color color) {
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 50.0),
       child: Row(
         children: [
@@ -104,18 +192,16 @@ class _BPRendererState extends State<BPRenderer> {
             children: [
               Text(
                 label,
-                textAlign: TextAlign.right,
                 style: TextStyle(
                   color: Colors.grey.shade700,
                   fontSize: 20.0,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              Text(
+              const Text(
                 'mmHg',
-                textAlign: TextAlign.right,
                 style: TextStyle(
-                  color: Colors.grey.shade700,
+                  color: Colors.grey,
                   fontSize: 14.0,
                 ),
               ),
@@ -124,7 +210,6 @@ class _BPRendererState extends State<BPRenderer> {
           const SizedBox(width: 50),
           Text(
             '$value',
-            textAlign: TextAlign.right,
             style: TextStyle(
               color: color,
               fontSize: 72.0,
@@ -137,16 +222,14 @@ class _BPRendererState extends State<BPRenderer> {
   }
 }
 
-// ======== BODY TEMPERATURE RENDERER ========
+// ========== BODY TEMPERATURE RENDERER =========
 class BtempRenderer extends StatefulWidget {
   final bool isRecording;
-  final String title;
   final double btempValue;
 
   const BtempRenderer({
     super.key,
     required this.isRecording,
-    required this.title,
     required this.btempValue,
   });
 
@@ -155,103 +238,105 @@ class BtempRenderer extends StatefulWidget {
 }
 
 class _BtempRendererState extends State<BtempRenderer> {
-  late double minBtemp;
-  late double maxBtemp;
+  double minBtemp = 100.0;
+  double maxBtemp = 0.0;
 
   @override
   void initState() {
     super.initState();
-    minBtemp = widget.btempValue;
-    maxBtemp = widget.btempValue;
+    _updateMinMaxTemperatures(widget.btempValue);
   }
 
   @override
-  void didUpdateWidget(covariant BtempRenderer oldWidget) {
+  void didUpdateWidget(BtempRenderer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.btempValue != widget.btempValue) {
-      updateMinMaxTemperatures(widget.btempValue);
+      _updateMinMaxTemperatures(widget.btempValue);
     }
   }
 
-  void updateMinMaxTemperatures(double newValue) {
+  void _updateMinMaxTemperatures(double newValue) {
     setState(() {
-      if (newValue < minBtemp) {
-        minBtemp = newValue;
-      }
-      if (newValue > maxBtemp) {
-        maxBtemp = newValue;
-      }
+      minBtemp = minBtemp.isNaN || newValue < minBtemp ? newValue : minBtemp;
+      maxBtemp = maxBtemp.isNaN || newValue > maxBtemp ? newValue : maxBtemp;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.isRecording) {
-      return Center(
+    if (widget.btempValue.isNaN || !widget.isRecording) {
+      return const Center(
         child: Text(
-          widget.title,
+          'Start Monitoring Your Body Temperature',
+          textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.grey.shade500,
-            fontSize: 24,
+            color: Colors.grey,
             fontWeight: FontWeight.bold,
+            fontSize: 24,
           ),
         ),
       );
     }
+
     return Padding(
       padding: const EdgeInsets.all(30),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // temperature monitor screen
-          Container(
-            height: 180.0,
-            width: 180.0,
-            decoration: BoxDecoration(
-              color: Colors.amber.shade300,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.amber.shade100,
-                width: 8,
-                style: BorderStyle.solid,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                '${widget.btempValue.toStringAsFixed(1)} °C',
-                style: const TextStyle(
-                  fontSize: 36.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
+          _buildTemperatureMonitor(),
           const SizedBox(height: 20),
-          // MIN MAX TEMPERATURE
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildContainer(
-                color: Colors.blue.shade100,
-                textColor: Colors.blue,
-                labelText: 'lowest',
-                valueText: '${minBtemp.toStringAsFixed(1)} °C',
-              ),
-              _buildContainer(
-                color: Colors.red.shade100,
-                textColor: Colors.red,
-                labelText: 'highest',
-                valueText: '${maxBtemp.toStringAsFixed(1)} °C',
-              ),
-            ],
-          ),
+          _buildMinMaxTemperatures(),
         ],
       ),
     );
   }
 
-  Widget _buildContainer({
+  Widget _buildTemperatureMonitor() {
+    return Container(
+      height: 180.0,
+      width: 180.0,
+      decoration: BoxDecoration(
+        color: Colors.amber.shade300,
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: Colors.amber.shade100,
+          width: 8,
+          style: BorderStyle.solid,
+        ),
+      ),
+      child: Center(
+        child: Text(
+          '${widget.btempValue.toStringAsFixed(1)} °C',
+          style: const TextStyle(
+            fontSize: 36.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMinMaxTemperatures() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _buildTemperatureContainer(
+          color: Colors.blue.shade100,
+          textColor: Colors.blue,
+          labelText: 'lowest',
+          valueText: '${minBtemp.toStringAsFixed(1)} °C',
+        ),
+        _buildTemperatureContainer(
+          color: Colors.red.shade100,
+          textColor: Colors.red,
+          labelText: 'highest',
+          valueText: '${maxBtemp.toStringAsFixed(1)} °C',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTemperatureContainer({
     required Color color,
     required Color textColor,
     required String labelText,
@@ -265,7 +350,6 @@ class _BtempRendererState extends State<BtempRenderer> {
       ),
       child: DefaultTextStyle(
         style: TextStyle(
-          overflow: TextOverflow.fade,
           color: textColor,
           fontSize: 12.0,
         ),

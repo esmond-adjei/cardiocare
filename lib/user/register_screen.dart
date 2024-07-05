@@ -4,11 +4,13 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:xmonapp/user/dummy_user_data.dart';
-import 'package:xmonapp/services/models/db_helper.dart';
-import 'package:xmonapp/services/models/db_model.dart';
-import 'package:xmonapp/user/custom_text_field.dart';
-import 'package:xmonapp/user/custom_button.dart';
+
+import 'package:cardiocare/services/models/user_model.dart';
+import 'package:cardiocare/services/models/db_helper.dart';
+
+import 'package:cardiocare/user/dummy_user_data.dart';
+import 'package:cardiocare/user/custom_text_field.dart';
+import 'package:cardiocare/user/custom_button.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {

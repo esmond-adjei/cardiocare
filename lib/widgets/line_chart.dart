@@ -5,15 +5,15 @@ import 'package:flutter/scheduler.dart';
 class ScrollableLineChart extends StatefulWidget {
   final List<int> dataList;
   final Color lineColor;
+  final double height;
   final double stretchFactor;
   final double maxY;
 
-  static const sampleData = [1, 2, 3, 4, 5, 5, 6, 5, 7, 8, 7, 6, 5, 4, 3, 3, 3];
-
   const ScrollableLineChart({
     super.key,
-    this.dataList = sampleData,
+    required this.dataList,
     this.lineColor = Colors.redAccent,
+    this.height = 260,
     this.stretchFactor = 1.0,
     this.maxY = 300.0,
   });
@@ -46,7 +46,7 @@ class _ScrollableLineChartState extends State<ScrollableLineChart> {
     }
   }
 
-  List<FlSpot> ecgData() {
+  List<FlSpot> _ecgDataSpots() {
     return widget.dataList.asMap().entries.map((entry) {
       return FlSpot(entry.key.toDouble() * 0.01, entry.value.toDouble());
     }).toList();
@@ -56,7 +56,7 @@ class _ScrollableLineChartState extends State<ScrollableLineChart> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 0),
-      color: Colors.grey.withOpacity(0.2),
+      color: Colors.grey.withOpacity(0.1),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         controller: _scrollController,
@@ -66,7 +66,7 @@ class _ScrollableLineChartState extends State<ScrollableLineChart> {
                   MediaQuery.of(context).size.width
               ? widget.dataList.length * widget.stretchFactor
               : MediaQuery.of(context).size.width,
-          height: 300,
+          height: widget.height,
           child: LayoutBuilder(
             builder: (context, constraints) {
               return LineChart(mainData());
@@ -81,7 +81,7 @@ class _ScrollableLineChartState extends State<ScrollableLineChart> {
     return LineChartData(
       lineBarsData: [
         LineChartBarData(
-          spots: ecgData(),
+          spots: _ecgDataSpots(),
           color: widget.lineColor,
           show: true,
           isCurved: true,

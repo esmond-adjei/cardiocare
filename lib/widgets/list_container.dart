@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:xmonapp/widgets/list_item.dart';
+import 'package:cardiocare/widgets/list_item.dart';
 
 class ListContainer extends StatelessWidget {
   final List<dynamic> listData;

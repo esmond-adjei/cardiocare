@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:developer' as dev;
+import 'package:cardiocare/utils/enums.dart';
+import 'package:cardiocare/widgets/line_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:xmonapp/screens/drawers/monitoring_screen.dart';
-import 'package:xmonapp/services/constants.dart';
-import 'package:xmonapp/services/models/db_helper.dart';
-import 'package:xmonapp/services/models/db_model.dart';
-import 'package:xmonapp/widgets/list_container.dart';
+import 'package:cardiocare/screens/drawers/monitoring_screen.dart';
+import 'package:cardiocare/services/models/db_helper.dart';
+import 'package:cardiocare/services/models/signal_model.dart';
+import 'package:cardiocare/widgets/list_container.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -64,9 +65,9 @@ class _HistoryScreenState extends State<HistoryScreen>
         body: TabBarView(
           controller: _tabController,
           children: const [
-            DataTab(dataType: ecgType),
-            DataTab(dataType: bpType),
-            DataTab(dataType: btempType),
+            DataTab(dataType: SignalType.ecg),
+            DataTab(dataType: SignalType.bp),
+            DataTab(dataType: SignalType.btemp),
           ],
         ),
         floatingActionButton: Builder(
@@ -93,7 +94,7 @@ class _HistoryScreenState extends State<HistoryScreen>
 }
 
 class DataTab extends StatefulWidget {
-  final String dataType;
+  final SignalType dataType;
 
   const DataTab({
     super.key,
@@ -110,14 +111,14 @@ class _DataTabState extends State<DataTab> {
   Future<List<Signal>> _fetchData(DatabaseHelper dbhelper) async {
     try {
       switch (widget.dataType) {
-        case ecgType:
-          tabTitle = 'Ecg History';
+        case SignalType.ecg:
+          tabTitle = widget.dataType.description;
           return await dbhelper.getEcgData(1);
-        case bpType:
-          tabTitle = 'Blood Pressure History';
+        case SignalType.bp:
+          tabTitle = widget.dataType.description;
           return await dbhelper.getBpData(1);
-        case btempType:
-          tabTitle = 'Body Temperature History';
+        case SignalType.btemp:
+          tabTitle = widget.dataType.description;
           return await dbhelper.getBtempData(1);
         default:
           return [];
@@ -146,17 +147,50 @@ class _DataTabState extends State<DataTab> {
             child: Column(
               children: [
                 // HISTORY SNAPSHOT VIEW
-                Container(
-                  height: 180,
-                  margin: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    height: 200,
+                    margin: const EdgeInsets.all(20),
+                    // decoration: BoxDecoration(
+                    //   color: Colors.grey.shade100,
+                    //   borderRadius: BorderRadius.circular(10),
+                    // ),
+                    child: ScrollableLineChart(
+                      maxY: 100,
+                      lineColor: snapshot.data![0].signalType.color,
+                      dataList: const [
+                        52,
+                        31,
+                        4,
+                        51,
+                        6,
+                        72,
+                        8,
+                        48,
+                        9,
+                        97,
+                        9,
+                        58,
+                        6,
+                        54,
+                        4,
+                        2,
+                        48,
+                        5,
+                        60,
+                        7,
+                        87,
+                        94,
+                        9,
+                        27
+                      ],
+                    ),
                   ),
                 ),
                 // HISTORY DATA VIEW
                 ListContainer(
-                  listHeading: tabTitle,
+                  listHeading: '$tabTitle History',
                   listData: snapshot.data!,
                 ),
               ],

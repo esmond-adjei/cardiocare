@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:xmonapp/main.dart';
-import 'package:xmonapp/screens/drawers/signal_renderers.dart';
-import 'package:xmonapp/services/models/db_helper.dart';
-import 'package:xmonapp/services/models/db_model.dart';
-import 'package:xmonapp/utils/singal_generator.dart';
-import 'package:xmonapp/widgets/timer.dart';
+import 'package:cardiocare/main.dart';
+import 'package:cardiocare/screens/drawers/signal_renderers.dart';
+import 'package:cardiocare/services/models/db_helper.dart';
+import 'package:cardiocare/services/models/signal_model.dart';
+import 'package:cardiocare/utils/singal_generator.dart';
+import 'package:cardiocare/widgets/timer.dart';
 
 class SingleMonitorLayout extends StatefulWidget {
   final int initialScreen;
@@ -27,7 +27,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   bool isPaused = false;
 
   final List<int> _ecgValues = [];
-  Map<String, int> _bpValues = {'systolic': 120, 'diastolic': 80};
+  Map<String, int> _bpValues = {'systolic': 120, 'diastolic': 90};
   double _btempValue = 36.1;
 
   StreamSubscription<dynamic>? _subscription;
@@ -50,13 +50,21 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   void dispose() {
     _subscription?.cancel();
     _stopwatch.reset();
-
     _tabController.dispose();
-
     super.dispose();
   }
 
+  void _showTabChangeWarning() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Cannot change tabs while recording is in progress.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
   void _startRecording() {
+    _ecgValues.clear();
     setState(() {
       isRecording = true;
       isPaused = false;
@@ -151,7 +159,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
       builder: (context) {
         final DatabaseHelper dbhelper = Provider.of<DatabaseHelper>(context);
         return AlertDialog(
-          title: Text('Save ${_currentSignal.signalType} Data'),
+          title: Text('Save ${_currentSignal.signalType.name} Data'),
           content: TextField(
             controller: textFieldController,
             decoration: const InputDecoration(hintText: "Enter recording name"),
@@ -185,7 +193,10 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                       break;
                   }
 
-                  _stopRecording();
+                  // _stopRecording();
+                  setState(() {
+                    isRecording = false;
+                  });
 
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -209,9 +220,23 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
       appBar: AppBar(
         backgroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.black),
+        leading: IconButton(
+          onPressed: () {
+            if (isRecording) {
+              _showTabChangeWarning();
+              return;
+            }
+            Navigator.pop(context);
+          },
+          icon: const Icon(Icons.arrow_back),
+        ),
         actions: [
           TextButton(
             onPressed: () {
+              if (isRecording) {
+                _showTabChangeWarning();
+                return;
+              }
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
@@ -242,22 +267,13 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
           Expanded(
             child: TabBarView(
               controller: _tabController,
+              physics:
+                  isRecording ? const NeverScrollableScrollPhysics() : null,
               children: [
-                ECGRenderer(
-                  isRecording: isRecording,
-                  ecgValues: _ecgValues,
-                  title: 'Monitor Your ECG',
-                ),
-                BPRenderer(
-                  isRecording: isRecording,
-                  bpValues: _bpValues,
-                  title: 'Monitor Your Blood Pressure',
-                ),
+                ECGRenderer(isRecording: isRecording, ecgValues: _ecgValues),
+                BPRenderer(isRecording: isRecording, bpValues: _bpValues),
                 BtempRenderer(
-                  isRecording: isRecording,
-                  btempValue: _btempValue,
-                  title: 'Monitor Your Body Temperature',
-                ),
+                    isRecording: isRecording, btempValue: _btempValue),
               ],
             ),
           ),
@@ -285,6 +301,18 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                 horizontal: 20,
               ),
               tabs: const [Text('ECG'), Text('BP'), Text('TEMP')],
+              onTap: (index) {
+                if (isRecording) {
+                  _tabController.index = _tabController.previousIndex;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'Cannot switch tabs while recording is in progress.'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
+              },
             ),
           ),
           // RECORDING CONTROL BUTTONS

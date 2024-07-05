@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:xmonapp/services/constants.dart';
 
 final ThemeData customRedTheme = ThemeData(
   useMaterial3: true,
@@ -23,6 +21,14 @@ final ThemeData customRedTheme = ThemeData(
     ),
     iconTheme: IconThemeData(color: Colors.white),
   ),
+  textTheme: const TextTheme(
+    displayLarge: TextStyle(
+      color: Colors.black,
+      fontSize: 24,
+      fontWeight: FontWeight.bold,
+    ),
+    titleLarge: TextStyle(color: Colors.black, fontSize: 20),
+  ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       backgroundColor: Colors.redAccent,
@@ -42,13 +48,12 @@ final ThemeData customRedTheme = ThemeData(
       foregroundColor: Colors.redAccent,
     ),
   ),
-  progressIndicatorTheme: const ProgressIndicatorThemeData(
-      // color: Colors.redAccent,
-      // linearTrackColor: Colors.redAccent,
-      // circularTrackColor: Colors.redAccent,
-      ),
+  snackBarTheme: const SnackBarThemeData(
+    backgroundColor: Colors.white,
+  ),
 );
 
+//========== DARK THEME ==========
 final ThemeData customRedDarkTheme = customRedTheme.copyWith(
   brightness: Brightness.dark,
   colorScheme: customRedTheme.colorScheme.copyWith(brightness: Brightness.dark),
@@ -84,29 +89,3 @@ final ThemeData customRedDarkTheme = customRedTheme.copyWith(
     backgroundColor: Colors.grey.shade900,
   ),
 );
-
-Color getSignalColor(String signalType) {
-  switch (signalType) {
-    case ecgType:
-      return Colors.blue;
-    case bpType:
-      return Colors.purple;
-    case btempType:
-      return Colors.amber;
-    default:
-      return Colors.grey;
-  }
-}
-
-FaIcon getSignalIcon(String signalType) {
-  switch (signalType) {
-    case ecgType:
-      return const FaIcon(FontAwesomeIcons.heartPulse);
-    case bpType:
-      return const FaIcon(FontAwesomeIcons.heart);
-    case btempType:
-      return const FaIcon(FontAwesomeIcons.thermometer);
-    default:
-      return const FaIcon(FontAwesomeIcons.heart);
-  }
-}

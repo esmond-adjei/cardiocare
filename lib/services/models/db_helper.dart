@@ -1,11 +1,13 @@
 import 'dart:developer';
+import 'package:cardiocare/utils/enums.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
-import 'package:xmonapp/services/models/db_model.dart';
-import 'package:xmonapp/services/constants.dart';
-import 'package:xmonapp/services/exceptions.dart';
+import 'package:cardiocare/services/constants.dart';
+import 'package:cardiocare/services/exceptions.dart';
+import 'package:cardiocare/services/models/signal_model.dart';
+import 'package:cardiocare/services/models/user_model.dart';
 
 // databseService
 class DatabaseHelper extends ChangeNotifier {
@@ -108,7 +110,7 @@ class DatabaseHelper extends ChangeNotifier {
   Future<List<CardioUser>> getAllUsers() async {
     final db = await database;
     final List<Map<String, dynamic>> results = await db.query(userTable);
-    return results.map((map) => CardioUser.fromRow(map)).toList();
+    return results.map((map) => CardioUser.fromMap(map)).toList();
   }
 
   Future<CardioUser> getUser({required String email}) async {
@@ -122,7 +124,7 @@ class DatabaseHelper extends ChangeNotifier {
     if (results.isEmpty) {
       throw UserDoesNotExist();
     }
-    return CardioUser.fromRow(results.first);
+    return CardioUser.fromMap(results.first);
   }
 
   Future<int> updateUser(CardioUser user) async {
@@ -203,7 +205,7 @@ class DatabaseHelper extends ChangeNotifier {
     final db = await database;
     String table;
 
-    switch (signal.signalType) {
+    switch (signal.signalType.name) {
       case ecgType:
         table = ecgTable;
         break;
@@ -297,7 +299,7 @@ class DatabaseHelper extends ChangeNotifier {
   }
 
   // DASHBOARD
-  Future<Map<String, List<Signal>>> getRecentRecords(int userId,
+  Future<Map<SignalType, List<Signal>>> getRecentRecords(int userId,
       {int limit = 3}) async {
     final List<EcgModel> recentEcgRecords =
         await getEcgData(userId, limit: limit);
@@ -306,9 +308,9 @@ class DatabaseHelper extends ChangeNotifier {
         await getBtempData(userId, limit: limit);
 
     return {
-      ecgType: recentEcgRecords,
-      bpType: recentBpRecords,
-      btempType: recentBtempRecords,
+      SignalType.ecg: recentEcgRecords,
+      SignalType.bp: recentBpRecords,
+      SignalType.btemp: recentBtempRecords,
     };
   }
 }
