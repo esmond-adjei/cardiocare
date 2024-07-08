@@ -12,7 +12,7 @@ class ScrollableLineChart extends StatefulWidget {
   const ScrollableLineChart({
     super.key,
     required this.dataList,
-    this.lineColor = Colors.redAccent,
+    this.lineColor = Colors.blueAccent,
     this.height = 260,
     this.stretchFactor = 1.0,
     this.maxY = 300.0,
@@ -62,10 +62,12 @@ class _ScrollableLineChartState extends State<ScrollableLineChart> {
         controller: _scrollController,
         physics: const BouncingScrollPhysics(),
         child: SizedBox(
-          width: widget.dataList.length * widget.stretchFactor >
-                  MediaQuery.of(context).size.width
-              ? widget.dataList.length * widget.stretchFactor
-              : MediaQuery.of(context).size.width,
+          width: widget.dataList.length * widget.stretchFactor
+          //  >
+          //         MediaQuery.of(context).size.width
+          //     ? widget.dataList.length * widget.stretchFactor
+          //     : MediaQuery.of(context).size.width
+          ,
           height: widget.height,
           child: LayoutBuilder(
             builder: (context, constraints) {

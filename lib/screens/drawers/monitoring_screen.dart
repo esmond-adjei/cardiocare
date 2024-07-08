@@ -45,7 +45,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
 
   void _showSaveDialog(MonitorState monitorState) {
     monitorState.pauseRecording();
-    dynamic signal = monitorState.currentSignal;
+    dynamic signal = monitorState.getCurrentSignal(_tabController.index);
     TextEditingController textFieldController = TextEditingController();
     textFieldController.text = signal.name;
 
@@ -72,15 +72,13 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                       signal.startTime.add(monitorState.stopwatch.elapsed);
                   switch (signal.signalType) {
                     case SignalType.ecg:
-                      signal.ecgData = monitorState.ecgValues;
+                      signal.storeEcg();
                       await dbHelper.createEcgData(signal);
                       break;
                     case SignalType.bp:
-                      signal.bpData = monitorState.bpValues;
                       await dbHelper.createBpData(signal);
                       break;
                     case SignalType.btemp:
-                      signal.bodyTemp = monitorState.btempValue;
                       await dbHelper.createBtempData(signal);
                       break;
                   }
@@ -177,15 +175,15 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
         children: [
           ECGRenderer(
             isActive: monitorState.isRecording,
-            ecgValues: monitorState.ecgValues,
+            ecgSignal: monitorState.ecgSignal,
           ),
           BPRenderer(
             isActive: monitorState.isRecording,
-            bpValues: monitorState.bpValues,
+            bpSignal: monitorState.bpSignal,
           ),
           BtempRenderer(
             isActive: monitorState.isRecording,
-            btempValue: monitorState.btempValue,
+            btempSignal: monitorState.btempSignal,
           ),
         ],
       ),

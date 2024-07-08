@@ -227,6 +227,8 @@ class DatabaseHelper extends ChangeNotifier {
     return await db.insert(ecgTable, {
       signalIdColumn: signalId,
       'ecg': ecgData.ecg,
+      'hrv': ecgData.hrv,
+      'hbpm': ecgData.hbpm,
     });
   }
 
@@ -275,7 +277,9 @@ class DatabaseHelper extends ChangeNotifier {
     dev.log(">> DB: saving db (SID: $signalId)");
     return await db.insert(btempTable, {
       signalIdColumn: signalId,
-      'body_temp': btempModel.bodyTemp,
+      'body_temp': btempModel.avgTemp,
+      'body_temp_max': btempModel.maxTemp,
+      'body_temp_min': btempModel.minTemp,
     });
   }
 

@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'dart:typed_data';
 import 'package:cardiocare/utils/enums.dart';
 import 'package:cardiocare/services/constants.dart';
 
@@ -17,22 +17,19 @@ abstract class Signal {
     this.signalName,
     this.signalId,
     required this.userId,
-    required this.startTime,
-    required this.stopTime,
+    DateTime? startTime,
+    DateTime? stopTime,
     required this.signalType,
-  });
+  })  : startTime = startTime ?? DateTime.now(),
+        stopTime = stopTime ?? DateTime.now();
 
   String get name =>
       signalName ??
       '${signalType.name} ${stopTime.day}-${stopTime.month}-${stopTime.year} ${stopTime.hour}:${stopTime.minute}';
 
-  set name(String newName) {
-    signalName = newName;
-  }
+  set name(String newName) => signalName = newName;
 
-  set stoptime(DateTime time) {
-    stopTime = time;
-  }
+  set stoptime(DateTime time) => stopTime = time;
 
   Map<String, dynamic> toMap() {
     return {
@@ -65,26 +62,52 @@ abstract class Signal {
 }
 
 class EcgModel extends Signal {
-  Uint8List? ecg;
-  double? hrv;
-  double? hbpm;
+  List<int> _ecgCache = [];
+  Uint8List? ecg; // for saving to db
+  double? _hrv;
+  int? _hbpm;
 
   EcgModel({
     super.id,
     super.signalName,
     super.signalId,
     required super.userId,
-    required super.startTime,
-    required super.stopTime,
+    super.startTime,
+    super.stopTime,
     this.ecg,
-  }) : super(signalType: SignalType.ecg);
+    double? hrv,
+    int? hbpm,
+  })  : _hrv = hrv,
+        _hbpm = hbpm,
+        super(signalType: SignalType.ecg);
 
-  set ecgData(List<int> ecgValues) {
-    ecg = Uint8List.fromList(ecgValues);
+  set ecgList(List<int> ecgList) => ecg = Uint8List.fromList(ecgList);
+  List<int> get ecgList => ecg?.toList() ?? _ecgCache;
+
+  void addEcgCache(int ecgValue) => _ecgCache.add(ecgValue); // before create
+  void storeEcg() => ecg = Uint8List.fromList(_ecgCache); // before save
+
+  set hrv(double hrvValue) => _hrv = hrvValue;
+  double get hrv => _hrv ?? 0.0;
+
+  set hbpm(int hbpmValue) => _hbpm = hbpmValue;
+  int get hbpm => _hbpm ?? 0;
+
+  set ecgData(Map<String, dynamic> ecgValues) {
+    ecg = Uint8List.fromList(ecgValues['ecgList']);
+    _hrv = ecgValues['hrv'];
+    _hbpm = ecgValues['hbpm'];
   }
 
-  Uint8List get ecgData {
-    return ecg ?? Uint8List.fromList([]);
+  Map<String, dynamic> get ecgData => {
+        'ecgList': ecgList,
+        'hbpm': hbpm,
+        'hrv': hrv,
+      };
+
+  void clearEcg() {
+    ecg = null;
+    _ecgCache = [];
   }
 
   factory EcgModel.fromMap(Map<String, dynamic> map) {
@@ -95,7 +118,9 @@ class EcgModel extends Signal {
       signalId: map[signalIdColumn] as int?,
       startTime: DateTime.parse(map[startTimeColumn] as String),
       stopTime: DateTime.parse(map[stopTimeColumn] as String),
-      ecg: map['ecg'] as Uint8List,
+      ecg: map['ecg'] as Uint8List?,
+      hrv: map['hrv'] as double?,
+      hbpm: map['hbpm'] as int?,
     );
   }
 }
@@ -109,20 +134,24 @@ class BpModel extends Signal {
     super.signalName,
     super.signalId,
     required super.userId,
-    required super.startTime,
-    required super.stopTime,
+    super.startTime,
+    super.stopTime,
     this.bpSystolic,
     this.bpDiastolic,
   }) : super(signalType: SignalType.bp);
+
+  int get systolic => bpSystolic ?? 120;
+  set systolic(int sysValue) => bpSystolic = sysValue;
+
+  int get diastolic => bpDiastolic ?? 120;
+  set diastolic(int diaValue) => bpDiastolic = diaValue;
 
   set bpData(List<int> bpValues) {
     bpSystolic = bpValues[0];
     bpDiastolic = bpValues[1];
   }
 
-  List<int> get bpData {
-    return [bpSystolic ?? 0, bpDiastolic ?? 0];
-  }
+  List<int> get bpData => [bpSystolic ?? 0, bpDiastolic ?? 0];
 
   factory BpModel.fromMap(Map<String, dynamic> map) {
     return BpModel(
@@ -139,29 +168,44 @@ class BpModel extends Signal {
 }
 
 class BtempModel extends Signal {
+  double? _minTemp;
   double? bodyTemp;
-  double? minTemp;
-  double? maxTemp;
+  double? _maxTemp;
 
   BtempModel({
     super.id,
     super.signalName,
     super.signalId,
     required super.userId,
-    required super.startTime,
-    required super.stopTime,
+    super.startTime,
+    super.stopTime,
     this.bodyTemp,
-    this.minTemp,
-    this.maxTemp,
-  }) : super(signalType: SignalType.btemp);
+    double? minTemp,
+    double? maxTemp,
+  })  : _minTemp = minTemp,
+        _maxTemp = maxTemp,
+        super(signalType: SignalType.btemp);
 
-  set tempData(double tempValue) {
-    bodyTemp = tempValue;
+  set avgTemp(double tempValue) => bodyTemp = tempValue;
+  double get avgTemp => bodyTemp ?? 0.0;
+
+  set minTemp(double minTempValue) => _minTemp = minTempValue;
+  double get minTemp => _minTemp ?? 0.0;
+
+  set maxTemp(double maxTempValue) => _maxTemp = maxTempValue;
+  double get maxTemp => _maxTemp ?? 0.0;
+
+  set tempData(Map<String, double> tempValues) {
+    _minTemp = tempValues['minTemp'];
+    bodyTemp = tempValues['avgTemp'];
+    _maxTemp = tempValues['maxTemp'];
   }
 
-  double get tempData {
-    return bodyTemp ?? 0.0;
-  }
+  Map<String, double> get tempData => {
+        'minTemp': minTemp,
+        'avgTemp': avgTemp,
+        'maxTemp': maxTemp,
+      };
 
   factory BtempModel.fromMap(Map<String, dynamic> map) {
     return BtempModel(
@@ -171,8 +215,8 @@ class BtempModel extends Signal {
       signalName: map[nameColumn] as String?,
       startTime: DateTime.parse(map[startTimeColumn] as String),
       stopTime: DateTime.parse(map[stopTimeColumn] as String),
-      bodyTemp: map['body_temp'] as double?,
       minTemp: map['body_temp_min'] as double?,
+      bodyTemp: map['body_temp'] as double?,
       maxTemp: map['body_temp_max'] as double?,
     );
   }

@@ -257,17 +257,17 @@ class _PeakItemDrawerState extends State<PeakItemDrawer> {
       case SignalType.ecg:
         return ECGRenderer(
           isActive: true,
-          ecgValues: widget.signal.ecg,
+          ecgSignal: widget.signal,
         );
       case SignalType.bp:
         return BPRenderer(
           isActive: true,
-          bpValues: widget.signal.bpData,
+          bpSignal: widget.signal,
         );
       case SignalType.btemp:
         return BtempRenderer(
           isActive: true,
-          btempValue: widget.signal.bodyTemp,
+          btempSignal: widget.signal,
         );
       default:
         return const Center(

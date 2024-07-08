@@ -79,8 +79,18 @@ class BlogDetail extends StatelessWidget {
                   Row(
                     children: [
                       CircleAvatar(
-                        backgroundImage: NetworkImage(
-                          post.authorImageUrl,
+                        backgroundImage: NetworkImage(post.authorImageUrl),
+                        child: Container(
+                          decoration:
+                              const BoxDecoration(shape: BoxShape.circle),
+                          clipBehavior: Clip.antiAlias,
+                          child: Image(
+                            image: NetworkImage(post.authorImageUrl),
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.person, size: 30);
+                            },
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),

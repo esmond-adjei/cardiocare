@@ -2,89 +2,53 @@ import 'dart:async';
 import 'dart:developer' as dev;
 import 'dart:math';
 
-class ECGGenerator {
-  final int duration;
-  final int fs;
-  final double heartRate;
-  final double rrInterval;
-  final int numBeats;
-  final StreamController<int> _controller = StreamController<int>();
-
-  ECGGenerator({this.duration = 10, this.fs = 500, this.heartRate = 60})
-      : rrInterval = 60 / heartRate,
-        numBeats = (duration / (60 / heartRate)).floor();
-
-  Stream<int> get ecgStream async* {
-    List<double> t = List.generate(duration * fs, (i) => i / fs);
-    List<double> ecg = List.filled(t.length, 0.0);
-
-    for (int beat = 0; beat < numBeats; beat++) {
-      double beatTime = beat * rrInterval;
-      for (int i = 0; i < t.length; i++) {
-        double pWave =
-            exp(-pow((t[i] - beatTime - 0.1), 2) / (2 * pow(0.01, 2)));
-        double qWave =
-            -exp(-pow((t[i] - beatTime - 0.16), 2) / (2 * pow(0.02, 2)));
-        double rWave =
-            2 * exp(-pow((t[i] - beatTime - 0.2), 2) / (2 * pow(0.02, 2)));
-        double sWave =
-            -exp(-pow((t[i] - beatTime - 0.26), 2) / (2 * pow(0.02, 2)));
-        double tWave =
-            0.5 * exp(-pow((t[i] - beatTime - 0.4), 2) / (2 * pow(0.04, 2)));
-
-        ecg[i] += pWave + qWave + rWave + sWave + tWave;
-      }
-    }
-
-    // Normalize the ecg values to be within 0-255 range
-    double minValue = ecg.reduce(min);
-    double maxValue = ecg.reduce(max);
-    double range = maxValue - minValue;
-
-    for (int i = 0; i < t.length; i++) {
-      await Future.delayed(Duration(milliseconds: (1000 / fs).round()));
-      yield ((ecg[i] - minValue) / range * 255).round();
-    }
-  }
-
-  void dispose() {
-    _controller.close();
-  }
-}
-
-// ------------------------------------------------
 class SignalGenerator {
   final int durationSeconds;
   final int samplingRate;
 
   SignalGenerator({
-    this.durationSeconds = 10,
+    this.durationSeconds = 60 * 60, // one minute
     this.samplingRate = 2,
   });
 
-  Stream<int> generateECG() async* {
+  Stream<Map<String, dynamic>> generateECG() async* {
     const int fs = 500;
-    const double heartRate = 60.0;
-    final numBeats = (durationSeconds / (60 / heartRate)).floor();
-    const rrInterval = 60 / heartRate;
-    List<double> t = List.generate(durationSeconds * fs, (i) => i / fs);
-    List<double> ecg = List.filled(t.length, 0.0);
+    const double baseHeartRate = 60.0;
+    final random = Random();
+    List<double> rrIntervals = [];
+    List<int> heartRates = [];
 
-    for (int beat = 0; beat < numBeats; beat++) {
-      double beatTime = beat * rrInterval;
-      for (int i = 0; i < t.length; i++) {
-        double pWave =
-            exp(-pow((t[i] - beatTime - 0.1), 2) / (2 * pow(0.01, 2)));
+    double time = 0;
+    while (time < durationSeconds) {
+      double heartRate =
+          baseHeartRate + random.nextDouble() * 20 - 10; // between 50-70 bpm
+      double rrInterval = 60 / heartRate;
+      rrIntervals.add(rrInterval);
+      heartRates.add(heartRate.round());
+      time += rrInterval;
+    }
+
+    List<double> t = [];
+    List<double> ecg = [];
+
+    for (int i = 0; i < rrIntervals.length; i++) {
+      double beatTime = t.isEmpty ? 0 : t.last;
+      List<double> beatT = List.generate(
+          (rrIntervals[i] * fs).round(), (j) => beatTime + j / fs);
+      t.addAll(beatT);
+
+      for (double ti in beatT) {
+        double pWave = exp(-pow((ti - beatTime - 0.1), 2) / (2 * pow(0.01, 2)));
         double qWave =
-            -exp(-pow((t[i] - beatTime - 0.16), 2) / (2 * pow(0.02, 2)));
+            -exp(-pow((ti - beatTime - 0.16), 2) / (2 * pow(0.02, 2)));
         double rWave =
-            2 * exp(-pow((t[i] - beatTime - 0.2), 2) / (2 * pow(0.02, 2)));
+            2 * exp(-pow((ti - beatTime - 0.2), 2) / (2 * pow(0.02, 2)));
         double sWave =
-            -exp(-pow((t[i] - beatTime - 0.26), 2) / (2 * pow(0.02, 2)));
+            -exp(-pow((ti - beatTime - 0.26), 2) / (2 * pow(0.02, 2)));
         double tWave =
-            0.5 * exp(-pow((t[i] - beatTime - 0.4), 2) / (2 * pow(0.04, 2)));
+            0.5 * exp(-pow((ti - beatTime - 0.4), 2) / (2 * pow(0.04, 2)));
 
-        ecg[i] += pWave + qWave + rWave + sWave + tWave;
+        ecg.add(pWave + qWave + rWave + sWave + tWave);
       }
     }
 
@@ -93,9 +57,25 @@ class SignalGenerator {
     double maxValue = ecg.reduce(max);
     double range = maxValue - minValue;
 
+    // Calculate HRV (SDNN - Standard Deviation of NN intervals)
+    double meanRR = rrIntervals.reduce((a, b) => a + b) / rrIntervals.length;
+    num sumSquaredDiff =
+        rrIntervals.map((rr) => pow(rr - meanRR, 2)).reduce((a, b) => a + b);
+    double sdnn = sqrt(sumSquaredDiff / (rrIntervals.length - 1));
+
+    int currentBeatIndex = 0;
     for (int i = 0; i < t.length; i++) {
-      await Future.delayed(Duration(milliseconds: (1000 / fs).round()));
-      yield ((ecg[i] - minValue) / range * 255).round();
+      await Future.delayed(Duration(milliseconds: (500 / fs).round()));
+      if (i / fs >=
+          rrIntervals.take(currentBeatIndex + 1).reduce((a, b) => a + b)) {
+        currentBeatIndex++;
+      }
+      dev.log("hbpm: ${heartRates[currentBeatIndex]}, hrv: $sdnn");
+      yield {
+        'ecg': ((ecg[i] - minValue) / range * 255).round(),
+        'hbpm': heartRates[currentBeatIndex],
+        'hrv': sdnn,
+      };
     }
   }
 
@@ -121,19 +101,31 @@ class SignalGenerator {
     }
   }
 
-  Stream<double> generateBtemp() async* {
+  Stream<Map<String, double>> generateBtemp() async* {
     const double tempNoiseAmplitude = 0.5;
     final numSamples = durationSeconds * samplingRate;
     var temp = 37.0;
     final random = Random();
+    double minTemp = temp;
+    double maxTemp = temp;
+    double sumTemp = 0;
 
     for (int i = 0; i < numSamples; i++) {
       temp += random.nextDouble() * 2 * tempNoiseAmplitude - tempNoiseAmplitude;
       temp = temp.clamp(35.0, 40.0);
 
+      minTemp = min(minTemp, temp);
+      maxTemp = max(maxTemp, temp);
+      sumTemp += temp;
+
       dev.log('Temperature: $temp');
 
-      yield temp;
+      yield {
+        // 'current': temp,
+        'minTemp': minTemp,
+        'maxTemp': maxTemp,
+        'avgTemp': sumTemp / (i + 1),
+      };
       await Future.delayed(
           Duration(milliseconds: (1000 / samplingRate).round()));
     }

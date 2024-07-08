@@ -1,59 +1,26 @@
+import 'package:cardiocare/services/models/signal_model.dart';
 import 'package:flutter/material.dart';
 import 'package:cardiocare/widgets/line_chart.dart';
 
 // ========== ECG RENDERER RENDERER =========
-class ECGRenderer extends StatefulWidget {
+class ECGRenderer extends StatelessWidget {
   final bool isActive;
-  final List<int> ecgValues;
+  final EcgModel ecgSignal;
 
   const ECGRenderer({
     super.key,
     required this.isActive,
-    required this.ecgValues,
+    required this.ecgSignal,
   });
 
-  @override
-  State<ECGRenderer> createState() => _ECGRendererState();
-}
+//   @override
+//   State<ECGRenderer> createState() => _ECGRendererState();
+// }
 
-class _ECGRendererState extends State<ECGRenderer> {
-  // String _status = 'calibrating...';
-  int _heartRate = 72;
-  double _hrv = 42.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _updateMeasurements();
-  }
-
-  void _updateMeasurements() {
-    // TODO: Implement real calculations
-    setState(() {
-      _heartRate = _calcHR(widget.ecgValues);
-      _hrv = _calcHRV(widget.ecgValues).toDouble();
-      // _status = _determineStatus();
-    });
-  }
-
-  int _calcHR(List<int> ecgData) {
-    // TODO: Calculate heart rate from ecg data
-    return 72;
-  }
-
-  int _calcHRV(List<int> ecgData) {
-    // TODO: Calculate heart rate variability from ecg data
-    return 42;
-  }
-
-  String _determineStatus() {
-    // TODO: Determine status based on HR and HRV
-    return 'Normal';
-  }
-
+// class _ECGRendererState extends State<ECGRenderer> {
   @override
   Widget build(BuildContext context) {
-    if (!widget.isActive) {
+    if (!isActive) {
       return const Center(
         child: Text(
           'Start Recording Your ECG',
@@ -71,7 +38,7 @@ class _ECGRendererState extends State<ECGRenderer> {
       children: [
         const SizedBox(height: 10),
         ScrollableLineChart(
-          dataList: widget.ecgValues,
+          dataList: ecgSignal.ecgList,
           height: 200,
         ),
         const SizedBox(height: 10),
@@ -81,7 +48,7 @@ class _ECGRendererState extends State<ECGRenderer> {
               child: _buildInfoCard(
                 icon: Icons.favorite,
                 title: 'Heart Rate',
-                value: '$_heartRate BPM',
+                value: "${ecgSignal.hbpm} BPM",
                 color: Colors.red,
               ),
             ),
@@ -89,19 +56,12 @@ class _ECGRendererState extends State<ECGRenderer> {
               child: _buildInfoCard(
                 icon: Icons.timeline,
                 title: 'HRV',
-                value: '${_hrv.toStringAsFixed(1)} ms',
+                value: "${ecgSignal.hrv.toStringAsFixed(2)} ms",
                 color: Colors.blue,
               ),
             ),
           ],
         ),
-        // if (!widget.isActive)
-        //   _buildInfoCard(
-        //     icon: Icons.warning,
-        //     title: 'Status',
-        //     value: _status,
-        //     color: Colors.orange,
-        //   ),
       ],
     );
   }
@@ -125,8 +85,10 @@ class _ECGRendererState extends State<ECGRenderer> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: Theme.of(context).textTheme.labelMedium),
-                Text(value, style: Theme.of(context).textTheme.bodyLarge),
+                Text(title, style: const TextStyle(fontSize: 12.0)),
+                //Theme.of(context).textTheme.labelMedium),
+                Text(value, style: const TextStyle(fontSize: 16)),
+                //Theme.of(context).textTheme.bodyLarge),
               ],
             ),
           ],
@@ -139,12 +101,12 @@ class _ECGRendererState extends State<ECGRenderer> {
 // ========== BLOOD PRESSURE RENDERER =========
 class BPRenderer extends StatelessWidget {
   final bool isActive;
-  final List<int> bpValues;
+  final BpModel bpSignal;
 
   const BPRenderer({
     super.key,
     required this.isActive,
-    required this.bpValues,
+    required this.bpSignal,
   });
 
   @override
@@ -162,20 +124,20 @@ class BPRenderer extends StatelessWidget {
       );
     }
 
-    final color = bpValues[0] > 120 ? Colors.red : Colors.purple;
+    final color = bpSignal.systolic > 120 ? Colors.red : Colors.purple;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildBloodPressureRow(
           'systolic',
-          bpValues[0],
+          bpSignal.systolic,
           color,
         ),
         const SizedBox(height: 20),
         _buildBloodPressureRow(
           'diastolic',
-          bpValues[1],
+          bpSignal.diastolic,
           color.withOpacity(0.6),
         ),
       ],
@@ -223,48 +185,19 @@ class BPRenderer extends StatelessWidget {
 }
 
 // ========== BODY TEMPERATURE RENDERER =========
-class BtempRenderer extends StatefulWidget {
+class BtempRenderer extends StatelessWidget {
   final bool isActive;
-  final double btempValue;
+  final BtempModel btempSignal;
 
   const BtempRenderer({
     super.key,
     required this.isActive,
-    required this.btempValue,
+    required this.btempSignal,
   });
 
   @override
-  State<BtempRenderer> createState() => _BtempRendererState();
-}
-
-class _BtempRendererState extends State<BtempRenderer> {
-  double minBtemp = 100.0;
-  double maxBtemp = 0.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _updateMinMaxTemperatures(widget.btempValue);
-  }
-
-  @override
-  void didUpdateWidget(BtempRenderer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.btempValue != widget.btempValue) {
-      _updateMinMaxTemperatures(widget.btempValue);
-    }
-  }
-
-  void _updateMinMaxTemperatures(double newValue) {
-    setState(() {
-      minBtemp = minBtemp.isNaN || newValue < minBtemp ? newValue : minBtemp;
-      maxBtemp = maxBtemp.isNaN || newValue > maxBtemp ? newValue : maxBtemp;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (!widget.isActive) {
+    if (!isActive) {
       return const Center(
         child: Text(
           'Start Monitoring Your Body Temperature',
@@ -306,7 +239,7 @@ class _BtempRendererState extends State<BtempRenderer> {
       ),
       child: Center(
         child: Text(
-          '${widget.btempValue.toStringAsFixed(1)} °C',
+          '${btempSignal.avgTemp.toStringAsFixed(1)} °C',
           style: const TextStyle(
             fontSize: 36.0,
             fontWeight: FontWeight.bold,
@@ -324,13 +257,13 @@ class _BtempRendererState extends State<BtempRenderer> {
           color: Colors.blue.shade100,
           textColor: Colors.blue,
           labelText: 'lowest',
-          valueText: '${minBtemp.toStringAsFixed(1)} °C',
+          valueText: '${btempSignal.minTemp.toStringAsFixed(1)} °C',
         ),
         _buildTemperatureContainer(
           color: Colors.red.shade100,
           textColor: Colors.red,
           labelText: 'highest',
-          valueText: '${maxBtemp.toStringAsFixed(1)} °C',
+          valueText: '${btempSignal.maxTemp.toStringAsFixed(1)} °C',
         ),
       ],
     );
