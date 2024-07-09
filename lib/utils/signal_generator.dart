@@ -65,7 +65,7 @@ class SignalGenerator {
 
     int currentBeatIndex = 0;
     for (int i = 0; i < t.length; i++) {
-      await Future.delayed(Duration(milliseconds: (500 / fs).round()));
+      await Future.delayed(Duration(milliseconds: (100 / fs).round()));
       if (i / fs >=
           rrIntervals.take(currentBeatIndex + 1).reduce((a, b) => a + b)) {
         currentBeatIndex++;

@@ -1,4 +1,4 @@
-// import 'dart:developer' as dev;
+import 'package:cardiocare/screens/_playground.dart';
 import 'package:flutter/material.dart';
 import 'package:cardiocare/utils/enums.dart';
 import 'package:provider/provider.dart';
@@ -15,37 +15,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeState extends State<HomeScreen> {
-  late DatabaseHelper dbhelper;
-
-  @override
-  void initState() {
-    super.initState();
-    dbhelper = DatabaseHelper();
-  }
-
-  // void _loadSignalsTable() async {
-  //   List<Map<String, dynamic>> signals = await dbhelper.getAllSignals();
-  //   dev.log('\n>> ALL SIGNALS (length): ${signals.length}');
-  //   for (var s in signals) {
-  //     dev.log('>> DATA: $s');
-  //   }
-  //   List<EcgModel> ecg = await dbhelper.getEcgData(1);
-  //   dev.log('\n>> ALL ECG (length): ${ecg.length}');
-  //   for (var s in ecg) {
-  //     dev.log('>> DATA: ${s.toMap()}');
-  //   }
-  //   List<BpModel> bp = await dbhelper.getBpData(1);
-  //   dev.log('\n>> ALL BP (length): ${bp.length}');
-  //   for (var s in bp) {
-  //     dev.log('>> DATA: ${s.toMap()}');
-  //   }
-  //   List<BtempModel> btemp = await dbhelper.getBtempData(1);
-  //   dev.log('\n>> ALL BTEMP (length): ${btemp.length}');
-  //   for (var s in btemp) {
-  //     dev.log('>> DATA: ${s.toMap()}');
-  //   }
-  // }
-
   Future<Map<SignalType, List<Signal>>> _getRecent(
       DatabaseHelper dbhelper) async {
     return await dbhelper.getRecentRecords(1, limit: 3);
@@ -126,11 +95,6 @@ class _HomeState extends State<HomeScreen> {
               ],
             ),
 
-            // ElevatedButton(
-            //   onPressed: _loadSignalsTable,
-            //   child: const Text('load signals'),
-            // ),
-
             // LIST OF RECENT RECORDS
             FutureBuilder<Map<SignalType, List<Signal>>>(
               future: _getRecent(dbhelper),
@@ -167,12 +131,50 @@ class _HomeState extends State<HomeScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/device');
-        },
-        child: const FaIcon(FontAwesomeIcons.personRays),
-        // const Icon(Icons.bluetooth),
+      floatingActionButton: Stack(
+        children: [
+          Positioned(
+            bottom: 80.0,
+            right: 14.0,
+            child: Container(
+              width: 40.0,
+              height: 40.0,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.greenAccent,
+                    Colors.blueAccent,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: FloatingActionButton(
+                heroTag: 'cardiobot-mobile',
+                backgroundColor: Colors.transparent,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HealthDashboard(),
+                    ),
+                  );
+                },
+                child: const FaIcon(FontAwesomeIcons.userDoctor, size: 20),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 10.0,
+            right: 10.0,
+            child: FloatingActionButton(
+              heroTag: 'connect-device',
+              onPressed: () => Navigator.pushNamed(context, '/device'),
+              child: const FaIcon(FontAwesomeIcons.personRays),
+            ),
+          ),
+        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );

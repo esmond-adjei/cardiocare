@@ -84,9 +84,9 @@ class MonitorState extends ChangeNotifier {
   void stopRecording() {
     isRecording = false;
     isPaused = false;
-    _ecgSignal.clearEcg();
     _stopwatch.reset();
     _subscription?.cancel();
+    _ecgSignal.clearEcg();
     notifyListeners();
   }
 }
