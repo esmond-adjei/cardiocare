@@ -45,9 +45,9 @@ enum SignalType {
       case SignalType.ecg:
         return Colors.blue;
       case SignalType.bp:
-        return Colors.purple;
+        return Colors.green;
       case SignalType.btemp:
-        return Colors.amber;
+        return Colors.orange;
       default:
         return Colors.grey;
     }

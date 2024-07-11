@@ -9,9 +9,15 @@ class HeartRateChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LineChart(
+      curve: Curves.decelerate,
+      duration: const Duration(seconds: 5),
       LineChartData(
         gridData: const FlGridData(show: true),
         titlesData: FlTitlesData(
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
@@ -46,13 +52,14 @@ class HeartRateChart extends StatelessWidget {
           ),
         ),
         borderData: FlBorderData(
-          show: true,
+          show: false,
           border: Border.all(color: const Color(0xff37434d)),
         ),
         minX: 0,
         maxX: heartRateData.length.toDouble() - 1,
-        minY: 0,
-        maxY: 150,
+        minY: 60,
+        maxY: 100,
+        backgroundColor: Colors.blue.withOpacity(0.1),
         lineBarsData: [
           LineChartBarData(
             spots: heartRateData
@@ -62,10 +69,13 @@ class HeartRateChart extends StatelessWidget {
                     entry.key.toDouble(), entry.value.heartRate.toDouble()))
                 .toList(),
             isCurved: true,
-            color: Colors.red,
+            // color: Colors.redAccent,
             barWidth: 3,
-            isStrokeCapRound: true,
-            belowBarData: BarAreaData(show: false),
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.purpleAccent, Colors.blueAccent],
+            ),
           ),
         ],
       ),
@@ -78,32 +88,4 @@ class HeartRateData {
   final int heartRate;
 
   HeartRateData(this.day, this.heartRate);
-}
-
-// === example ===
-class HeartRateTrend extends StatelessWidget {
-  const HeartRateTrend({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final List<HeartRateData> heartRateData = [
-      HeartRateData("Mon", 72),
-      HeartRateData("Tue", 78),
-      HeartRateData("Wed", 69),
-      HeartRateData("Thu", 85),
-      HeartRateData("Fri", 90),
-      HeartRateData("Sat", 75),
-      HeartRateData("Sun", 80),
-    ];
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Heart Rate Over Time"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: HeartRateChart(heartRateData: heartRateData),
-      ),
-    );
-  }
 }

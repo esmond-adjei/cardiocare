@@ -26,7 +26,7 @@ class _HomeState extends State<HomeScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         toolbarHeight: 20,
         scrolledUnderElevation: 0,
       ),
@@ -115,12 +115,7 @@ class _HomeState extends State<HomeScreen> {
                         (entry) => ListContainer(
                           listHeading: entry.key.description,
                           listData: entry.value,
-                          routeToHistoryScreen: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/history',
-                            );
-                          },
+                          expandable: true,
                         ),
                       ),
                     ],
@@ -134,8 +129,8 @@ class _HomeState extends State<HomeScreen> {
       floatingActionButton: Stack(
         children: [
           Positioned(
-            bottom: 80.0,
-            right: 14.0,
+            bottom: 70.0,
+            right: 7.0,
             child: Container(
               width: 40.0,
               height: 40.0,
@@ -166,8 +161,8 @@ class _HomeState extends State<HomeScreen> {
             ),
           ),
           Positioned(
-            bottom: 10.0,
-            right: 10.0,
+            bottom: 0.0,
+            right: 0.0,
             child: FloatingActionButton(
               heroTag: 'connect-device',
               onPressed: () => Navigator.pushNamed(context, '/device'),

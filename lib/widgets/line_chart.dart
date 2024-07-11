@@ -6,16 +6,20 @@ class ScrollableLineChart extends StatefulWidget {
   final List<int> dataList;
   final Color lineColor;
   final double height;
+  final double? width;
   final double stretchFactor;
   final double maxY;
+  final bool rounded;
 
   const ScrollableLineChart({
     super.key,
     required this.dataList,
     this.lineColor = Colors.blueAccent,
     this.height = 260,
+    this.width,
     this.stretchFactor = 1.0,
     this.maxY = 300.0,
+    this.rounded = false,
   });
 
   @override
@@ -55,19 +59,17 @@ class _ScrollableLineChartState extends State<ScrollableLineChart> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 0),
-      color: Colors.grey.withOpacity(0.1),
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        color: widget.lineColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(widget.rounded ? 12 : 0),
+      ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         controller: _scrollController,
         physics: const BouncingScrollPhysics(),
         child: SizedBox(
-          width: widget.dataList.length * widget.stretchFactor
-          //  >
-          //         MediaQuery.of(context).size.width
-          //     ? widget.dataList.length * widget.stretchFactor
-          //     : MediaQuery.of(context).size.width
-          ,
+          width: widget.width ?? widget.dataList.length * widget.stretchFactor,
           height: widget.height,
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -106,15 +108,9 @@ class _ScrollableLineChartState extends State<ScrollableLineChart> {
       maxY: widget.maxY,
       minY: widget.maxY * -0.1,
       titlesData: const FlTitlesData(
-        rightTitles: AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
-        topTitles: AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
-        leftTitles: AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
+        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
       ),
       borderData: FlBorderData(show: false),
       gridData: FlGridData(

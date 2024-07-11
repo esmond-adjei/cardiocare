@@ -26,6 +26,19 @@ class ListItem extends StatelessWidget {
     };
   }
 
+  String _getSignalHighlight(dynamic signal) {
+    switch (signal.signalType) {
+      case SignalType.ecg:
+        return '${signal.hbpm} bpm';
+      case SignalType.bp:
+        return '${signal.systolic}/${signal.diastolic} mmHg';
+      case SignalType.btemp:
+        return '${signal.avgTemp.toStringAsFixed(1)} °C';
+      default:
+        return 'Unknown';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final DatabaseHelper dbhelper = Provider.of<DatabaseHelper>(context);
@@ -72,24 +85,54 @@ class ListItem extends StatelessWidget {
         );
       },
       child: ListTile(
-        iconColor: Colors.white,
-        splashColor: Colors.grey.shade100,
+        tileColor: Colors.white,
+        iconColor: signal.signalType.color,
+        splashColor: signal.signalType.color.withOpacity(0.5),
         contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
         leading: Container(
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: signal.signalType.color,
+            color: signal.signalType.color.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
           child: Center(child: signal.signalType.icon),
         ),
         onTap: _showPeakDrawer(context),
-        title: Text(
-          signal.name,
-          style: const TextStyle(
-            fontSize: 16,
-          ),
+        title: Stack(
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: Text(
+                signal.name,
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 4.0,
+                  vertical: 1.0,
+                ),
+                decoration: BoxDecoration(
+                  color: signal.signalType.color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  _getSignalHighlight(signal),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: signal.signalType.color,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
         subtitle: Row(
           children: [

@@ -117,7 +117,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   AppBar _buildAppBar(BuildContext context) {
     final monitorState = Provider.of<MonitorState>(context, listen: false);
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       iconTheme: const IconThemeData(color: Colors.black),
       leading: IconButton(
         onPressed: () {
@@ -200,7 +200,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
       padding: const EdgeInsets.all(4),
       child: TabBar(
         indicator: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: BorderRadius.circular(40),
         ),
         indicatorSize: TabBarIndicatorSize.tab,

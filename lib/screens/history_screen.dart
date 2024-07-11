@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:developer' as dev;
 import 'package:cardiocare/utils/enums.dart';
+import 'package:cardiocare/widgets/column_chart.dart';
+import 'package:cardiocare/widgets/chart_card.dart';
 import 'package:cardiocare/widgets/line_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -19,18 +21,31 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen>
     with SingleTickerProviderStateMixin {
+  List<Color> tabColors = [
+    SignalType.ecg.color,
+    SignalType.bp.color,
+    SignalType.btemp.color
+  ];
   late TabController _tabController;
+  late Color _currentColor;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, initialIndex: 0, vsync: this);
+    _tabController.addListener(_handleTabChange);
+    _currentColor = SignalType.ecg.color;
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_handleTabChange);
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _handleTabChange() {
+    setState(() => _currentColor = tabColors[_tabController.index]);
   }
 
   @override
@@ -39,27 +54,35 @@ class _HistoryScreenState extends State<HistoryScreen>
       length: 3,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: const Text('History'),
-          actions: const [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.0),
-              child: CircleAvatar(
-                backgroundImage: AssetImage('assets/images/profile.jpg'),
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight + 48),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            color: _currentColor,
+            child: AppBar(
+              title: const Text('History'),
+              backgroundColor: Colors.transparent,
+              actions: const [
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.0),
+                  child: CircleAvatar(
+                    backgroundImage: AssetImage('assets/images/profile.jpg'),
+                  ),
+                ),
+              ],
+              bottom: TabBar(
+                dividerHeight: 0,
+                indicatorColor: Colors.white,
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.white70,
+                controller: _tabController,
+                tabs: const [
+                  Tab(text: 'ECG'),
+                  Tab(text: 'Blood Pressure'),
+                  Tab(text: 'Body Temperature'),
+                ],
               ),
             ),
-          ],
-          bottom: TabBar(
-            dividerHeight: 0,
-            indicatorColor: Colors.white,
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
-            controller: _tabController,
-            tabs: const [
-              Tab(text: 'ECG'),
-              Tab(text: 'Blood Pressure'),
-              Tab(text: 'Body Temperature'),
-            ],
           ),
         ),
         body: TabBarView(
@@ -75,6 +98,7 @@ class _HistoryScreenState extends State<HistoryScreen>
             final tabController = DefaultTabController.of(context);
             return FloatingActionButton(
               heroTag: 'fab-${tabController.index}',
+              backgroundColor: _currentColor,
               onPressed: () {
                 Navigator.push(
                   context,
@@ -84,7 +108,7 @@ class _HistoryScreenState extends State<HistoryScreen>
                   ),
                 );
               },
-              child: const FaIcon(FontAwesomeIcons.recordVinyl),
+              child: const FaIcon(FontAwesomeIcons.plus),
             );
           },
         ),
@@ -147,47 +171,7 @@ class _DataTabState extends State<DataTab> {
             child: Column(
               children: [
                 // HISTORY SNAPSHOT VIEW
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    height: 200,
-                    margin: const EdgeInsets.all(20),
-                    // decoration: BoxDecoration(
-                    //   color: Colors.grey.shade100,
-                    //   borderRadius: BorderRadius.circular(10),
-                    // ),
-                    child: ScrollableLineChart(
-                      maxY: 100,
-                      lineColor: snapshot.data![0].signalType.color,
-                      dataList: const [
-                        52,
-                        31,
-                        4,
-                        51,
-                        6,
-                        72,
-                        8,
-                        48,
-                        9,
-                        97,
-                        9,
-                        58,
-                        6,
-                        54,
-                        4,
-                        2,
-                        48,
-                        5,
-                        60,
-                        7,
-                        87,
-                        94,
-                        9,
-                        27
-                      ],
-                    ),
-                  ),
-                ),
+                _buildChartSummary(context, snapshot.data!),
                 // HISTORY DATA VIEW
                 ListContainer(
                   listHeading: '$tabTitle History',
@@ -199,5 +183,73 @@ class _DataTabState extends State<DataTab> {
         }
       },
     );
+  }
+
+  List<ColumnChartData> _parseColumnChartData(List<dynamic> data) {
+    // average over each day so that you can chart by days
+    return data
+        .map(
+          (e) => ColumnChartData(
+            label: '${e.id}00',
+            primaryValue: e.systolic,
+            secondaryValue: e.diastolic,
+          ),
+        )
+        .toList();
+  }
+
+  Widget _buildChartSummary(BuildContext context, List<dynamic> signalData) {
+    final List<int> sampleData = [
+      52,
+      31,
+      4,
+      51,
+      6,
+      72,
+      8,
+      48,
+      9,
+      48,
+      5,
+      60,
+      7,
+      87,
+      94,
+      9,
+      27
+    ];
+
+    switch (signalData[0].signalType) {
+      case SignalType.bp:
+        return Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: ChartCard(
+            title: 'Blood Pressure Summary',
+            menuOptions: () {},
+            child: ColumnChart(
+              data: _parseColumnChartData(signalData),
+              primaryUnit: 'mmHg',
+              primaryLabel: 'sys',
+              secondaryLabel: 'dia',
+              primaryColor: signalData[0].signalType.color,
+              secondaryColor: signalData[0].signalType.color.withOpacity(0.4),
+            ),
+          ),
+        );
+      default:
+        return Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: ChartCard(
+            child: ScrollableLineChart(
+              maxY: 100,
+              height: 200,
+              rounded: true,
+              width: MediaQuery.of(context).size.width,
+              lineColor: signalData[0].signalType.color,
+              dataList: sampleData,
+            ),
+          ),
+        );
+    }
   }
 }

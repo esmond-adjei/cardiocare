@@ -1,6 +1,8 @@
 import 'dart:developer' as dev;
 import 'package:cardiocare/services/models/db_helper.dart';
 import 'package:cardiocare/services/models/signal_model.dart';
+import 'package:cardiocare/widgets/column_chart.dart';
+import 'package:cardiocare/widgets/chart_card.dart';
 import 'package:cardiocare/widgets/pie_chart.dart';
 import 'package:cardiocare/widgets/trend_line_chart.dart';
 import 'package:flutter/material.dart';
@@ -50,9 +52,19 @@ class HealthDashboard extends StatelessWidget {
       'Intense': 25,
     };
 
+    final temperatureData = [
+      ColumnChartData(label: 'Sun', primaryValue: 81, secondaryValue: 75),
+      ColumnChartData(label: 'Mon', primaryValue: 77, secondaryValue: 70),
+      ColumnChartData(label: 'Tue', primaryValue: 76, secondaryValue: 73),
+      ColumnChartData(label: 'Wed', primaryValue: 81, secondaryValue: 76),
+      ColumnChartData(label: 'Thu', primaryValue: 78, secondaryValue: 76),
+      ColumnChartData(label: 'Fri', primaryValue: 72, secondaryValue: 70),
+      ColumnChartData(label: 'Sat', primaryValue: 82, secondaryValue: 68),
+    ];
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Health Dashboard"),
+        title: const Text("playground screen"),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -60,21 +72,32 @@ class HealthDashboard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              //
+              ElevatedButton(
+                onPressed: _loadSignalsTable,
+                child: const Text('load signals'),
+              ),
+              const SizedBox(height: 20),
+              //
+              ChartCard(
+                title: 'Max vs Min Temperatures ',
+                child: ColumnChart(
+                  data: temperatureData,
+                  primaryUnit: '°C',
+                ),
+              ),
+              const SizedBox(height: 20),
+              //
               const Text(
                 'Heart Rate Over Time',
                 style: TextStyle(fontSize: 18),
               ),
-
-              // ElevatedButton(
-              //   onPressed: _loadSignalsTable,
-              //   child: const Text('load signals'),
-              // ),
-
               SizedBox(
                 height: 300,
                 child: HeartRateChart(heartRateData: heartRateData),
               ),
               const SizedBox(height: 20),
+              //
               const Text(
                 'Activity Distribution',
                 style: TextStyle(fontSize: 18),
