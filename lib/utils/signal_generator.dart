@@ -62,6 +62,7 @@ class SignalGenerator {
     num sumSquaredDiff =
         rrIntervals.map((rr) => pow(rr - meanRR, 2)).reduce((a, b) => a + b);
     double sdnn = sqrt(sumSquaredDiff / (rrIntervals.length - 1));
+    // ROOT(SUM((rr - rm)^2)) / (n - 1)
 
     int currentBeatIndex = 0;
     for (int i = 0; i < t.length; i++) {
@@ -124,7 +125,7 @@ class SignalGenerator {
         // 'current': temp,
         'minTemp': minTemp,
         'maxTemp': maxTemp,
-        'avgTemp': sumTemp / (i + 1),
+        'avgTemp': (sumTemp / (i + 1)),
       };
       await Future.delayed(
           Duration(milliseconds: (1000 / samplingRate).round()));

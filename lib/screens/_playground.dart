@@ -1,16 +1,17 @@
 import 'dart:developer' as dev;
 import 'package:cardiocare/services/models/db_helper.dart';
 import 'package:cardiocare/services/models/signal_model.dart';
-import 'package:cardiocare/widgets/column_chart.dart';
+import 'package:cardiocare/widgets/charts/column_chart.dart';
 import 'package:cardiocare/widgets/chart_card.dart';
-import 'package:cardiocare/widgets/pie_chart.dart';
-import 'package:cardiocare/widgets/trend_line_chart.dart';
+import 'package:cardiocare/widgets/charts/pie_chart.dart';
+import 'package:cardiocare/widgets/charts/trend_line_chart.dart';
 import 'package:flutter/material.dart';
 
 class HealthDashboard extends StatelessWidget {
   const HealthDashboard({super.key});
 
   void _loadSignalsTable() async {
+    print(">> TIME: ${DateTime.now()}");
     DatabaseHelper dbhelper = DatabaseHelper();
     List<Map<String, dynamic>> signals = await dbhelper.getAllSignals();
     dev.log('\n>> ALL SIGNALS (length): ${signals.length}');
@@ -36,14 +37,14 @@ class HealthDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<HeartRateData> heartRateData = [
-      HeartRateData("Mon", 72),
-      HeartRateData("Tue", 78),
-      HeartRateData("Wed", 69),
-      HeartRateData("Thu", 85),
-      HeartRateData("Fri", 90),
-      HeartRateData("Sat", 75),
-      HeartRateData("Sun", 80),
+    final List<TrendLinePoint> heartRateData = [
+      TrendLinePoint("Mon", 72),
+      TrendLinePoint("Tue", 78),
+      TrendLinePoint("Wed", 69),
+      TrendLinePoint("Thu", 85),
+      TrendLinePoint("Fri", 90),
+      TrendLinePoint("Sat", 75),
+      TrendLinePoint("Sun", 80),
     ];
 
     final Map<String, double> activityData = {
@@ -72,32 +73,41 @@ class HealthDashboard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //
+              // LOAD SIGNALS BUTTON
               ElevatedButton(
                 onPressed: _loadSignalsTable,
                 child: const Text('load signals'),
               ),
               const SizedBox(height: 20),
-              //
+              // BAR CHART
               ChartCard(
                 title: 'Max vs Min Temperatures ',
+                summary: ChartSummary(
+                  primaryValue: 82,
+                  secondaryValue: 68,
+                  primaryUnitLabel: '°F',
+                  priamryNameLabel: 'Max',
+                  secondaryNameLabel: 'Min',
+                  periodValue: temperatureData.length,
+                ),
                 child: ColumnChart(
                   data: temperatureData,
-                  primaryUnit: '°C',
+                  showMultipleColumns: true,
                 ),
               ),
               const SizedBox(height: 20),
-              //
+              // TREND LINE CHART
               const Text(
                 'Heart Rate Over Time',
                 style: TextStyle(fontSize: 18),
               ),
-              SizedBox(
-                height: 300,
-                child: HeartRateChart(heartRateData: heartRateData),
+              TrendLineChart(
+                lines: [
+                  TrendLine(data: heartRateData, color: Colors.red),
+                ],
               ),
               const SizedBox(height: 20),
-              //
+              // PIE CHART
               const Text(
                 'Activity Distribution',
                 style: TextStyle(fontSize: 18),

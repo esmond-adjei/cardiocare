@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:developer' as dev;
 import 'package:cardiocare/utils/enums.dart';
-import 'package:cardiocare/widgets/column_chart.dart';
+import 'package:cardiocare/utils/format_datetime.dart';
+import 'package:cardiocare/widgets/charts/column_chart.dart';
 import 'package:cardiocare/widgets/chart_card.dart';
-import 'package:cardiocare/widgets/line_chart.dart';
+import 'package:cardiocare/widgets/charts/line_chart.dart';
+import 'package:cardiocare/widgets/charts/trend_line_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
@@ -58,8 +60,23 @@ class _HistoryScreenState extends State<HistoryScreen>
           preferredSize: const Size.fromHeight(kToolbarHeight + 48),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
-            color: _currentColor,
+            height: 600,
+            decoration: BoxDecoration(
+              color: _currentColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  spreadRadius: 2,
+                  blurRadius: 4,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(32),
+              ),
+            ),
             child: AppBar(
+              scrolledUnderElevation: 10,
               title: const Text('History'),
               backgroundColor: Colors.transparent,
               actions: const [
@@ -190,7 +207,7 @@ class _DataTabState extends State<DataTab> {
     return data
         .map(
           (e) => ColumnChartData(
-            label: '${e.id}00',
+            label: formatWeekday(e.startTime.toString()).substring(0, 3),
             primaryValue: e.systolic,
             secondaryValue: e.diastolic,
           ),
@@ -198,7 +215,54 @@ class _DataTabState extends State<DataTab> {
         .toList();
   }
 
+  List<TrendLinePoint> _parseTrendLineData(List<dynamic> data) {
+    return data
+        .map(
+          (e) => TrendLinePoint(
+            formatWeekday(e.startTime.toString()).substring(0, 3),
+            e.avgTemp,
+          ),
+        )
+        .toList();
+  }
+
+  List<TrendLinePoint> _parseMinTrendLineData(List<dynamic> data) {
+    return data
+        .map(
+          (e) => TrendLinePoint(
+            formatWeekday(e.startTime.toString()).substring(0, 3),
+            e.minTemp,
+          ),
+        )
+        .toList();
+  }
+
+  List<TrendLinePoint> _parseMaxTrendLineData(List<dynamic> data) {
+    return data
+        .map(
+          (e) => TrendLinePoint(
+            formatWeekday(e.startTime.toString()).substring(0, 3),
+            e.maxTemp,
+          ),
+        )
+        .toList();
+  }
+
+  List<TrendLinePoint> _parseHBPMTrendLineData(List<dynamic> data) {
+    return data
+        .map(
+          (e) => TrendLinePoint(
+            formatWeekday(e.startTime.toString()).substring(0, 3),
+            e.hbpm.toDouble(),
+          ),
+        )
+        .toList();
+  }
+
   Widget _buildChartSummary(BuildContext context, List<dynamic> signalData) {
+    final signaldata = signalData.reversed.toList();
+    final datalength = signaldata.length;
+
     final List<int> sampleData = [
       52,
       31,
@@ -219,20 +283,109 @@ class _DataTabState extends State<DataTab> {
       27
     ];
 
-    switch (signalData[0].signalType) {
+    switch (signaldata[0].signalType) {
+      case SignalType.ecg:
+        final avgHBPM = signaldata.fold(0, (sum, e) => sum + e.hbpm as int) /
+            signaldata.length;
+        return Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: ChartCard(
+            title: 'Heart Rate Summary',
+            menuOptions: () {},
+            summary: ChartSummary(
+              showLegend: true,
+              showMultipleColumns: false,
+              summaryLabel: 'Avg. Heart Rate (bpm)',
+              periodValue: datalength,
+              periodLabel: 'records',
+              priamryNameLabel: 'Heart Rate',
+              primaryUnitLabel: 'bpm',
+              primaryValue: avgHBPM,
+              primaryColor: SignalType.ecg.color,
+            ),
+            child: TrendLineChart(
+              height: 160,
+              lines: [
+                TrendLine(
+                  data: _parseHBPMTrendLineData(signaldata),
+                  color: SignalType.ecg.color,
+                  // beautify: true,
+                ),
+              ],
+            ),
+          ),
+        );
+
       case SignalType.bp:
+        final avgSystolic =
+            signaldata.fold(0, (sum, e) => sum + e.systolic as int) /
+                datalength;
+        final avgDiastolic =
+            signaldata.fold(0, (sum, e) => sum + e.diastolic as int) /
+                datalength;
         return Padding(
           padding: const EdgeInsets.all(12.0),
           child: ChartCard(
             title: 'Blood Pressure Summary',
             menuOptions: () {},
+            summary: ChartSummary(
+              showLegend: true,
+              showMultipleColumns: true,
+              summaryLabel: 'Average Blood Pressure (mmHg/day)',
+              periodValue: signaldata.length,
+              periodLabel: 'days',
+              priamryNameLabel: 'systolic',
+              primaryUnitLabel: 'mmHg',
+              primaryValue: avgSystolic.toInt(),
+              primaryColor: SignalType.bp.color,
+              secondaryNameLabel: 'diastolic',
+              secondaryValue: avgDiastolic.toInt(),
+            ),
             child: ColumnChart(
-              data: _parseColumnChartData(signalData),
-              primaryUnit: 'mmHg',
-              primaryLabel: 'sys',
-              secondaryLabel: 'dia',
-              primaryColor: signalData[0].signalType.color,
-              secondaryColor: signalData[0].signalType.color.withOpacity(0.4),
+              data: _parseColumnChartData(signaldata),
+              primaryColor: SignalType.bp.color,
+              secondaryColor: SignalType.bp.color.withOpacity(0.4),
+            ),
+          ),
+        );
+
+      case SignalType.btemp:
+        final maxTemp =
+            signaldata.map((e) => e.avgTemp).reduce((a, b) => a > b ? a : b);
+        return Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: ChartCard(
+            title: 'Body Temprature',
+            summary: ChartSummary(
+              showLegend: true,
+              showMultipleColumns: false,
+              summaryLabel: 'Max Avg. Body Temperature (°C)',
+              periodValue: datalength,
+              periodLabel: 'records',
+              priamryNameLabel: 'Avg. Body Temp',
+              primaryUnitLabel: '°C',
+              primaryValue: maxTemp,
+              primaryColor: SignalType.btemp.color,
+            ),
+            child: TrendLineChart(
+              height: 160,
+              lines: [
+                TrendLine(
+                  data: _parseTrendLineData(signaldata),
+                  color: SignalType.btemp.color,
+                  beautify: true,
+                ),
+                TrendLine(
+                  data: _parseMinTrendLineData(signaldata),
+                  color: Colors.blueAccent,
+                  beautify: true,
+                ),
+                TrendLine(
+                  data: _parseMaxTrendLineData(signaldata),
+                  color: Colors.redAccent,
+                  beautify: true,
+                ),
+              ],
             ),
           ),
         );

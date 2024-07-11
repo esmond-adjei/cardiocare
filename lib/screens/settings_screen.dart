@@ -90,11 +90,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       height: 160.0,
       padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.redAccent, Colors.red.shade800],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+        color: Theme.of(context).primaryColor,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

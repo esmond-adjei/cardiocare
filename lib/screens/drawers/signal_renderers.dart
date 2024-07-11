@@ -1,6 +1,6 @@
 import 'package:cardiocare/services/models/signal_model.dart';
 import 'package:flutter/material.dart';
-import 'package:cardiocare/widgets/line_chart.dart';
+import 'package:cardiocare/widgets/charts/line_chart.dart';
 
 // ========== ECG RENDERER RENDERER =========
 class ECGRenderer extends StatelessWidget {
@@ -124,7 +124,8 @@ class BPRenderer extends StatelessWidget {
       );
     }
 
-    final color = bpSignal.systolic > 120 ? Colors.red : Colors.purple;
+    final color =
+        bpSignal.systolic > 120 ? Colors.red : bpSignal.signalType.color;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,

@@ -1,4 +1,5 @@
 import 'dart:async';
+// import 'dart:developer' as dev;
 import 'package:flutter/foundation.dart';
 import 'package:cardiocare/services/models/signal_model.dart';
 import 'package:cardiocare/utils/signal_generator.dart';
@@ -34,6 +35,7 @@ class MonitorState extends ChangeNotifier {
 
     switch (tabIndex) {
       case 0:
+        _ecgSignal.starttime = DateTime.now();
         _subscription = _signalGenerator.generateECG().listen((value) {
           _ecgSignal.addEcgCache(value['ecg']);
           _ecgSignal.hrv = value['hrv'];
@@ -42,12 +44,14 @@ class MonitorState extends ChangeNotifier {
         });
         break;
       case 1:
+        _bpSignal.starttime = DateTime.now();
         _subscription = _signalGenerator.generateBP().listen((value) {
           _bpSignal.bpData = value;
           notifyListeners();
         });
         break;
       case 2:
+        _btempSignal.starttime = DateTime.now();
         _subscription = _signalGenerator.generateBtemp().listen((value) {
           _btempSignal.tempData = value;
           notifyListeners();

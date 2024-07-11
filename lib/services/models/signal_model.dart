@@ -7,7 +7,7 @@ abstract class Signal {
   final int userId;
   String? signalName;
   final int? signalId;
-  final DateTime startTime;
+  DateTime startTime;
   DateTime stopTime;
   final SignalType signalType;
   String? signalInfo;
@@ -25,9 +25,11 @@ abstract class Signal {
 
   String get name =>
       signalName ??
-      '${signalType.name} ${stopTime.day}-${stopTime.month}-${stopTime.year} ${stopTime.hour}:${stopTime.minute}';
+      '${signalType.name} ${startTime.day}-${startTime.month}-${startTime.year} ${startTime.hour}:${startTime.minute}';
 
   set name(String newName) => signalName = newName;
+
+  set starttime(DateTime time) => startTime = time;
 
   set stoptime(DateTime time) => stopTime = time;
 

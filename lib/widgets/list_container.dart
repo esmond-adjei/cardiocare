@@ -60,7 +60,7 @@ class _ListContainerState extends State<ListContainer> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // GROUPED CATEGORY: DATE
+            // GROUPED CATEGORY: DATE || CATEGORY
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16.0,

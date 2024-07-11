@@ -70,21 +70,23 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                   signal.name = textFieldController.text;
                   signal.stopTime =
                       signal.startTime.add(monitorState.stopwatch.elapsed);
+                  int signalId = -1;
                   switch (signal.signalType) {
                     case SignalType.ecg:
                       signal.storeEcg();
-                      await dbHelper.createEcgData(signal);
+                      signalId = await dbHelper.createEcgData(signal);
                       break;
                     case SignalType.bp:
-                      await dbHelper.createBpData(signal);
+                      signalId = await dbHelper.createBpData(signal);
                       break;
                     case SignalType.btemp:
-                      await dbHelper.createBtempData(signal);
+                      signalId = await dbHelper.createBtempData(signal);
                       break;
                   }
                   monitorState.stopRecording();
                   Navigator.pop(context);
-                  _showSnackBar('${signal.name} saved successfully');
+                  _showSnackBar(
+                      '${signal.name} saved successfully (ID: $signalId)');
                 } catch (e) {
                   dev.log('>> CREATE_SIGNAL_ERROR: ${e.toString()}');
                   _showSnackBar('Failed to save data');
@@ -266,29 +268,31 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                     label: const Text("Restart"),
                   ),
                   const SizedBox(width: 16),
-                  ElevatedButton.icon(
-                    onPressed: monitorState.isPaused
-                        ? monitorState.resumeRecording
-                        : monitorState.pauseRecording,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.amberAccent,
-                    ),
-                    icon: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      transitionBuilder:
-                          (Widget child, Animation<double> animation) {
-                        return ScaleTransition(
-                          scale: animation,
-                          child: child,
-                        );
-                      },
-                      child: monitorState.isPaused
-                          ? const Icon(Icons.play_arrow, key: ValueKey("play"))
-                          : const Icon(Icons.pause, key: ValueKey("pause")),
-                    ),
-                    label: Text(monitorState.isPaused ? "Resume" : "Paused"),
-                  ),
-                  const SizedBox(width: 16),
+                  // ElevatedButton.icon(
+                  //   onPressed: monitorState.isPaused
+                  //       ? monitorState.resumeRecording
+                  //       : monitorState.pauseRecording,
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: monitorState.isPaused
+                  //         ? Colors.amberAccent
+                  //         : Colors.grey.shade400,
+                  //   ),
+                  //   icon: AnimatedSwitcher(
+                  //     duration: const Duration(milliseconds: 300),
+                  //     transitionBuilder:
+                  //         (Widget child, Animation<double> animation) {
+                  //       return ScaleTransition(
+                  //         scale: animation,
+                  //         child: child,
+                  //       );
+                  //     },
+                  //     child: monitorState.isPaused
+                  //         ? const Icon(Icons.play_arrow, key: ValueKey("play"))
+                  //         : const Icon(Icons.pause, key: ValueKey("pause")),
+                  //   ),
+                  //   label: Text(monitorState.isPaused ? "Resume" : "Paused"),
+                  // ),
+                  // const SizedBox(width: 16),
                   ElevatedButton.icon(
                     onPressed: () => _showSaveDialog(monitorState),
                     style: ElevatedButton.styleFrom(

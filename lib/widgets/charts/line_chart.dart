@@ -51,8 +51,10 @@ class _ScrollableLineChartState extends State<ScrollableLineChart> {
   }
 
   List<FlSpot> _ecgDataSpots() {
+    const samplingRate = 500;
     return widget.dataList.asMap().entries.map((entry) {
-      return FlSpot(entry.key.toDouble() * 0.01, entry.value.toDouble());
+      return FlSpot(
+          entry.key.toDouble() * 12 / samplingRate, entry.value.toDouble());
     }).toList();
   }
 
@@ -73,7 +75,7 @@ class _ScrollableLineChartState extends State<ScrollableLineChart> {
           height: widget.height,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              return LineChart(mainData());
+              return LineChart(_buildChart());
             },
           ),
         ),
@@ -81,13 +83,12 @@ class _ScrollableLineChartState extends State<ScrollableLineChart> {
     );
   }
 
-  LineChartData mainData() {
+  LineChartData _buildChart() {
     return LineChartData(
       lineBarsData: [
         LineChartBarData(
           spots: _ecgDataSpots(),
           color: widget.lineColor,
-          show: true,
           isCurved: true,
           curveSmoothness: 0.3,
           preventCurveOverShooting: true,
@@ -107,12 +108,26 @@ class _ScrollableLineChartState extends State<ScrollableLineChart> {
       ],
       maxY: widget.maxY,
       minY: widget.maxY * -0.1,
-      titlesData: const FlTitlesData(
-        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      titlesData: FlTitlesData(
+        rightTitles:
+            const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            reservedSize: 30,
+            interval: 1.0,
+            getTitlesWidget: (value, meta) => SideTitleWidget(
+              axisSide: meta.axisSide,
+              child: Text(
+                value.toInt().toString(),
+                style: const TextStyle(color: Colors.grey, fontSize: 10),
+              ),
+            ),
+          ),
+        ),
       ),
-      borderData: FlBorderData(show: false),
       gridData: FlGridData(
         show: true,
         drawHorizontalLine: false,
@@ -124,6 +139,26 @@ class _ScrollableLineChartState extends State<ScrollableLineChart> {
           );
         },
       ),
+      lineTouchData: LineTouchData(
+        touchTooltipData: LineTouchTooltipData(
+          tooltipBorder: BorderSide(color: Colors.grey.shade200),
+          getTooltipColor: (touchedSpot) => Colors.white,
+          tooltipRoundedRadius: 8,
+          getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
+            return touchedBarSpots.map((barSpot) {
+              final flSpot = barSpot;
+              return LineTooltipItem(
+                flSpot.y.toStringAsFixed(2),
+                TextStyle(
+                  color: barSpot.bar.color,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            }).toList();
+          },
+        ),
+      ),
+      borderData: FlBorderData(show: false),
     );
   }
 }
