@@ -4,7 +4,6 @@ import 'package:cardiocare/utils/enums.dart';
 import 'package:cardiocare/utils/format_datetime.dart';
 import 'package:cardiocare/widgets/charts/column_chart.dart';
 import 'package:cardiocare/widgets/chart_card.dart';
-import 'package:cardiocare/widgets/charts/line_chart.dart';
 import 'package:cardiocare/widgets/charts/trend_line_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -263,26 +262,6 @@ class _DataTabState extends State<DataTab> {
     final signaldata = signalData.reversed.toList();
     final datalength = signaldata.length;
 
-    final List<int> sampleData = [
-      52,
-      31,
-      4,
-      51,
-      6,
-      72,
-      8,
-      48,
-      9,
-      48,
-      5,
-      60,
-      7,
-      87,
-      94,
-      9,
-      27
-    ];
-
     switch (signaldata[0].signalType) {
       case SignalType.ecg:
         final avgHBPM = signaldata.fold(0, (sum, e) => sum + e.hbpm as int) /
@@ -298,18 +277,18 @@ class _DataTabState extends State<DataTab> {
               summaryLabel: 'Avg. Heart Rate (bpm)',
               periodValue: datalength,
               periodLabel: 'records',
-              priamryNameLabel: 'Heart Rate',
               primaryUnitLabel: 'bpm',
               primaryValue: avgHBPM,
               primaryColor: SignalType.ecg.color,
             ),
+            legend:
+                LegendItem(color: SignalType.ecg.color, label: 'heart rate'),
             child: TrendLineChart(
               height: 160,
               lines: [
                 TrendLine(
                   data: _parseHBPMTrendLineData(signaldata),
                   color: SignalType.ecg.color,
-                  // beautify: true,
                 ),
               ],
             ),
@@ -334,12 +313,20 @@ class _DataTabState extends State<DataTab> {
               summaryLabel: 'Average Blood Pressure (mmHg/day)',
               periodValue: signaldata.length,
               periodLabel: 'days',
-              priamryNameLabel: 'systolic',
               primaryUnitLabel: 'mmHg',
               primaryValue: avgSystolic.toInt(),
               primaryColor: SignalType.bp.color,
-              secondaryNameLabel: 'diastolic',
               secondaryValue: avgDiastolic.toInt(),
+            ),
+            legend: Row(
+              children: [
+                LegendItem(color: SignalType.bp.color, label: 'systolic'),
+                const SizedBox(width: 8),
+                LegendItem(
+                  color: SignalType.bp.color.withOpacity(0.4),
+                  label: 'diastolic',
+                ),
+              ],
             ),
             child: ColumnChart(
               data: _parseColumnChartData(signaldata),
@@ -362,10 +349,27 @@ class _DataTabState extends State<DataTab> {
               summaryLabel: 'Max Avg. Body Temperature (°C)',
               periodValue: datalength,
               periodLabel: 'records',
-              priamryNameLabel: 'Avg. Body Temp',
               primaryUnitLabel: '°C',
               primaryValue: maxTemp,
               primaryColor: SignalType.btemp.color,
+            ),
+            legend: Row(
+              children: [
+                LegendItem(
+                  color: SignalType.btemp.color,
+                  label: 'avg. body temp.',
+                ),
+                const SizedBox(width: 8),
+                const LegendItem(
+                  color: Colors.blueAccent,
+                  label: 'min body temp.',
+                ),
+                const SizedBox(width: 8),
+                const LegendItem(
+                  color: Colors.redAccent,
+                  label: 'max body temp.',
+                ),
+              ],
             ),
             child: TrendLineChart(
               height: 160,
@@ -378,29 +382,22 @@ class _DataTabState extends State<DataTab> {
                 TrendLine(
                   data: _parseMinTrendLineData(signaldata),
                   color: Colors.blueAccent,
-                  beautify: true,
+                  // beautify: true,
                 ),
                 TrendLine(
                   data: _parseMaxTrendLineData(signaldata),
                   color: Colors.redAccent,
-                  beautify: true,
+                  // beautify: true,
                 ),
               ],
             ),
           ),
         );
       default:
-        return Padding(
-          padding: const EdgeInsets.all(12.0),
+        return const Padding(
+          padding: EdgeInsets.all(12.0),
           child: ChartCard(
-            child: ScrollableLineChart(
-              maxY: 100,
-              height: 200,
-              rounded: true,
-              width: MediaQuery.of(context).size.width,
-              lineColor: signalData[0].signalType.color,
-              dataList: sampleData,
-            ),
+            child: Placeholder(),
           ),
         );
     }

@@ -6,12 +6,14 @@ class ChartCard extends StatelessWidget {
   final String? title;
   final Function? menuOptions;
   final Widget? summary;
+  final Widget? legend;
 
   const ChartCard({
     super.key,
     this.title,
     this.menuOptions,
     this.summary,
+    this.legend,
     required this.child,
   });
 
@@ -58,6 +60,9 @@ class ChartCard extends StatelessWidget {
 
           // CHART WIDGET
           child,
+
+          // CHART LEGEND
+          if (legend != null) ...[const SizedBox(height: 16), legend!],
         ],
       ),
     );
@@ -74,8 +79,6 @@ class ChartSummary extends StatelessWidget {
 
   final num primaryValue;
   final num? secondaryValue;
-  final String priamryNameLabel;
-  final String? secondaryNameLabel;
   final String primaryUnitLabel;
   final String? secondaryUnitLabel;
 
@@ -90,8 +93,6 @@ class ChartSummary extends StatelessWidget {
     this.secondaryValue,
     this.primaryUnitLabel = '',
     this.secondaryUnitLabel,
-    this.priamryNameLabel = 'Add Label',
-    this.secondaryNameLabel,
     this.primaryColor = Colors.redAccent,
     this.secondaryColor,
     required this.periodValue,
@@ -155,21 +156,6 @@ class ChartSummary extends StatelessWidget {
                     ?.copyWith(color: primaryColor),
               ),
             ),
-            if (showLegend) ...[
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  _LegendItem(color: primaryColor, label: priamryNameLabel),
-                  if (showMultipleColumns) ...[
-                    const SizedBox(width: 16),
-                    _LegendItem(
-                      color: secondaryColor ?? primaryColor.withOpacity(0.4),
-                      label: secondaryNameLabel ?? 'Add Label',
-                    ),
-                  ],
-                ],
-              ),
-            ],
           ],
         )
       ],
@@ -200,11 +186,11 @@ class ChartSummary extends StatelessWidget {
   }
 }
 
-class _LegendItem extends StatelessWidget {
+class LegendItem extends StatelessWidget {
   final Color color;
   final String label;
 
-  const _LegendItem({required this.color, required this.label});
+  const LegendItem({super.key, required this.color, required this.label});
 
   @override
   Widget build(BuildContext context) {

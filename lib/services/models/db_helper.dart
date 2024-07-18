@@ -297,7 +297,7 @@ class DatabaseHelper extends ChangeNotifier {
   }
 
   // DASHBOARD
-  Future<Map<SignalType, List<Signal>>> getRecentRecords(int userId,
+  Future<Map<SignalType, List<Signal>>> getRecentRecords2(int userId,
       {int limit = 3}) async {
     final List<EcgModel> recentEcgRecords =
         await getEcgData(userId, limit: limit);
@@ -310,5 +310,71 @@ class DatabaseHelper extends ChangeNotifier {
       SignalType.bp: recentBpRecords,
       SignalType.btemp: recentBtempRecords,
     };
+  }
+
+  Future<Map<SignalType, List<Signal>>> getRecentRecords(int userId,
+      {int limit = 3}) async {
+    final db = await database;
+
+    const String query = '''
+    WITH RankedSignals AS (
+      SELECT 
+        s.$idColumn, 
+        s.$userIdColumn, 
+        s.$nameColumn,
+        s.$startTimeColumn,
+        s.$stopTimeColumn,
+        s.$signalTypeColumn,
+        s.$signalInfoColumn,
+        e.ecg, e.hrv, e.hbpm,
+        b.bp_systolic, b.bp_diastolic,
+        t.body_temp, t.body_temp_min, t.body_temp_max,
+        ROW_NUMBER() OVER (PARTITION BY s.$signalTypeColumn ORDER BY s.$startTimeColumn DESC) as rn
+      FROM $signalTable s
+      LEFT JOIN $ecgTable e ON s.$idColumn = e.$signalIdColumn AND s.$signalTypeColumn = 'ECG'
+      LEFT JOIN $bpTable b ON s.$idColumn = b.$signalIdColumn AND s.$signalTypeColumn = 'BP'
+      LEFT JOIN $btempTable t ON s.$idColumn = t.$signalIdColumn AND s.$signalTypeColumn = 'BTEMP'
+      WHERE s.$userIdColumn = ?
+      AND s.$signalTypeColumn IN ('ECG', 'BP', 'BTEMP')
+    )
+    SELECT * FROM RankedSignals
+    WHERE rn <= ?
+    ORDER BY $signalTypeColumn, $startTimeColumn DESC
+  ''';
+
+    final List<Map<String, dynamic>> results =
+        await db.rawQuery(query, [userId, limit]);
+
+    final Map<SignalType, List<Signal>> recentRecords = {
+      SignalType.ecg: [],
+      SignalType.bp: [],
+      SignalType.btemp: [],
+    };
+
+    for (var row in results) {
+      switch (row[signalTypeColumn]) {
+        case 'ECG':
+          final ecg = EcgModel.fromMap(row);
+          recentRecords[SignalType.ecg]!.add(ecg);
+          break;
+        case 'BP':
+          final bp = BpModel.fromMap(row);
+          recentRecords[SignalType.bp]!.add(bp);
+          break;
+        case 'BTEMP':
+          final btemp = BtempModel.fromMap(row);
+          recentRecords[SignalType.btemp]!.add(btemp);
+          break;
+        default:
+          throw ArgumentError('Unknown signal type: ${row[signalTypeColumn]}');
+      }
+    }
+
+    return recentRecords;
+  }
+
+  Future<EcgModel> getLatestEcg(int userId) async {
+    final List<EcgModel> recentEcgRecords = await getEcgData(userId, limit: 1);
+    return recentEcgRecords.first;
   }
 }

@@ -86,9 +86,11 @@ class HealthDashboard extends StatelessWidget {
                   primaryValue: 82,
                   secondaryValue: 68,
                   primaryUnitLabel: '°F',
-                  priamryNameLabel: 'Max',
-                  secondaryNameLabel: 'Min',
                   periodValue: temperatureData.length,
+                ),
+                legend: const LegendItem(
+                  label: 'Max',
+                  color: Colors.red,
                 ),
                 child: ColumnChart(
                   data: temperatureData,

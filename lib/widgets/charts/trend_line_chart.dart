@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 class TrendLineChart extends StatelessWidget {
   final List<TrendLine> lines;
   final double height;
+  final bool? showLeftTitles;
 
   const TrendLineChart({
     super.key,
     required this.lines,
     this.height = 200,
+    this.showLeftTitles,
   });
 
   @override
@@ -24,7 +26,7 @@ class TrendLineChart extends StatelessWidget {
           lineBarsData: _getLineBarsData(),
           minY: minY * 0.98,
           maxY: maxY * 1.02,
-          titlesData: _getTitlesData(),
+          titlesData: _getTitlesData(showLeftTitles: showLeftTitles ?? true),
           gridData: FlGridData(
             show: true,
             drawVerticalLine: false,
@@ -86,12 +88,11 @@ class TrendLineChart extends StatelessWidget {
     }).toList();
   }
 
-  FlTitlesData _getTitlesData() {
+  FlTitlesData _getTitlesData({bool showLeftTitles = true}) {
     return FlTitlesData(
-      bottomTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       leftTitles: AxisTitles(
         sideTitles: SideTitles(
-          showTitles: true,
+          showTitles: showLeftTitles,
           reservedSize: 30,
           getTitlesWidget: (value, meta) => SideTitleWidget(
             axisSide: meta.axisSide,
@@ -102,6 +103,7 @@ class TrendLineChart extends StatelessWidget {
           ),
         ),
       ),
+      bottomTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
     );
@@ -114,11 +116,12 @@ class TrendLine {
   final String? name;
   final bool beautify;
 
-  TrendLine(
-      {required this.data,
-      required this.color,
-      this.name,
-      this.beautify = false});
+  TrendLine({
+    required this.data,
+    required this.color,
+    this.name,
+    this.beautify = false,
+  });
 }
 
 class TrendLinePoint {

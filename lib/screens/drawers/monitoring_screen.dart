@@ -296,7 +296,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                   ElevatedButton.icon(
                     onPressed: () => _showSaveDialog(monitorState),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: Colors.redAccent,
                     ),
                     icon: const Icon(Icons.done),
                     label: const Text("Done"),

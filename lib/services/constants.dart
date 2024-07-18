@@ -21,7 +21,7 @@ const createECGTable = '''CREATE TABLE IF NOT EXISTS $ecgTable (
     $signalIdColumn INTEGER NOT NULL,
     ecg BLOB NOT NULL,
     hrv REAL,
-    hbpm REAL,
+    hbpm INTEGER,
     FOREIGN KEY ($signalIdColumn) REFERENCES $signalTable ($idColumn)
 );''';
 
