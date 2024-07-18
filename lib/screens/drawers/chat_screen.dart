@@ -203,7 +203,7 @@ class _ChatWidgetState extends State<ChatWidget> {
       _textFieldFocus.requestFocus();
       _saveConversationHistory();
     }
-      _scrollDown();
+    _scrollDown();
   }
 
   Future<void> _resendMessage(ChatMessage message) async {
