@@ -1,25 +1,28 @@
 import 'dart:developer' as dev;
-import 'package:cardiocare/utils/enums.dart';
+import 'package:cardiocare/chatbot_app/chat_model.dart';
+import 'package:cardiocare/signal_app/model/signal_enums.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 import 'package:cardiocare/services/constants.dart';
 import 'package:cardiocare/services/exceptions.dart';
-import 'package:cardiocare/services/models/signal_model.dart';
-import 'package:cardiocare/services/models/user_model.dart';
+import 'package:cardiocare/signal_app/model/signal_model.dart';
+import 'package:cardiocare/user_app/user_model.dart';
 
 // databseService
 class DatabaseHelper extends ChangeNotifier {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _db;
   static const int _v = 1;
-  static const List dbs = [
+  static const List dbTables = [
     createUserTable,
     createSignalTable,
     createECGTable,
     createBPTable,
     createBTempTable,
+    createChatHistoryTable,
+    createMedicalInfoTable,
   ];
 
   factory DatabaseHelper() {
@@ -46,7 +49,7 @@ class DatabaseHelper extends ChangeNotifier {
         onCreate: (db, version) async {
           dev.log('>> Creating tables..');
           db.execute('PRAGMA foreign_keys = ON;');
-          for (var database in dbs) {
+          for (var database in dbTables) {
             await db.execute(database);
           }
         },
@@ -148,6 +151,96 @@ class DatabaseHelper extends ChangeNotifier {
       throw UserDoesNotExist();
     }
     return response;
+  }
+
+  // =========== MANAGE MEDICAL INFORMATION ===========
+  Future<int> createMedicalInfo(
+      int userId, String infoType, String infoValue) async {
+    final db = _getDatabaseOrThrow();
+    return await db.insert(medicalInfoTable, {
+      userIdColumn: userId,
+      'info_type': infoType,
+      'info_value': infoValue,
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getMedicalInfo(int userId) async {
+    final db = await database;
+    return await db.query(
+      medicalInfoTable,
+      where: '$userIdColumn = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  Future<int> updateMedicalInfo(
+      int userId, String infoType, String infoValue) async {
+    final db = await database;
+    return await db.update(
+      medicalInfoTable,
+      {'info_value': infoValue},
+      where: '$userIdColumn = ? AND info_type = ?',
+      whereArgs: [userId, infoType],
+    );
+  }
+
+  Future<int> deleteMedicalInfo(int userId, String infoType) async {
+    final db = await database;
+    return await db.delete(
+      medicalInfoTable,
+      where: '$userIdColumn = ? AND $infoType = ?',
+      whereArgs: [userId, infoType],
+    );
+  }
+
+  // =========== MANAGE CHAT HISTORY ===========
+  Future<int> createChatMessage(int userId, ChatMessage message) async {
+    final db = await database;
+    final map = message.toMap();
+    map[userIdColumn] = userId;
+    return await db.insert(chatHistoryTable, map);
+  }
+
+  Future<List<ChatMessage>> getChatHistory(int userId, {int? limit}) async {
+    final db = await database;
+    final results = await db.query(
+      chatHistoryTable,
+      where: '$userIdColumn = ?',
+      whereArgs: [userId],
+      orderBy: timestampColumn,
+      limit: limit,
+    );
+
+    return results.map((map) => ChatMessage.fromMap(map)).toList();
+  }
+
+  Future<int> updateChatMessageStatus(
+      DateTime timestamp, MessageStatus newStatus) async {
+    final db = await database;
+    return await db.update(
+      chatHistoryTable,
+      {'status': newStatus.index},
+      where: '$timestampColumn = ?',
+      whereArgs: [timestamp.toIso8601String()],
+    );
+  }
+
+  Future<int> deleteChatMessage(DateTime timestamp) async {
+    final db = await database;
+    return await db.delete(
+      chatHistoryTable,
+      where: '$timestampColumn = ?',
+      whereArgs: [timestamp.toIso8601String()],
+    );
+  }
+
+  Future<int> clearChatHistory(int userId) async {
+    final db = await database;
+    return await db.delete(
+      chatHistoryTable,
+      where: '$userIdColumn = ?',
+      whereArgs: [userId],
+    );
   }
 
   // =========== MANAGE SIGNAL TABLE ===========
@@ -373,8 +466,43 @@ class DatabaseHelper extends ChangeNotifier {
     return recentRecords;
   }
 
-  Future<EcgModel> getLatestEcg(int userId) async {
+  Future<EcgModel?> getLatestEcg(int userId) async {
     final List<EcgModel> recentEcgRecords = await getEcgData(userId, limit: 1);
-    return recentEcgRecords.first;
+    return recentEcgRecords.isNotEmpty ? recentEcgRecords.first : null;
+  }
+
+  // =========== ADDITIONAL UTILITY METHODS ===========
+  Future<void> deleteAllUserData(int userId) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      // Delete user's medical info
+      await txn.delete(medicalInfoTable,
+          where: '$userIdColumn = ?', whereArgs: [userId]);
+
+      // Delete user's chat history
+      await txn.delete(chatHistoryTable,
+          where: '$userIdColumn = ?', whereArgs: [userId]);
+
+      // Delete user's signals and related data
+      final signalIds = await txn.query(signalTable,
+          columns: [idColumn], where: '$userIdColumn = ?', whereArgs: [userId]);
+
+      for (var signal in signalIds) {
+        int signalId = signal[idColumn] as int;
+        await txn.delete(ecgTable,
+            where: '$signalIdColumn = ?', whereArgs: [signalId]);
+        await txn.delete(bpTable,
+            where: '$signalIdColumn = ?', whereArgs: [signalId]);
+        await txn.delete(btempTable,
+            where: '$signalIdColumn = ?', whereArgs: [signalId]);
+      }
+
+      await txn
+          .delete(signalTable, where: '$userIdColumn = ?', whereArgs: [userId]);
+
+      // Finally, delete the user
+      await txn.delete(userTable, where: '$idColumn = ?', whereArgs: [userId]);
+    });
+    notifyListeners();
   }
 }

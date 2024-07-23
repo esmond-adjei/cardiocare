@@ -1,9 +1,9 @@
-import 'package:cardiocare/utils/enums.dart';
+import 'package:cardiocare/signal_app/model/signal_enums.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cardiocare/screens/drawers/signal_renderers.dart';
-import 'package:cardiocare/services/models/db_helper.dart';
-import 'package:cardiocare/services/models/signal_model.dart';
+import 'package:cardiocare/signal_app/widgets/signal_renderers.dart';
+import 'package:cardiocare/services/db_helper.dart';
+import 'package:cardiocare/signal_app/model/signal_model.dart';
 import 'package:cardiocare/utils/format_datetime.dart';
 
 class ListItem extends StatelessWidget {
@@ -17,6 +17,7 @@ class ListItem extends StatelessWidget {
   void Function() _showPeakDrawer(BuildContext context) {
     return () {
       showModalBottomSheet(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         context: context,
         isScrollControlled: true,
         builder: (context) {
@@ -50,7 +51,8 @@ class ListItem extends StatelessWidget {
         color: signal.signalType.color,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: const Icon(Icons.delete, color: Colors.white),
+        child:
+            Icon(Icons.delete, color: Theme.of(context).colorScheme.secondary),
       ),
       onDismissed: (direction) async {
         int success = await dbhelper.deleteSignal(signal);
@@ -70,7 +72,7 @@ class ListItem extends StatelessWidget {
               insetPadding: const EdgeInsets.symmetric(horizontal: 20.0),
               title: Text("Delete ${signal.name}?"),
               content: const Text("Are you sure you want to delete this item?"),
-              actions: <Widget>[
+              actions: [
                 ElevatedButton(
                   onPressed: () => Navigator.of(context).pop(false),
                   child: const Text("CANCEL"),
@@ -85,7 +87,7 @@ class ListItem extends StatelessWidget {
         );
       },
       child: ListTile(
-        tileColor: Colors.white,
+        tileColor: Theme.of(context).colorScheme.secondary,
         iconColor: signal.signalType.color,
         splashColor: signal.signalType.color.withOpacity(0.5),
         contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
@@ -105,8 +107,9 @@ class ListItem extends StatelessWidget {
               alignment: Alignment.topLeft,
               child: Text(
                 signal.name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),

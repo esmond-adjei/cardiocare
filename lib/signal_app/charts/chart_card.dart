@@ -22,11 +22,11 @@ class ChartCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.secondary,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.black.withOpacity(0.1),
             spreadRadius: 2,
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -117,7 +117,12 @@ class ChartSummary extends StatelessWidget {
             ),
             Row(
               children: [
-                _buildValueRow(context, primaryValue, primaryUnitLabel),
+                _buildValueRow(
+                  context,
+                  primaryValue,
+                  primaryUnitLabel,
+                  primaryColor,
+                ),
                 if (showMultipleColumns && secondaryValue != null) ...[
                   Text(
                     ' | ',
@@ -132,6 +137,7 @@ class ChartSummary extends StatelessWidget {
                     context,
                     secondaryValue!,
                     secondaryUnitLabel ?? primaryUnitLabel,
+                    secondaryColor ?? primaryColor,
                   ),
                 ],
               ],
@@ -162,7 +168,8 @@ class ChartSummary extends StatelessWidget {
     );
   }
 
-  Widget _buildValueRow(BuildContext context, num value, String unit) {
+  Widget _buildValueRow(
+      BuildContext context, num value, String unit, Color color) {
     final numberFormat = NumberFormat('#,###.#');
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,14 +179,14 @@ class ChartSummary extends StatelessWidget {
           style: Theme.of(context)
               .textTheme
               .headlineMedium
-              ?.copyWith(fontWeight: FontWeight.bold),
+              ?.copyWith(fontWeight: FontWeight.bold, color: color),
         ),
         Text(
           unit,
           style: Theme.of(context)
               .textTheme
               .titleSmall
-              ?.copyWith(color: Colors.grey, fontSize: 12),
+              ?.copyWith(color: color, fontSize: 12),
         ),
       ],
     );

@@ -1,14 +1,15 @@
-import 'package:cardiocare/screens/_playground.dart';
+// import 'package:cardiocare/_playground.dart';
+import 'package:cardiocare/chatbot_app/chat_screen.dart';
 import 'package:cardiocare/utils/format_datetime.dart';
-import 'package:cardiocare/widgets/charts/trend_line_chart.dart';
-import 'package:cardiocare/widgets/stressmogi.dart';
+import 'package:cardiocare/signal_app/charts/trend_line_chart.dart';
+import 'package:cardiocare/signal_app/widgets/stressmogi.dart';
 import 'package:flutter/material.dart';
-import 'package:cardiocare/utils/enums.dart';
+import 'package:cardiocare/signal_app/model/signal_enums.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:cardiocare/services/models/db_helper.dart';
-import 'package:cardiocare/services/models/signal_model.dart';
-import 'package:cardiocare/widgets/list_container.dart';
+import 'package:cardiocare/services/db_helper.dart';
+import 'package:cardiocare/signal_app/model/signal_model.dart';
+import 'package:cardiocare/signal_app/widgets/list_container.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,22 +19,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeState extends State<HomeScreen> {
-  Future<Map<SignalType, List<Signal>>> _getRecent(
-    DatabaseHelper dbhelper,
-  ) async {
-    return await dbhelper.getRecentRecords(1, limit: 3);
-  }
-
   @override
   Widget build(BuildContext context) {
     final DatabaseHelper dbhelper = Provider.of<DatabaseHelper>(context);
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      // appBar: AppBar(
-      //   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      //   toolbarHeight: 20,
-      //   scrolledUnderElevation: 0,
-      // ),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        toolbarHeight: 20,
+        scrolledUnderElevation: 0,
+      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,95 +55,14 @@ class _HomeState extends State<HomeScreen> {
               ),
             ),
 
-            const HealthDashboardContainer(),
+            const _DashBoard(),
 
-            Row(
+            const Row(
               children: [
                 Expanded(
-                  child: Container(
-                    height: 140,
-                    margin: const EdgeInsets.all(10),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: FutureBuilder<EcgModel>(
-                      future: dbhelper.getLatestEcg(1),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        } else if (snapshot.hasError) {
-                          return Center(
-                              child: Text('Error: ${snapshot.error}'));
-                        } else if (!snapshot.hasData) {
-                          return const Center(child: Text('No data available'));
-                        } else {
-                          final ecgData = snapshot.data!;
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                  formatRelativeDate(
-                                      ecgData.stopTime.toString()),
-                                  style: Theme.of(context).textTheme.bodySmall),
-                              Row(
-                                children: [
-                                  FaIcon(
-                                    FontAwesomeIcons.heartPulse,
-                                    color: Theme.of(context).primaryColor,
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    '${ecgData.hbpm} bpm',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              TrendLineChart(
-                                height: 70,
-                                showLeftTitles: false,
-                                lines: [
-                                  TrendLine(
-                                    data: ecgData.ecgList
-                                        .map(
-                                          (e) => TrendLinePoint(
-                                            e.toDouble(),
-                                            e.toDouble(),
-                                          ),
-                                        )
-                                        .toList(),
-                                    color: Theme.of(context).primaryColor,
-                                    beautify: true,
-                                  )
-                                ],
-                              ),
-                            ],
-                          );
-                        }
-                      },
-                    ),
-                  ),
+                  child: DashSignalView(),
                 ),
-                const StressCard(),
-                // Expanded(
-                //   child: Container(
-                //     height: 140,
-                //     margin: const EdgeInsets.all(10),
-                //     decoration: BoxDecoration(
-                //       color: Colors.grey.shade300,
-                //       borderRadius: BorderRadius.circular(16),
-                //     ),
-                //   ),
-                // ),
+                StressCard(),
               ],
             ),
 
@@ -209,7 +123,8 @@ class _HomeState extends State<HomeScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const HealthDashboard(),
+                      builder: (context) => const ChatScreen(),
+                      // const Playground(),
                     ),
                   );
                 },
@@ -222,7 +137,7 @@ class _HomeState extends State<HomeScreen> {
             right: 0.0,
             child: FloatingActionButton(
               heroTag: 'connect-device',
-              onPressed: () => Navigator.pushNamed(context, '/device'),
+              onPressed: () => Navigator.pushNamed(context, '/record'),
               child: const FaIcon(FontAwesomeIcons.personRays),
             ),
           ),
@@ -233,8 +148,90 @@ class _HomeState extends State<HomeScreen> {
   }
 }
 
-class HealthDashboardContainer extends StatelessWidget {
-  const HealthDashboardContainer({super.key});
+class DashSignalView extends StatelessWidget {
+  const DashSignalView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final DatabaseHelper dbhelper = Provider.of<DatabaseHelper>(context);
+
+    return Container(
+      height: 140,
+      margin: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: FutureBuilder<EcgModel?>(
+        future: dbhelper.getLatestEcg(1),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData) {
+            return const Center(child: Text('No data available'));
+          } else {
+            final ecgData = snapshot.data!;
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  formatRelativeDate(ecgData.stopTime.toString()),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: Theme.of(context).colorScheme.primary),
+                ),
+                Row(
+                  children: [
+                    FaIcon(
+                      FontAwesomeIcons.heartPulse,
+                      color: Theme.of(context).primaryColor,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${ecgData.hbpm} bpm',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                TrendLineChart(
+                  height: 70,
+                  showLeftTitles: false,
+                  lines: [
+                    TrendLine(
+                      data: ecgData.ecgList
+                          .map(
+                            (e) => TrendLinePoint(
+                              e.toDouble(),
+                              e.toDouble(),
+                            ),
+                          )
+                          .toList(),
+                      color: Theme.of(context).primaryColor,
+                      beautify: true,
+                    )
+                  ],
+                ),
+              ],
+            );
+          }
+        },
+      ),
+    );
+  }
+}
+
+class _DashBoard extends StatelessWidget {
+  const _DashBoard({super.key});
 
   @override
   Widget build(BuildContext context) {

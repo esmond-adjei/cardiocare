@@ -1,12 +1,13 @@
 import 'dart:developer' as dev;
-import 'package:cardiocare/utils/enums.dart';
+import 'package:cardiocare/signal_app/screens/connect_device_screen.dart';
+import 'package:cardiocare/signal_app/model/signal_enums.dart';
 import 'package:cardiocare/utils/format_datetime.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cardiocare/main.dart';
-import 'package:cardiocare/screens/drawers/signal_renderers.dart';
-import 'package:cardiocare/services/models/db_helper.dart';
-import 'package:cardiocare/states/monitoring_screen_state.dart';
+import 'package:cardiocare/signal_app/widgets/signal_renderers.dart';
+import 'package:cardiocare/services/db_helper.dart';
+import 'package:cardiocare/signal_app/screens/monitoring_screen_state.dart';
 
 class SingleMonitorLayout extends StatefulWidget {
   final int initialScreen;
@@ -29,12 +30,25 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
       initialIndex: widget.initialScreen,
       vsync: this,
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkBluetoothConnection();
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _checkBluetoothConnection() {
+    final monitorState = Provider.of<MonitorState>(context, listen: false);
+    if (!monitorState.isBluetoothConnected) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const ConnectDevice()),
+      );
+    }
   }
 
   void _showSnackBar(String message) {
@@ -103,6 +117,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   @override
   Widget build(BuildContext context) {
     MonitorState monitorState = Provider.of<MonitorState>(context);
+
     return Scaffold(
       appBar: _buildAppBar(context),
       body: Column(
@@ -120,7 +135,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
     final monitorState = Provider.of<MonitorState>(context, listen: false);
     return AppBar(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      iconTheme: const IconThemeData(color: Colors.black),
+      iconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
       leading: IconButton(
         onPressed: () {
           if (monitorState.isRecording) {
@@ -238,8 +253,9 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
         child: !monitorState.isRecording
             ? ElevatedButton(
                 key: const ValueKey("start"),
-                onPressed: () =>
-                    monitorState.startRecording(_tabController.index),
+                onPressed: () {
+                  monitorState.startRecording(_tabController.index);
+                },
                 style: ElevatedButton.styleFrom(
                   elevation: 2,
                   shape: CircleBorder(
@@ -268,6 +284,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                     label: const Text("Restart"),
                   ),
                   const SizedBox(width: 16),
+
                   // ElevatedButton.icon(
                   //   onPressed: monitorState.isPaused
                   //       ? monitorState.resumeRecording
@@ -293,6 +310,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                   //   label: Text(monitorState.isPaused ? "Resume" : "Paused"),
                   // ),
                   // const SizedBox(width: 16),
+
                   ElevatedButton.icon(
                     onPressed: () => _showSaveDialog(monitorState),
                     style: ElevatedButton.styleFrom(

@@ -5,13 +5,12 @@ final ThemeData customRedTheme = ThemeData(
   brightness: Brightness.light,
   colorScheme: ColorScheme.fromSeed(
     seedColor: Colors.redAccent,
-    primary: Colors.redAccent,
+    primary: Colors.grey.shade800,
     secondary: Colors.white,
   ),
   primaryColor: Colors.redAccent,
-  primarySwatch: Colors.red,
+  secondaryHeaderColor: Colors.white,
   hintColor: Colors.grey.shade700,
-  // scaffoldBackgroundColor: Colors.,
   appBarTheme: const AppBarTheme(
     backgroundColor: Colors.redAccent,
     titleTextStyle: TextStyle(
@@ -57,7 +56,12 @@ final ThemeData customRedTheme = ThemeData(
 //========== DARK THEME ==========
 final ThemeData customRedDarkTheme = customRedTheme.copyWith(
   brightness: Brightness.dark,
-  colorScheme: customRedTheme.colorScheme.copyWith(brightness: Brightness.dark),
+  colorScheme: customRedTheme.colorScheme.copyWith(
+    primary: Colors.white,
+    secondary: Colors.grey.shade800,
+    surface: Colors.grey.shade800,
+  ),
+  secondaryHeaderColor: Colors.grey.shade900,
   scaffoldBackgroundColor: Colors.grey.shade900,
   appBarTheme: customRedTheme.appBarTheme.copyWith(
     backgroundColor: Colors.redAccent,
@@ -88,5 +92,9 @@ final ThemeData customRedDarkTheme = customRedTheme.copyWith(
   ),
   bottomNavigationBarTheme: customRedTheme.bottomNavigationBarTheme.copyWith(
     backgroundColor: Colors.grey.shade900,
+  ),
+  snackBarTheme: customRedTheme.snackBarTheme.copyWith(
+    backgroundColor: Colors.grey.shade900,
+    contentTextStyle: const TextStyle(color: Colors.white),
   ),
 );

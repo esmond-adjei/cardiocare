@@ -1,18 +1,23 @@
-import 'package:cardiocare/states/monitoring_screen_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:cardiocare/screens/drawers/chat_screen.dart';
-import 'package:cardiocare/user/login_screen.dart';
-import 'package:cardiocare/user/register_screen.dart';
-import 'package:cardiocare/screens/drawers/monitoring_screen.dart';
-import 'package:cardiocare/services/models/db_helper.dart';
+
+import 'package:cardiocare/signal_app/home_screen.dart';
+import 'package:cardiocare/signal_app/screens/monitoring_screen.dart';
+import 'package:cardiocare/signal_app/screens/history_screen.dart';
+import 'package:cardiocare/signal_app/screens/connect_device_screen.dart';
+import 'package:cardiocare/signal_app/screens/monitoring_screen_state.dart';
+
+import 'package:cardiocare/chatbot_app/chat_screen.dart';
+
+import 'package:cardiocare/blog_app/health_blog_screen.dart';
+
+import 'package:cardiocare/user_app/settings_screen.dart';
+import 'package:cardiocare/user_app/login_screen.dart';
+import 'package:cardiocare/user_app/register_screen.dart';
+
+import 'package:cardiocare/services/db_helper.dart';
 import 'package:cardiocare/services/customTheme.dart';
-import 'package:cardiocare/screens/history_screen.dart';
-import 'package:cardiocare/screens/home_screen.dart';
-import 'package:cardiocare/screens/health_blog_screen.dart';
-import 'package:cardiocare/screens/settings_screen.dart';
-import 'package:cardiocare/screens/drawers/connect_device.dart';
 
 void main() {
   runApp(

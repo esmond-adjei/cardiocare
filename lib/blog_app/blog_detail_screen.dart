@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:cardiocare/services/models/blog_model.dart';
+import 'package:cardiocare/blog_app/model/blog_model.dart';
 
 class BlogDetail extends StatelessWidget {
   final BlogPost post;

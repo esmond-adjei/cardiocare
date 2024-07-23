@@ -1,6 +1,6 @@
-import 'package:cardiocare/services/models/signal_model.dart';
+import 'package:cardiocare/signal_app/model/signal_model.dart';
 import 'package:flutter/material.dart';
-import 'package:cardiocare/widgets/charts/line_chart.dart';
+import 'package:cardiocare/signal_app/charts/line_chart.dart';
 
 // ========== ECG RENDERER RENDERER =========
 class ECGRenderer extends StatelessWidget {

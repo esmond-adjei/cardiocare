@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cardiocare/user/dummy_user_data.dart';
+import 'package:cardiocare/user_app/dummy_user_data.dart';
 // import 'package:cardiocare/widgets/custom_button.dart';
-import '../screens/home_screen.dart';
+import '../signal_app/home_screen.dart';
 
 class UpdateProfileScreen extends StatefulWidget {
   const UpdateProfileScreen({super.key});

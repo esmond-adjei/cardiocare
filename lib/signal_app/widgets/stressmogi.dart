@@ -9,8 +9,7 @@ class StressCard extends StatefulWidget {
 }
 
 class _StressCardState extends State<StressCard> {
-  String _stressAnimation =
-      'assets/animations/happy.json'; // Default stress animation
+  String _stressAnimation = 'assets/animations/happy.json';
 
   void _updateStressAnimation(String newAnimation) {
     setState(() => _stressAnimation = newAnimation);
@@ -51,12 +50,12 @@ class _StressCardState extends State<StressCard> {
                 width: 80,
                 height: 80,
               ),
-              const Text(
+              Text(
                 'Tap to update your stressmoji',
                 style: TextStyle(
                   fontSize: 11,
                   fontStyle: FontStyle.italic,
-                  color: Colors.black38,
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.4),
                 ),
               ),
             ],

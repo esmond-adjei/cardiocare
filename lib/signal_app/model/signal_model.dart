@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import 'package:cardiocare/utils/enums.dart';
+import 'package:cardiocare/signal_app/model/signal_enums.dart';
 import 'package:cardiocare/services/constants.dart';
 
 abstract class Signal {

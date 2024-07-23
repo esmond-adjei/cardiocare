@@ -1,8 +1,8 @@
-import 'package:cardiocare/services/models/signal_model.dart';
+import 'package:cardiocare/signal_app/model/signal_model.dart';
 import 'package:cardiocare/utils/format_datetime.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:cardiocare/widgets/list_item.dart';
+import 'package:cardiocare/signal_app/widgets/list_item.dart';
 
 class ListContainer extends StatefulWidget {
   final List<Signal> listData;

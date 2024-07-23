@@ -1,13 +1,14 @@
 import 'dart:async';
 // import 'dart:developer' as dev;
 import 'package:flutter/foundation.dart';
-import 'package:cardiocare/services/models/signal_model.dart';
+import 'package:cardiocare/signal_app/model/signal_model.dart';
 import 'package:cardiocare/utils/signal_generator.dart';
 
 class MonitorState extends ChangeNotifier {
   // recording states: recording, pasued, resume, save, discard
   bool isRecording = false;
   bool isPaused = false;
+  bool _isBluetoothConnected = false;
 
   // create data: generator-to-subscriber, signal data type
   StreamSubscription<dynamic>? _subscription;
@@ -23,8 +24,25 @@ class MonitorState extends ChangeNotifier {
   EcgModel get ecgSignal => _ecgSignal;
   BpModel get bpSignal => _bpSignal;
   BtempModel get btempSignal => _btempSignal;
+  bool get isBluetoothConnected => _isBluetoothConnected;
 
   Stopwatch get stopwatch => _stopwatch;
+
+  dynamic getCurrentSignal(int tabIndex) {
+    switch (tabIndex) {
+      case 0:
+        return _ecgSignal;
+      case 1:
+        return _bpSignal;
+      case 2:
+        return _btempSignal;
+    }
+  }
+
+  void setBluetoothConnected(bool isConnected) {
+    _isBluetoothConnected = isConnected;
+    notifyListeners();
+  }
 
   // recording methods
   void startRecording(int tabIndex) {
@@ -57,17 +75,6 @@ class MonitorState extends ChangeNotifier {
           notifyListeners();
         });
         break;
-    }
-  }
-
-  dynamic getCurrentSignal(int tabIndex) {
-    switch (tabIndex) {
-      case 0:
-        return _ecgSignal;
-      case 1:
-        return _bpSignal;
-      case 2:
-        return _btempSignal;
     }
   }
 

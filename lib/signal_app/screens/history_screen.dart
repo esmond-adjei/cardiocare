@@ -1,17 +1,17 @@
 import 'dart:async';
 import 'dart:developer' as dev;
-import 'package:cardiocare/utils/enums.dart';
-import 'package:cardiocare/utils/format_datetime.dart';
-import 'package:cardiocare/widgets/charts/column_chart.dart';
-import 'package:cardiocare/widgets/chart_card.dart';
-import 'package:cardiocare/widgets/charts/trend_line_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:cardiocare/screens/drawers/monitoring_screen.dart';
-import 'package:cardiocare/services/models/db_helper.dart';
-import 'package:cardiocare/services/models/signal_model.dart';
-import 'package:cardiocare/widgets/list_container.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:cardiocare/signal_app/model/signal_enums.dart';
+import 'package:cardiocare/utils/format_datetime.dart';
+import 'package:cardiocare/signal_app/charts/column_chart.dart';
+import 'package:cardiocare/signal_app/charts/chart_card.dart';
+import 'package:cardiocare/signal_app/charts/trend_line_chart.dart';
+import 'package:cardiocare/signal_app/screens/monitoring_screen.dart';
+import 'package:cardiocare/services/db_helper.dart';
+import 'package:cardiocare/signal_app/model/signal_model.dart';
+import 'package:cardiocare/signal_app/widgets/list_container.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -54,7 +54,6 @@ class _HistoryScreenState extends State<HistoryScreen>
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(kToolbarHeight + 48),
           child: AnimatedContainer(
@@ -64,7 +63,7 @@ class _HistoryScreenState extends State<HistoryScreen>
               color: _currentColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
+                  color: Colors.black.withOpacity(0.2),
                   spreadRadius: 2,
                   blurRadius: 4,
                   offset: const Offset(0, 4),
@@ -317,6 +316,7 @@ class _DataTabState extends State<DataTab> {
               primaryValue: avgSystolic.toInt(),
               primaryColor: SignalType.bp.color,
               secondaryValue: avgDiastolic.toInt(),
+              secondaryColor: SignalType.bp.color.withOpacity(0.4),
             ),
             legend: Row(
               children: [
