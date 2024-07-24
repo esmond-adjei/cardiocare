@@ -1,49 +1,10 @@
+import 'package:cardiocare/user_app/widgets/user_info_edit.dart';
 import 'package:flutter/material.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
-  @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends State<SettingsScreen> {
-  bool _isProfileExpanded = false;
-  bool _isMedicalExpanded = false;
-  bool _isEmergencyExpanded = false;
-
-  // Sample data
-  Map<String, String> profileInfo = {
-    'First Name': 'John',
-    'Last Name': 'Doe',
-    'DOB': '22/02/1990',
-    'Sex': 'Male',
-    'Email': 'john@cardiocare.com',
-    'Phone': '+233 245 6789',
-    'Address': '123 Main Street, Accra',
-  };
-
-  Map<String, dynamic> medicalInfo = {
-    'Smoker Years': '2 years',
-    'Diagnosed with CVD': true,
-    'Height': '5.11 m',
-    'Weight': '79 kg',
-  };
-
-  List<Map<String, String>> emergencyContacts = [
-    {
-      'name': 'Dr. House',
-      'relation': 'Personal Cardiologist',
-      'phone': '+233 245 6789',
-      'email': 'drhouse@cardio.com',
-    },
-    {
-      'name': 'Honey',
-      'relation': 'Spouse',
-      'phone': '+233 986 6543',
-      'email': 'honey@wife.com',
-    },
-  ];
+  // TODO: toggle demo mode
 
   @override
   Widget build(BuildContext context) {
@@ -51,41 +12,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildProfileHeader(),
-            _buildExpandableSection(
+            _buildProfileHeader(context),
+            _buildSettingsSection(
+              context,
               title: 'Profile Information',
-              isExpanded: _isProfileExpanded,
-              onExpansionChanged: (value) =>
-                  setState(() => _isProfileExpanded = value),
-              children: [_buildProfileInfo()],
-              onEdit: () => _showEditDialog('Profile Information', profileInfo),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ProfileInfoScreen()),
+              ),
             ),
-            _buildExpandableSection(
+            _buildSettingsSection(
+              context,
               title: 'Medical Information',
-              isExpanded: _isMedicalExpanded,
-              onExpansionChanged: (value) =>
-                  setState(() => _isMedicalExpanded = value),
-              children: [_buildMedicalInfo()],
-              onEdit: () => _showEditDialog('Medical Information', medicalInfo),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const MedicalInfoScreen()),
+              ),
             ),
-            _buildExpandableSection(
+            _buildSettingsSection(
+              context,
               title: 'Emergency Contacts',
-              isExpanded: _isEmergencyExpanded,
-              onExpansionChanged: (value) =>
-                  setState(() => _isEmergencyExpanded = value),
-              children: [_buildEmergencyContacts()],
-              // onEdit: null,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const EmergencyContactsScreen()),
+              ),
             ),
             const SizedBox(height: 20),
-            _buildLogoutButton(),
-            _buildDeleteAccountButton(),
+            _buildLogoutButton(context),
+            _buildDeleteAccountButton(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(BuildContext context) {
+    // TODO: Replace this with actual user profile data
+    Map<String, String> profileInfo = {
+      'First Name': 'John',
+      'Last Name': 'Doe',
+      'DOB': '22/02/1990',
+      'Sex': 'Male',
+      'Email': 'john@cardiocare.com',
+      'Phone': '+233 245 6789',
+      'Address': '123 Main Street, Accra',
+    };
+
     return Container(
       height: 160.0,
       padding: const EdgeInsets.all(20.0),
@@ -141,184 +116,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildExpandableSection({
+  Widget _buildSettingsSection(
+    BuildContext context, {
     required String title,
-    required bool isExpanded,
-    required Function(bool) onExpansionChanged,
-    required List<Widget> children,
-    VoidCallback? onEdit,
+    required VoidCallback onTap,
   }) {
     return Card(
       elevation: 0,
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          title: Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: isExpanded ? Colors.redAccent : Colors.grey.shade800,
-            ),
+      child: ListTile(
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.grey.shade800,
           ),
-          initiallyExpanded: isExpanded,
-          onExpansionChanged: onExpansionChanged,
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              onEdit == null
-                  ? const SizedBox()
-                  : IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.grey),
-                      onPressed: onEdit,
-                    ),
-              Icon(
-                isExpanded ? Icons.expand_less : Icons.expand_more,
-                color: Colors.grey,
-              ),
-            ],
-          ),
-          children: children,
         ),
+        trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+        onTap: onTap,
       ),
     );
   }
 
-  Widget _buildProfileInfo() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: profileInfo.entries
-            .map((entry) => _buildInfoRow(entry.key, entry.value))
-            .toList(),
-      ),
-    );
-  }
-
-  Widget _buildMedicalInfo() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: medicalInfo.entries
-            .map((entry) => _buildInfoRow(entry.key, entry.value))
-            .toList(),
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String title, dynamic value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // TEXT TITLE COLUMN
-          Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-
-          // VALUE COLUMN
-          if (value is bool)
-            Switch(
-              value: value,
-              onChanged: (bool newValue) =>
-                  setState(() => medicalInfo[title] = newValue),
-              activeColor: Colors.redAccent,
-            )
-          else
-            Text(
-              value,
-              style: TextStyle(color: Colors.grey.shade600),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmergencyContacts() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          ...emergencyContacts
-              .map((contact) => _buildEmergencyContact(contact)),
-          ElevatedButton(
-            child: const Text('Add New Contact'),
-            onPressed: () => _showEditContactDialog({}),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmergencyContact(Map<String, String> contact) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: Colors.redAccent,
-                child: Text(
-                  contact['name']?.substring(0, 1).toUpperCase() ?? '',
-                  style: const TextStyle(color: Colors.white, fontSize: 18),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      contact['name'] ?? '',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    Text(
-                      contact['relation'] ?? '',
-                      style: TextStyle(color: Colors.grey.shade600),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.edit, color: Colors.grey),
-                onPressed: () => _showEditContactDialog(contact),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              const Icon(Icons.phone, size: 16, color: Colors.grey),
-              const SizedBox(width: 8),
-              Text(contact['phone'] ?? ''),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              const Icon(Icons.email, size: 16, color: Colors.grey),
-              const SizedBox(width: 8),
-              Text(contact['email'] ?? ''),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLogoutButton() {
+  Widget _buildLogoutButton(BuildContext context) {
     return ElevatedButton.icon(
       onPressed: () {
         // TODO: Implement logout functionality
@@ -335,7 +156,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildDeleteAccountButton() {
+  Widget _buildDeleteAccountButton(BuildContext context) {
     return TextButton(
       onPressed: () {
         // TODO: Implement delete account functionality
@@ -375,123 +196,5 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       child: const Text('Delete Account'),
     );
-  }
-
-  void _showEditContactDialog(Map<String, String> contact) {
-    final isNewContact = contact.isEmpty;
-    final editedContact = Map<String, String>.from(contact);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(isNewContact ? 'Add New Contact' : 'Edit Contact'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: [
-                for (String key in ['name', 'relation', 'phone', 'email'])
-                  TextFormField(
-                    initialValue: editedContact[key] ?? '',
-                    decoration: InputDecoration(labelText: key.capitalize()),
-                    onChanged: (value) {
-                      editedContact[key] = value;
-                    },
-                  ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            if (!isNewContact)
-              TextButton(
-                child: const Text('Delete'),
-                onPressed: () {
-                  setState(() => emergencyContacts.remove(contact));
-                  Navigator.of(context).pop();
-                },
-              ),
-            ElevatedButton(
-              child: const Text('Save'),
-              onPressed: () {
-                setState(() {
-                  if (isNewContact) {
-                    emergencyContacts.add(editedContact);
-                  } else {
-                    final index = emergencyContacts.indexOf(contact);
-                    emergencyContacts[index] = editedContact;
-                  }
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showEditDialog(String title, Map<String, dynamic> data) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        Map<String, dynamic> editedData = Map.from(data);
-        return AlertDialog(
-          title: Text('Edit $title'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: editedData.entries.map((entry) {
-                if (entry.value is bool) {
-                  return SwitchListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-                    title: Text(entry.key),
-                    value: entry.value,
-                    onChanged: (bool value) =>
-                        setState(() => editedData[entry.key] = value),
-                  );
-                } else {
-                  return TextFormField(
-                    initialValue: entry.value.toString(),
-                    decoration: InputDecoration(labelText: entry.key),
-                    onChanged: (value) {
-                      editedData[entry.key] = value;
-                    },
-                  );
-                }
-              }).toList(),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Save'),
-              onPressed: () {
-                setState(() {
-                  if (title == 'Profile Information') {
-                    profileInfo = Map<String, String>.from(editedData);
-                  } else if (title == 'Medical Information') {
-                    medicalInfo = editedData;
-                  }
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${substring(1)}";
   }
 }

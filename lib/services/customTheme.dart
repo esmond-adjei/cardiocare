@@ -51,6 +51,15 @@ final ThemeData customRedTheme = ThemeData(
     backgroundColor: Colors.white,
     contentTextStyle: TextStyle(color: Colors.black87),
   ),
+  dialogTheme: const DialogTheme(
+    backgroundColor: Colors.white,
+    titleTextStyle: TextStyle(
+      color: Colors.black,
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+    ),
+    contentTextStyle: TextStyle(color: Colors.black),
+  ),
 );
 
 //========== DARK THEME ==========
@@ -95,6 +104,15 @@ final ThemeData customRedDarkTheme = customRedTheme.copyWith(
   ),
   snackBarTheme: customRedTheme.snackBarTheme.copyWith(
     backgroundColor: Colors.grey.shade900,
+    contentTextStyle: const TextStyle(color: Colors.white),
+  ),
+  dialogTheme: customRedTheme.dialogTheme.copyWith(
+    backgroundColor: Colors.grey.shade900,
+    titleTextStyle: const TextStyle(
+      color: Colors.white,
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+    ),
     contentTextStyle: const TextStyle(color: Colors.white),
   ),
 );

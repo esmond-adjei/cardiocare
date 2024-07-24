@@ -23,7 +23,7 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => DatabaseHelper()),
+        ChangeNotifierProvider(create: (_) => DatabaseHelper()),
         ChangeNotifierProvider(create: (_) => MonitorState()),
       ],
       child: const MyApp(),

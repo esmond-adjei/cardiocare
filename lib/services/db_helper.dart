@@ -8,13 +8,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:cardiocare/services/constants.dart';
 import 'package:cardiocare/services/exceptions.dart';
 import 'package:cardiocare/signal_app/model/signal_model.dart';
-import 'package:cardiocare/user_app/user_model.dart';
+import 'package:cardiocare/user_app/models/user_model.dart';
+import 'package:cardiocare/user_app/models/demo_user.dart';
 
-// databseService
 class DatabaseHelper extends ChangeNotifier {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _db;
   static const int _v = 1;
+
   static const List dbTables = [
     createUserTable,
     createSignalTable,
@@ -23,6 +24,7 @@ class DatabaseHelper extends ChangeNotifier {
     createBTempTable,
     createChatHistoryTable,
     createMedicalInfoTable,
+    createEmergencyContactTable,
   ];
 
   factory DatabaseHelper() {
@@ -51,6 +53,14 @@ class DatabaseHelper extends ChangeNotifier {
           db.execute('PRAGMA foreign_keys = ON;');
           for (var database in dbTables) {
             await db.execute(database);
+          }
+
+          // Insert demo user
+          await createUser(user: demoUser); // create first
+          await createUserProfile(demoProfile);
+          await createMedicalInfo(demoMedicalInfo);
+          for (var contact in demoEmergencyContacts) {
+            await createEmergencyContact(contact);
           }
         },
       );
@@ -87,23 +97,20 @@ class DatabaseHelper extends ChangeNotifier {
     }
   }
 
-  // =========== MANAGE USER TABLES ===========
-  // manage user table
+  // User CRUD operations
   Future<CardioUser> createUser({required CardioUser user}) async {
     final db = await database;
     final results = await db.query(
       userTable,
       limit: 1,
-      where: 'email = ?',
+      where: '$emailColumn = ?',
       whereArgs: [user.email.toLowerCase()],
     );
     if (results.isNotEmpty) {
       throw UserAlreadyExists();
     }
 
-    final userId = await db.insert(userTable, {
-      emailColumn: user.email.toLowerCase(),
-    });
+    final userId = await db.insert(userTable, user.toMap());
     return user.copyWith(id: userId);
   }
 
@@ -114,12 +121,12 @@ class DatabaseHelper extends ChangeNotifier {
   }
 
   Future<CardioUser> getUser({required String email}) async {
-    final db = _getDatabaseOrThrow();
+    final db = await database;
     final results = await db.query(
       userTable,
       limit: 1,
-      where: 'email = ?',
-      whereArgs: [email],
+      where: '$emailColumn = ?',
+      whereArgs: [email.toLowerCase()],
     );
     if (results.isEmpty) {
       throw UserDoesNotExist();
@@ -128,23 +135,22 @@ class DatabaseHelper extends ChangeNotifier {
   }
 
   Future<int> updateUser(CardioUser user) async {
-    // yet to implement
     await getUser(email: user.email);
     final db = await database;
     return db.update(
       userTable,
       user.toMap(),
-      where: 'email = ?',
+      where: '$emailColumn = ?',
       whereArgs: [user.email],
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
   Future<int> deleteUser({required String email}) async {
-    final db = _getDatabaseOrThrow();
+    final db = await database;
     final response = await db.delete(
       userTable,
-      where: 'email = ?',
+      where: '$emailColumn = ?',
       whereArgs: [email.toLowerCase()],
     );
     if (response != 1) {
@@ -153,43 +159,112 @@ class DatabaseHelper extends ChangeNotifier {
     return response;
   }
 
-  // =========== MANAGE MEDICAL INFORMATION ===========
-  Future<int> createMedicalInfo(
-      int userId, String infoType, String infoValue) async {
-    final db = _getDatabaseOrThrow();
-    return await db.insert(medicalInfoTable, {
-      userIdColumn: userId,
-      'info_type': infoType,
-      'info_value': infoValue,
-    });
+  // UserProfile CRUD operations
+  Future<int> createUserProfile(UserProfile profile) async {
+    final db = await database;
+    return await db.insert(userProfileTable, profile.toMap());
   }
 
-  Future<List<Map<String, dynamic>>> getMedicalInfo(int userId) async {
+  Future<UserProfile?> getUserProfile(int userId) async {
     final db = await database;
-    return await db.query(
+    final results = await db.query(
+      userProfileTable,
+      where: '$userIdColumn = ?',
+      whereArgs: [userId],
+    );
+    if (results.isEmpty) {
+      return null;
+    }
+    return UserProfile.fromMap(results.first);
+  }
+
+  Future<int> updateUserProfile(UserProfile profile, int userId) async {
+    final db = await database;
+    return await db.update(
+      userProfileTable,
+      profile.toMap(),
+      where: '$userIdColumn = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  Future<int> deleteUserProfile(int userId) async {
+    final db = await database;
+    return await db.delete(
+      userProfileTable,
+      where: '$userIdColumn = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  // MedicalInfo CRUD operations
+  Future<int> createMedicalInfo(MedicalInfo medicalInfo) async {
+    final db = _getDatabaseOrThrow();
+    return await db.insert(medicalInfoTable, medicalInfo.toMap());
+  }
+
+  Future<List<MedicalInfo>> getMedicalInfo(int userId) async {
+    final db = await database;
+    final results = await db.query(
+      medicalInfoTable,
+      where: '$userIdColumn = ?',
+      whereArgs: [userId],
+    );
+    return results.map((map) => MedicalInfo.fromMap(map)).toList();
+  }
+
+  Future<int> updateMedicalInfo(MedicalInfo medicalInfo, int userId) async {
+    final db = await database;
+    return await db.update(
+      medicalInfoTable,
+      medicalInfo.toMap(),
+      where: '$userIdColumn = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  Future<int> deleteMedicalInfo(int userId) async {
+    final db = await database;
+    return await db.delete(
       medicalInfoTable,
       where: '$userIdColumn = ?',
       whereArgs: [userId],
     );
   }
 
-  Future<int> updateMedicalInfo(
-      int userId, String infoType, String infoValue) async {
+  // EmergencyContact CRUD operations
+  Future<int> createEmergencyContact(EmergencyContact contact) async {
+    final db = _getDatabaseOrThrow();
+    return await db.insert(emergencyContactTable, contact.toMap());
+  }
+
+  Future<List<EmergencyContact>> getEmergencyContacts(int userId) async {
+    final db = await database;
+    final results = await db.query(
+      emergencyContactTable,
+      where: '$userIdColumn = ?',
+      whereArgs: [userId],
+    );
+    return results.map((map) => EmergencyContact.fromMap(map)).toList();
+  }
+
+  Future<int> updateEmergencyContact(
+      EmergencyContact contact, int userId) async {
     final db = await database;
     return await db.update(
-      medicalInfoTable,
-      {'info_value': infoValue},
-      where: '$userIdColumn = ? AND info_type = ?',
-      whereArgs: [userId, infoType],
+      emergencyContactTable,
+      contact.toMap(),
+      where: '$userIdColumn = ? AND $contactNameColumn = ?',
+      whereArgs: [userId, contact.name],
     );
   }
 
-  Future<int> deleteMedicalInfo(int userId, String infoType) async {
+  Future<int> deleteEmergencyContact(int userId, String name) async {
     final db = await database;
     return await db.delete(
-      medicalInfoTable,
-      where: '$userIdColumn = ? AND $infoType = ?',
-      whereArgs: [userId, infoType],
+      emergencyContactTable,
+      where: '$userIdColumn = ? AND $contactNameColumn = ?',
+      whereArgs: [userId, name],
     );
   }
 
