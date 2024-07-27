@@ -25,7 +25,7 @@ Map<String, dynamic> medicalInfo = {
   hasCvdColumn: 1,
   diagnosedCvdColumn: 'Hypertension',
   heightColumn: 5.11,
-  weightColumn: 79,
+  weightColumn: 79.0,
 };
 
 // Emergency contacts

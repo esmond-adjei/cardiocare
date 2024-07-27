@@ -1,3 +1,4 @@
+import 'package:cardiocare/user_app/widgets/demo_setup.dart';
 import 'package:cardiocare/user_app/widgets/user_info_edit.dart';
 import 'package:flutter/material.dart';
 
@@ -43,6 +44,15 @@ class SettingsScreen extends StatelessWidget {
             const SizedBox(height: 20),
             _buildLogoutButton(context),
             _buildDeleteAccountButton(context),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const DemoSettingsScreen()));
+              },
+              child: const Text('Demo Settings'),
+            ),
           ],
         ),
       ),

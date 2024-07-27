@@ -1,3 +1,4 @@
+import 'package:cardiocare/services/preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -19,12 +20,16 @@ import 'package:cardiocare/user_app/register_screen.dart';
 import 'package:cardiocare/services/db_helper.dart';
 import 'package:cardiocare/services/customTheme.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SharedPreferencesManager.instance.initialize();
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => DatabaseHelper()),
+        ChangeNotifierProvider(create: (context) => DatabaseHelper()),
+        ChangeNotifierProvider.value(value: SharedPreferencesManager.instance),
         ChangeNotifierProvider(create: (_) => MonitorState()),
+        ChangeNotifierProvider(create: (_) => BluetoothConnectState()),
       ],
       child: const MyApp(),
     ),

@@ -40,7 +40,13 @@ class ChartCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(title!, style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  title!,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(color: Theme.of(context).colorScheme.primary),
+                ),
                 if (menuOptions != null)
                   IconButton(
                     onPressed: () => menuOptions!(),
@@ -214,7 +220,10 @@ class LegendItem extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall,
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(color: Theme.of(context).colorScheme.primary),
         ),
       ],
     );

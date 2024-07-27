@@ -115,4 +115,9 @@ final ThemeData customRedDarkTheme = customRedTheme.copyWith(
     ),
     contentTextStyle: const TextStyle(color: Colors.white),
   ),
+  popupMenuTheme: PopupMenuThemeData(
+    color: Colors.grey.shade800,
+    textStyle: const TextStyle(color: Colors.white),
+    shape: const RoundedRectangleBorder(),
+  ),
 );

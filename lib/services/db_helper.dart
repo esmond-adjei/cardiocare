@@ -9,29 +9,24 @@ import 'package:cardiocare/services/constants.dart';
 import 'package:cardiocare/services/exceptions.dart';
 import 'package:cardiocare/signal_app/model/signal_model.dart';
 import 'package:cardiocare/user_app/models/user_model.dart';
-import 'package:cardiocare/user_app/models/demo_user.dart';
 
 class DatabaseHelper extends ChangeNotifier {
-  static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _db;
-  static const int _v = 1;
-
+  static const int _v = 2;
   static const List dbTables = [
     createUserTable,
+    createMedicalInfoTable,
+    createEmergencyContactTable,
+    createUserProfileTable,
     createSignalTable,
     createECGTable,
     createBPTable,
     createBTempTable,
     createChatHistoryTable,
-    createMedicalInfoTable,
-    createEmergencyContactTable,
   ];
 
-  factory DatabaseHelper() {
-    return _instance;
-  }
-
   DatabaseHelper._internal();
+  factory DatabaseHelper() => DatabaseHelper._internal();
 
   // =========== MANAGE DATABASE: create tables, open db, close db ===========
   Future<void> onInitCreate() async {
@@ -53,14 +48,7 @@ class DatabaseHelper extends ChangeNotifier {
           db.execute('PRAGMA foreign_keys = ON;');
           for (var database in dbTables) {
             await db.execute(database);
-          }
-
-          // Insert demo user
-          await createUser(user: demoUser); // create first
-          await createUserProfile(demoProfile);
-          await createMedicalInfo(demoMedicalInfo);
-          for (var contact in demoEmergencyContacts) {
-            await createEmergencyContact(contact);
+            dev.log('>> Created table: $database');
           }
         },
       );
@@ -353,7 +341,7 @@ class DatabaseHelper extends ChangeNotifier {
     final result = await db.update(
       signalTable,
       {nameColumn: signal.name},
-      where: 'id=?',
+      where: '$idColumn =?',
       whereArgs: [signal.signalId],
     );
     notifyListeners();
@@ -377,6 +365,8 @@ class DatabaseHelper extends ChangeNotifier {
       default:
         throw UnknownSignalType;
     }
+
+    dev.log(">> deleting ${signal.signalId} from $table");
 
     final signalId =
         await db.delete(table, where: '$idColumn=?', whereArgs: [signal.id]);
@@ -464,81 +454,25 @@ class DatabaseHelper extends ChangeNotifier {
     return results.map((map) => BtempModel.fromMap(map)).toList();
   }
 
-  // DASHBOARD
-  Future<Map<SignalType, List<Signal>>> getRecentRecords2(int userId,
-      {int limit = 3}) async {
-    final List<EcgModel> recentEcgRecords =
-        await getEcgData(userId, limit: limit);
-    final List<BpModel> recentBpRecords = await getBpData(userId, limit: limit);
+  // ==================== DASHBOARD ====================
+  Future<List<Signal>> getRecentRecords(int userId, {int limit = 3}) async {
+    // get top 3 ecg records
+    final List<EcgModel> recentEcgRecords = await getEcgData(userId, limit: 3);
+    // get top 3 bp records
+    final List<BpModel> recentBpRecords = await getBpData(userId, limit: 3);
+    // get top 3 btemp records
     final List<BtempModel> recentBtempRecords =
-        await getBtempData(userId, limit: limit);
+        await getBtempData(userId, limit: 3);
 
-    return {
-      SignalType.ecg: recentEcgRecords,
-      SignalType.bp: recentBpRecords,
-      SignalType.btemp: recentBtempRecords,
-    };
-  }
+    // combine all records and order by createdAt and send top 3
+    final List<Signal> allRecords = [
+      ...recentEcgRecords,
+      ...recentBpRecords,
+      ...recentBtempRecords
+    ];
+    allRecords.sort((a, b) => b.stopTime.compareTo(a.stopTime));
 
-  Future<Map<SignalType, List<Signal>>> getRecentRecords(int userId,
-      {int limit = 3}) async {
-    final db = await database;
-
-    const String query = '''
-    WITH RankedSignals AS (
-      SELECT 
-        s.$idColumn, 
-        s.$userIdColumn, 
-        s.$nameColumn,
-        s.$startTimeColumn,
-        s.$stopTimeColumn,
-        s.$signalTypeColumn,
-        s.$signalInfoColumn,
-        e.ecg, e.hrv, e.hbpm,
-        b.bp_systolic, b.bp_diastolic,
-        t.body_temp, t.body_temp_min, t.body_temp_max,
-        ROW_NUMBER() OVER (PARTITION BY s.$signalTypeColumn ORDER BY s.$startTimeColumn DESC) as rn
-      FROM $signalTable s
-      LEFT JOIN $ecgTable e ON s.$idColumn = e.$signalIdColumn AND s.$signalTypeColumn = 'ECG'
-      LEFT JOIN $bpTable b ON s.$idColumn = b.$signalIdColumn AND s.$signalTypeColumn = 'BP'
-      LEFT JOIN $btempTable t ON s.$idColumn = t.$signalIdColumn AND s.$signalTypeColumn = 'BTEMP'
-      WHERE s.$userIdColumn = ?
-      AND s.$signalTypeColumn IN ('ECG', 'BP', 'BTEMP')
-    )
-    SELECT * FROM RankedSignals
-    WHERE rn <= ?
-    ORDER BY $signalTypeColumn, $startTimeColumn DESC
-  ''';
-
-    final List<Map<String, dynamic>> results =
-        await db.rawQuery(query, [userId, limit]);
-
-    final Map<SignalType, List<Signal>> recentRecords = {
-      SignalType.ecg: [],
-      SignalType.bp: [],
-      SignalType.btemp: [],
-    };
-
-    for (var row in results) {
-      switch (row[signalTypeColumn]) {
-        case 'ECG':
-          final ecg = EcgModel.fromMap(row);
-          recentRecords[SignalType.ecg]!.add(ecg);
-          break;
-        case 'BP':
-          final bp = BpModel.fromMap(row);
-          recentRecords[SignalType.bp]!.add(bp);
-          break;
-        case 'BTEMP':
-          final btemp = BtempModel.fromMap(row);
-          recentRecords[SignalType.btemp]!.add(btemp);
-          break;
-        default:
-          throw ArgumentError('Unknown signal type: ${row[signalTypeColumn]}');
-      }
-    }
-
-    return recentRecords;
+    return allRecords.take(limit).toList();
   }
 
   Future<EcgModel?> getLatestEcg(int userId) async {

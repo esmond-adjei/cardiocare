@@ -114,7 +114,7 @@ class BPRenderer extends StatelessWidget {
     if (!isActive) {
       return const Center(
         child: Text(
-          'Start Monitoring Your BP',
+          'Record Your BP',
           style: TextStyle(
             color: Colors.grey,
             fontSize: 24,
@@ -217,7 +217,7 @@ class BtempRenderer extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildTemperatureMonitor(),
+          _buildTemperatureMonitor(context),
           const SizedBox(height: 20),
           _buildMinMaxTemperatures(),
         ],
@@ -225,7 +225,7 @@ class BtempRenderer extends StatelessWidget {
     );
   }
 
-  Widget _buildTemperatureMonitor() {
+  Widget _buildTemperatureMonitor(BuildContext context) {
     return Container(
       height: 180.0,
       width: 180.0,
@@ -241,9 +241,10 @@ class BtempRenderer extends StatelessWidget {
       child: Center(
         child: Text(
           '${btempSignal.avgTemp.toStringAsFixed(1)} °C',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 36.0,
             fontWeight: FontWeight.bold,
+            color: Theme.of(context).scaffoldBackgroundColor,
           ),
         ),
       ),

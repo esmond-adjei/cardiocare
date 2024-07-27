@@ -1,15 +1,15 @@
-// import 'package:cardiocare/_playground.dart';
-import 'package:cardiocare/chatbot_app/chat_screen.dart';
+import 'package:cardiocare/services/preferences.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+import 'package:cardiocare/_playground.dart';
+import 'package:cardiocare/services/db_helper.dart';
 import 'package:cardiocare/utils/format_datetime.dart';
 import 'package:cardiocare/signal_app/charts/trend_line_chart.dart';
 import 'package:cardiocare/signal_app/widgets/stressmogi.dart';
-import 'package:flutter/material.dart';
-import 'package:cardiocare/signal_app/model/signal_enums.dart';
-import 'package:provider/provider.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:cardiocare/services/db_helper.dart';
-import 'package:cardiocare/signal_app/model/signal_model.dart';
 import 'package:cardiocare/signal_app/widgets/list_container.dart';
+import 'package:cardiocare/signal_app/model/signal_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -55,7 +55,7 @@ class _HomeState extends State<HomeScreen> {
               ),
             ),
 
-            const _DashBoard(),
+            _DashBoard(),
 
             const Row(
               children: [
@@ -67,29 +67,21 @@ class _HomeState extends State<HomeScreen> {
             ),
 
             // LIST OF RECENT RECORDS
-            FutureBuilder<Map<SignalType, List<Signal>>>(
-              future: dbhelper.getRecentRecords(1, limit: 3),
+            FutureBuilder<List<Signal>>(
+              future: dbhelper.getRecentRecords(1, limit: 6),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
+                  return const Center(
+                      child: Text('Error: something went wrong'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Center(child: Text('No data available'));
                 } else {
-                  Map<SignalType, List<Signal>> results;
-                  results = snapshot.data!;
-
-                  return Column(
-                    children: [
-                      ...results.entries.map(
-                        (entry) => ListContainer(
-                          listHeading: entry.key.description,
-                          listData: entry.value,
-                          expandable: true,
-                        ),
-                      ),
-                    ],
+                  return ListContainer(
+                    listHeading: 'Recent Records',
+                    listData: snapshot.data!,
+                    expandable: true,
                   );
                 }
               },
@@ -123,8 +115,9 @@ class _HomeState extends State<HomeScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const ChatScreen(),
-                      // const Playground(),
+                      builder: (context) =>
+                          // const ChatScreen(),
+                          const Playground(),
                     ),
                   );
                 },
@@ -231,13 +224,12 @@ class DashSignalView extends StatelessWidget {
 }
 
 class _DashBoard extends StatelessWidget {
-  const _DashBoard({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 200,
       margin: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
@@ -258,43 +250,43 @@ class _DashBoard extends StatelessWidget {
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(15),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                FaIcon(
-                  FontAwesomeIcons.chartLine,
-                  color: Colors.white,
-                  size: 18,
-                ),
-                SizedBox(width: 9),
-                Text(
-                  'Daily Overview',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildMetricColumn('Heart Rate', '72', 'bpm'),
-                  _buildMetricColumn('Body Temp', '36.5', '°C'),
-                  _buildMetricColumn('Blood Pressure', '120/80', 'mmHg'),
-                  _buildMetricColumn('HRV Score', '65', ''),
-                ],
+      child: Column(
+        children: [
+          const Row(
+            children: [
+              FaIcon(
+                FontAwesomeIcons.chartLine,
+                color: Colors.white,
+                size: 18,
               ),
+              SizedBox(width: 9),
+              Text(
+                'Daily Overview',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          Expanded(
+            child: Consumer<SharedPreferencesManager>(
+              builder: (context, prefsManager, child) {
+                final metrics = prefsManager.getAllMetrics();
+                return metrics.isEmpty
+                    ? const Center(child: Text('No data available'))
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: metrics
+                            .map((m) =>
+                                _buildMetricColumn(m.text, m.value, m.unit))
+                            .toList(),
+                      );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
