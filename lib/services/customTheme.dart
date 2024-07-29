@@ -7,6 +7,7 @@ final ThemeData customRedTheme = ThemeData(
     seedColor: Colors.redAccent,
     primary: Colors.grey.shade800,
     secondary: Colors.white,
+    tertiary: Colors.redAccent.shade100,
   ),
   primaryColor: Colors.redAccent,
   secondaryHeaderColor: Colors.white,
@@ -51,6 +52,15 @@ final ThemeData customRedTheme = ThemeData(
     backgroundColor: Colors.white,
     contentTextStyle: TextStyle(color: Colors.black87),
   ),
+  dialogTheme: const DialogTheme(
+    backgroundColor: Colors.white,
+    titleTextStyle: TextStyle(
+      color: Colors.black,
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+    ),
+    contentTextStyle: TextStyle(color: Colors.black),
+  ),
 );
 
 //========== DARK THEME ==========
@@ -59,6 +69,7 @@ final ThemeData customRedDarkTheme = customRedTheme.copyWith(
   colorScheme: customRedTheme.colorScheme.copyWith(
     primary: Colors.white,
     secondary: Colors.grey.shade800,
+    tertiary: const Color.fromARGB(255, 156, 57, 57),
     surface: Colors.grey.shade800,
   ),
   secondaryHeaderColor: Colors.grey.shade900,
@@ -96,5 +107,19 @@ final ThemeData customRedDarkTheme = customRedTheme.copyWith(
   snackBarTheme: customRedTheme.snackBarTheme.copyWith(
     backgroundColor: Colors.grey.shade900,
     contentTextStyle: const TextStyle(color: Colors.white),
+  ),
+  dialogTheme: customRedTheme.dialogTheme.copyWith(
+    backgroundColor: Colors.grey.shade900,
+    titleTextStyle: const TextStyle(
+      color: Colors.white,
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+    ),
+    contentTextStyle: const TextStyle(color: Colors.white),
+  ),
+  popupMenuTheme: PopupMenuThemeData(
+    color: Colors.grey.shade800,
+    textStyle: const TextStyle(color: Colors.white),
+    shape: const RoundedRectangleBorder(),
   ),
 );

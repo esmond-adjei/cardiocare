@@ -31,7 +31,7 @@ class TrendLineChart extends StatelessWidget {
             show: true,
             drawVerticalLine: false,
             getDrawingHorizontalLine: (value) => FlLine(
-              color: Colors.grey.shade200,
+              color: Colors.grey.withOpacity(0.5),
               strokeWidth: 2.0,
               dashArray: [8, 4],
             ),

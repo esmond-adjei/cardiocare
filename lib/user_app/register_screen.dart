@@ -5,10 +5,9 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
-import 'package:cardiocare/user_app/user_model.dart';
-import 'package:cardiocare/services/db_helper.dart';
+// import 'package:cardiocare/user_app/models/user_model.dart';
+// import 'package:cardiocare/services/db_helper.dart';
 
-import 'package:cardiocare/user_app/dummy_user_data.dart';
 import 'package:cardiocare/user_app/widgets/custom_text_field.dart';
 import 'package:cardiocare/user_app/widgets/custom_button.dart';
 import 'login_screen.dart';
@@ -23,14 +22,14 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthService _authService = AuthService();
-  final DatabaseHelper _dbHelper = DatabaseHelper();
+  // final AuthService _authService = AuthService();
+  // final DatabaseHelper _dbHelper = DatabaseHelper();
 
   void _register() async {
-    final password = _passwordController.text;
+    // final password = _passwordController.text;
 
     try {
-      _dbHelper.createUser(user: CardioUser(email: _emailController.text));
+      // _dbHelper.createUser(user: CardioUser(email: _emailController.text));
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),

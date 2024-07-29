@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:cardiocare/services/preferences.dart';
+
+const List<String> animations = [
+  'assets/animations/happy.json',
+  'assets/animations/neutral.json',
+  'assets/animations/sad.json',
+  'assets/animations/angry.json',
+];
 
 class StressCard extends StatefulWidget {
   const StressCard({super.key});
@@ -9,20 +17,24 @@ class StressCard extends StatefulWidget {
 }
 
 class _StressCardState extends State<StressCard> {
-  String _stressAnimation = 'assets/animations/happy.json';
+  late String _stressMoji;
 
-  void _updateStressAnimation(String newAnimation) {
-    setState(() => _stressAnimation = newAnimation);
+  @override
+  void initState() {
+    super.initState();
+    _stressMoji =
+        SharedPreferencesManager.instance.getStressMoji() ?? animations[0];
   }
 
-  void _navigateAndDisplaySelection(BuildContext context) async {
+  void _setNewStressMoji(BuildContext context) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const StressLevelScreen()),
     );
 
     if (result != null) {
-      _updateStressAnimation(result);
+      SharedPreferencesManager.instance.setStressMoji(result);
+      setState(() => _stressMoji = result);
     }
   }
 
@@ -30,7 +42,7 @@ class _StressCardState extends State<StressCard> {
   Widget build(BuildContext context) {
     return Expanded(
       child: GestureDetector(
-        onTap: () => _navigateAndDisplaySelection(context),
+        onTap: () => _setNewStressMoji(context),
         child: Container(
           height: 140,
           margin: const EdgeInsets.all(10),
@@ -46,7 +58,7 @@ class _StressCardState extends State<StressCard> {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Lottie.asset(
-                _stressAnimation,
+                _stressMoji,
                 width: 80,
                 height: 80,
               ),
@@ -67,13 +79,6 @@ class _StressCardState extends State<StressCard> {
 }
 
 class StressLevelScreen extends StatelessWidget {
-  static const List<String> animations = [
-    'assets/animations/happy.json',
-    'assets/animations/neutral.json',
-    'assets/animations/sad.json',
-    'assets/animations/angry.json',
-  ];
-
   const StressLevelScreen({super.key});
 
   @override
@@ -93,11 +98,12 @@ class StressLevelScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () {
+              // await SharedPreferencesManager.saveStressMoji(animations[index]);
               Navigator.pop(context, animations[index]);
             },
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Center(

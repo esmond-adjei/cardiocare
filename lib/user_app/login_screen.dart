@@ -1,8 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:cardiocare/user_app/dummy_user_data.dart';
-import 'package:cardiocare/services/db_helper.dart';
+// import 'package:cardiocare/services/db_helper.dart';
 import 'package:cardiocare/user_app/widgets/custom_text_field.dart';
 import 'package:cardiocare/user_app/widgets/custom_button.dart';
 import 'register_screen.dart';
@@ -17,13 +16,13 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthService _authService = AuthService();
-  final DatabaseHelper _dbHelper = DatabaseHelper();
+  // final AuthService _authService = AuthService();
+  // final DatabaseHelper _dbHelper = DatabaseHelper();
 
   void _login() async {
-    final password = _passwordController.text;
+    // final password = _passwordController.text;
     try {
-      await _dbHelper.getUser(email: _emailController.text);
+      // await _dbHelper.getUser(email: _emailController.text);
       Navigator.pushNamed(context, '/home');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));

@@ -97,6 +97,10 @@ class _ChatWidgetState extends State<ChatWidget> {
           _conversationHistory.add(botMessage);
         });
         await _dbHelper.createChatMessage(1, botMessage);
+        await _dbHelper.updateChatMessageStatus(
+          userMessage.timestamp,
+          MessageStatus.sent,
+        );
       }
     } catch (e) {
       await _dbHelper.updateChatMessageStatus(
@@ -130,14 +134,13 @@ class _ChatWidgetState extends State<ChatWidget> {
           status: MessageStatus.sent,
         );
 
-        await _dbHelper.updateChatMessageStatus(
-            message.timestamp, MessageStatus.sent);
-
         setState(() {
           _conversationHistory[index].status = MessageStatus.sent;
           _conversationHistory.insert(index + 1, botMessage);
         });
         await _dbHelper.createChatMessage(1, botMessage);
+        await _dbHelper.updateChatMessageStatus(
+            message.timestamp, MessageStatus.sent);
       }
     } catch (e) {
       setState(() => message.status = MessageStatus.failed);
