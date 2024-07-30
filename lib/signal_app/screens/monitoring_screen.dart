@@ -139,8 +139,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   }
 
   AppBar _buildAppBar(BuildContext context) {
-    final monitorState =
-        Provider.of<SignalMonitorState>(context, listen: false);
+    final monitorState = Provider.of<SignalMonitorState>(context, listen: true);
     // final blueState =
     //     Provider.of<BluetoothConnectState>(context, listen: false);
     return AppBar(

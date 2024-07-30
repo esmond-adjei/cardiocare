@@ -64,7 +64,7 @@ class CardioDevice {
             _targetDevice = r.device;
             dev.log("${r.device.name} @ ${r.device.address}");
             stopDiscovery();
-            connectToDevice(_targetDevice!);
+            connectToDevice(r.device);
           }
         },
         onDone: () {

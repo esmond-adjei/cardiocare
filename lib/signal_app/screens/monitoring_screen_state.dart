@@ -69,6 +69,7 @@ class SignalMonitorState extends ChangeNotifier {
     if (DEVICE_TYPE == DeviceType.virtual) {
       return;
     }
+    await _cardioDevice.sendData(Uint8List.fromList([0]));
     await _cardioDevice.disconnectFromDevice();
   }
 
@@ -87,6 +88,7 @@ class SignalMonitorState extends ChangeNotifier {
     _stopwatch.start();
     _currentMode = mode;
     _startTime = DateTime.now();
+    notifyListeners();
 
     if (DEVICE_TYPE == DeviceType.virtual) {
       Signal currentSignal = getCurrentSignal(mode);
@@ -96,8 +98,6 @@ class SignalMonitorState extends ChangeNotifier {
     } else {
       await _cardioDevice.sendData(Uint8List.fromList([mode]));
     }
-
-    notifyListeners();
   }
 
   void pauseRecording() {
@@ -118,14 +118,16 @@ class SignalMonitorState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void stopRecording() {
+  void stopRecording() async {
     isRecording = false;
     isPaused = false;
+    _ecgSignal.clearEcg();
     _stopwatch.stop();
     _stopwatch.reset();
     if (DEVICE_TYPE == DeviceType.virtual) {
       _virtualDevice.stopListening();
     }
+    await _cardioDevice.sendData(Uint8List.fromList([0]));
     notifyListeners();
   }
 
@@ -144,14 +146,25 @@ class SignalMonitorState extends ChangeNotifier {
     }
   }
 
+  double minTemp = 100.0;
+  double maxTemp = 0.0;
+  double parsedNumber = 0.0;
+  int ecgValue = 0;
   void _onDataReceived(Uint8List data) {
     // Process received data
-    dev.log('Data received: ${String.fromCharCodes(data)}');
+    // dev.log('Data received: ${String.fromCharCodes(data)}');
 
     String strData = String.fromCharCodes(data);
     switch (_currentMode) {
       case 1:
-        dev.log('Updating ECG data: $strData');
+        try {
+          ecgValue = int.parse(strData);
+          dev.log("ecg: $ecgValue");
+        } catch (e) {
+          dev.log("error: $e");
+        }
+        _ecgSignal.addEcgCache(ecgValue);
+        // dev.log('Updating ECG data: $strData, $ecgValue');
         notifyListeners();
         break;
       case 2:
@@ -159,13 +172,20 @@ class SignalMonitorState extends ChangeNotifier {
         notifyListeners();
         break;
       case 3:
-        int btempData = 0;
         try {
-          btempData = strData as int;
+          parsedNumber = double.parse(strData);
+          parsedNumber += 3; // adjusting for body temperature
+          if (parsedNumber > 0) {
+            minTemp = parsedNumber < minTemp ? parsedNumber : minTemp;
+            maxTemp = parsedNumber > maxTemp ? parsedNumber : maxTemp;
+          }
         } catch (e) {
-          dev.log("error: $e");
+          dev.log("Error parsing number: $e");
         }
-        dev.log('Updating Body Temperature data: $strData, $btempData');
+        // dev.log('Updating Body Temperature data: $strData, $parsedNumber');
+        _btempSignal.avgTemp = parsedNumber;
+        _btempSignal.minTemp = minTemp;
+        _btempSignal.maxTemp = maxTemp;
         notifyListeners();
         break;
       default:
