@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer' as dev;
+import 'package:cardiocare/utils/device.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -60,8 +61,7 @@ class _ConnectDeviceState extends State<ConnectDevice> {
   }
 
   void _showPairedDevices() async {
-    final blueState =
-        Provider.of<BluetoothConnectState>(context, listen: false);
+    final blueState = Provider.of<SignalMonitorState>(context, listen: false);
     final bondedDevices = await _bluetooth.getBondedDevices();
     showDialog(
       context: context,
@@ -78,8 +78,17 @@ class _ConnectDeviceState extends State<ConnectDevice> {
               itemCount: bondedDevices.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text(bondedDevices[index].name ?? "Unknown device"),
-                  subtitle: Text(bondedDevices[index].address),
+                  title: Text(
+                    bondedDevices[index].name ?? "Unknown device",
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.primary),
+                  ),
+                  subtitle: Text(
+                    bondedDevices[index].address,
+                    style: TextStyle(
+                      color: Colors.grey.withOpacity(0.8),
+                    ),
+                  ),
                   onTap: () async {
                     Navigator.of(context).pop();
                     blueState.connectToDevice(bondedDevices[index]);
@@ -112,7 +121,7 @@ class _ConnectDeviceState extends State<ConnectDevice> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BluetoothConnectState>(
+    return Consumer<SignalMonitorState>(
       builder: (context, blueState, child) {
         Color colorTheme = _getColorTheme(blueState.bluetoothState);
 
@@ -198,7 +207,7 @@ class _ConnectDeviceState extends State<ConnectDevice> {
     );
   }
 
-  VoidCallback? _getButtonAction(BluetoothConnectState blueState) {
+  VoidCallback? _getButtonAction(SignalMonitorState blueState) {
     switch (blueState.bluetoothState) {
       case BluetoothConnectionState.disconnected:
       case BluetoothConnectionState.error:

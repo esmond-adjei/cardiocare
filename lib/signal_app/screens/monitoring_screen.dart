@@ -1,13 +1,13 @@
 import 'dart:developer' as dev;
-import 'package:cardiocare/signal_app/screens/connect_device_screen.dart';
-import 'package:cardiocare/signal_app/model/signal_enums.dart';
-import 'package:cardiocare/utils/format_datetime.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cardiocare/main.dart';
 import 'package:cardiocare/signal_app/widgets/signal_renderers.dart';
 import 'package:cardiocare/services/db_helper.dart';
 import 'package:cardiocare/signal_app/screens/monitoring_screen_state.dart';
+import 'package:cardiocare/signal_app/screens/connect_device_screen.dart';
+import 'package:cardiocare/signal_app/model/signal_enums.dart';
+import 'package:cardiocare/utils/format_datetime.dart';
 
 class SingleMonitorLayout extends StatefulWidget {
   final int initialScreen;
@@ -36,14 +36,19 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   }
 
   @override
+  void didUpdateWidget(covariant SingleMonitorLayout oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _checkBluetoothConnection();
+  }
+
+  @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
 
   void _checkBluetoothConnection() {
-    final blueState =
-        Provider.of<BluetoothConnectState>(context, listen: false);
+    final blueState = Provider.of<SignalMonitorState>(context, listen: false);
     if (!blueState.isBluetoothConnected) {
       Navigator.pushReplacement(
         context,
@@ -58,7 +63,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
     );
   }
 
-  void _showSaveDialog(MonitorState monitorState) {
+  void _showSaveDialog(SignalMonitorState monitorState) {
     monitorState.pauseRecording();
     dynamic signal = monitorState.getCurrentSignal(_tabController.index);
     TextEditingController textFieldController = TextEditingController();
@@ -117,8 +122,8 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
 
   @override
   Widget build(BuildContext context) {
-    MonitorState monitorState = Provider.of<MonitorState>(context);
-    final blueState = Provider.of<BluetoothConnectState>(context);
+    final monitorState = Provider.of<SignalMonitorState>(context);
+    // final blueState = Provider.of<BluetoothConnectState>(context);
 
     return Scaffold(
       appBar: _buildAppBar(context),
@@ -127,16 +132,17 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
           _buildTimer(monitorState),
           _buildTabBarView(monitorState),
           _buildTabBar(monitorState),
-          _buildControlButtons(monitorState, blueState),
+          _buildControlButtons(monitorState),
         ],
       ),
     );
   }
 
   AppBar _buildAppBar(BuildContext context) {
-    final monitorState = Provider.of<MonitorState>(context, listen: false);
-    final blueState =
-        Provider.of<BluetoothConnectState>(context, listen: false);
+    final monitorState =
+        Provider.of<SignalMonitorState>(context, listen: false);
+    // final blueState =
+    //     Provider.of<BluetoothConnectState>(context, listen: false);
     return AppBar(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       iconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
@@ -168,25 +174,55 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
           },
           child: const Text('List'),
         ),
-        PopupMenuButton<String>(
-          onSelected: (value) {
-            if (value == 'disconnect bluetooth') {
-              blueState.disconnectFromDevice();
-            }
-          },
-          enabled: blueState.isBluetoothConnected,
-          itemBuilder: (context) => [
-            const PopupMenuItem<String>(
-              value: 'disconnect bluetooth',
-              child: Text('Disconnect Bluetooth'),
-            ),
-          ],
-        ),
+        monitorState.isBluetoothConnected
+            ? PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'disconnect bluetooth') {
+                    monitorState.disconnectFromDevice();
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ConnectDevice()));
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem<String>(
+                    value: 'disconnect bluetooth',
+                    child: Text(
+                      'Disconnect Bluetooth',
+                      style: TextStyle(color: Colors.grey.withOpacity(0.7)),
+                    ),
+                  ),
+                ],
+              )
+            : PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'connect bluetooth') {
+                    monitorState.disconnectFromDevice();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ConnectDevice()),
+                    );
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem<String>(
+                    value: 'connect bluetooth',
+                    child: Text(
+                      'connect Bluetooth',
+                      style: TextStyle(
+                        color: Colors.grey.withOpacity(0.7),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
       ],
     );
   }
 
-  Widget _buildTimer(MonitorState monitorState) {
+  Widget _buildTimer(SignalMonitorState monitorState) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Text(
@@ -196,7 +232,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
     );
   }
 
-  Widget _buildTabBarView(MonitorState monitorState) {
+  Widget _buildTabBarView(SignalMonitorState monitorState) {
     return Expanded(
       child: TabBarView(
         controller: _tabController,
@@ -221,7 +257,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
     );
   }
 
-  Widget _buildTabBar(MonitorState monitorState) {
+  Widget _buildTabBar(SignalMonitorState monitorState) {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
@@ -255,8 +291,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
     );
   }
 
-  Widget _buildControlButtons(
-      MonitorState monitorState, BluetoothConnectState blueState) {
+  Widget _buildControlButtons(SignalMonitorState monitorState) {
     return Container(
       height: 100,
       padding: const EdgeInsets.all(16.0),
@@ -269,8 +304,8 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
             ? ElevatedButton(
                 key: const ValueKey("start"),
                 onPressed: () {
-                  blueState.isBluetoothConnected
-                      ? monitorState.startRecording(_tabController.index)
+                  monitorState.isBluetoothConnected
+                      ? monitorState.startRecording(_tabController.index + 1)
                       : null;
                 },
                 style: ElevatedButton.styleFrom(

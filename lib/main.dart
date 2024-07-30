@@ -28,8 +28,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => DatabaseHelper()),
         ChangeNotifierProvider.value(value: SharedPreferencesManager.instance),
-        ChangeNotifierProvider(create: (_) => MonitorState()),
-        ChangeNotifierProvider(create: (_) => BluetoothConnectState()),
+        ChangeNotifierProvider(create: (_) => SignalMonitorState()),
       ],
       child: const MyApp(),
     ),
@@ -43,7 +42,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'X-Monitoring App',
+      title: 'Cardiocare App',
       theme: customRedTheme,
       darkTheme: customRedDarkTheme,
       themeMode: ThemeMode.system,

@@ -26,7 +26,8 @@ class MessageWidget extends StatelessWidget {
         child: Card(
           margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
           color: message.isFromUser
-              ? const Color.fromARGB(255, 245, 185, 180)
+              ? Theme.of(context).colorScheme.tertiary
+              // const Color.fromARGB(255, 245, 185, 180)
               : Theme.of(context).colorScheme.secondary,
           child: Container(
             constraints: BoxConstraints(
@@ -41,9 +42,7 @@ class MessageWidget extends StatelessWidget {
                   data: message.text,
                   styleSheet: MarkdownStyleSheet(
                     p: TextStyle(
-                      color: message.isFromUser
-                          ? Theme.of(context).colorScheme.secondary
-                          : Theme.of(context).colorScheme.primary,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ),

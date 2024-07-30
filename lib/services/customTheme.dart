@@ -7,6 +7,7 @@ final ThemeData customRedTheme = ThemeData(
     seedColor: Colors.redAccent,
     primary: Colors.grey.shade800,
     secondary: Colors.white,
+    tertiary: Colors.redAccent.shade100,
   ),
   primaryColor: Colors.redAccent,
   secondaryHeaderColor: Colors.white,
@@ -68,6 +69,7 @@ final ThemeData customRedDarkTheme = customRedTheme.copyWith(
   colorScheme: customRedTheme.colorScheme.copyWith(
     primary: Colors.white,
     secondary: Colors.grey.shade800,
+    tertiary: const Color.fromARGB(255, 156, 57, 57),
     surface: Colors.grey.shade800,
   ),
   secondaryHeaderColor: Colors.grey.shade900,

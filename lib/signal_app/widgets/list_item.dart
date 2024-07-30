@@ -123,7 +123,7 @@ class ListItem extends StatelessWidget {
         Align(
           alignment: Alignment.topLeft,
           child: Text(
-            '${signal.id}:${signal.signalId} ${signal.name}',
+            signal.name,
             style: TextStyle(
               fontSize: 16,
               color: Theme.of(context).colorScheme.primary,

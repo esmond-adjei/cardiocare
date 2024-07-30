@@ -7,8 +7,12 @@ import 'package:cardiocare/chatbot_app/chat_model.dart';
 import 'package:cardiocare/chatbot_app/widgets/message.dart';
 import 'package:cardiocare/services/db_helper.dart';
 
-const String _apiKey = String.fromEnvironment('API_KEY');
-const String _systemInstructions = String.fromEnvironment('BOT_INSTRUCTIONS');
+const String _apiKey =
+// String.fromEnvironment('API_KEY');
+    "AIzaSyDFFinex_fsJgs5uAkXlWKkiw-EknfjHKw";
+const String _systemInstructions =
+//  String.fromEnvironment('BOT_INSTRUCTIONS');
+    "you're an expert cardiologist. your sole purpose is to help clients by providing them with useful information about the cardiac health. In less than 3 statements, provide very detailed yet concise response to their questions. your name is cardiobot. don't answer questions not related to cardiac health and those not casual information.";
 
 class ChatWidget extends StatefulWidget {
   const ChatWidget({super.key});
@@ -97,6 +101,10 @@ class _ChatWidgetState extends State<ChatWidget> {
           _conversationHistory.add(botMessage);
         });
         await _dbHelper.createChatMessage(1, botMessage);
+        await _dbHelper.updateChatMessageStatus(
+          userMessage.timestamp,
+          MessageStatus.sent,
+        );
       }
     } catch (e) {
       await _dbHelper.updateChatMessageStatus(
@@ -130,14 +138,13 @@ class _ChatWidgetState extends State<ChatWidget> {
           status: MessageStatus.sent,
         );
 
-        await _dbHelper.updateChatMessageStatus(
-            message.timestamp, MessageStatus.sent);
-
         setState(() {
           _conversationHistory[index].status = MessageStatus.sent;
           _conversationHistory.insert(index + 1, botMessage);
         });
         await _dbHelper.createChatMessage(1, botMessage);
+        await _dbHelper.updateChatMessageStatus(
+            message.timestamp, MessageStatus.sent);
       }
     } catch (e) {
       setState(() => message.status = MessageStatus.failed);

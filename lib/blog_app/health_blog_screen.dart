@@ -124,11 +124,24 @@ class HealthBlogScreen extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'cardiobot',
-        onPressed: () => Navigator.pushNamed(context, '/chat'),
-        backgroundColor: Colors.red,
-        child: const FaIcon(FontAwesomeIcons.userDoctor),
+      floatingActionButton: Container(
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(
+            colors: [
+              Colors.greenAccent,
+              Colors.blueAccent,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: FloatingActionButton(
+          heroTag: 'cardiobot-blog',
+          backgroundColor: Colors.transparent,
+          onPressed: () => Navigator.pushNamed(context, '/chat'),
+          child: const FaIcon(FontAwesomeIcons.userDoctor, size: 20),
+        ),
       ),
     );
   }
