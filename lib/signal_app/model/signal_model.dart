@@ -145,7 +145,7 @@ class BpModel extends Signal {
   int get systolic => bpSystolic ?? 120;
   set systolic(int sysValue) => bpSystolic = sysValue;
 
-  int get diastolic => bpDiastolic ?? 120;
+  int get diastolic => bpDiastolic ?? 80;
   set diastolic(int diaValue) => bpDiastolic = diaValue;
 
   set bpData(List<int> bpValues) {

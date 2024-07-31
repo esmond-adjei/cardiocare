@@ -1,4 +1,5 @@
 import 'dart:developer' as dev;
+import 'package:cardiocare/signal_app/model/signal_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cardiocare/main.dart';
@@ -30,6 +31,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
       initialIndex: widget.initialScreen,
       vsync: this,
     );
+
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         setState(() {}); // Trigger state update when tab index changes
@@ -304,9 +306,37 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
     );
   }
 
+  void _saveRealBP(SignalMonitorState monitorState) async {
+    dev.log(
+        "${monitorState.bpSignal.systolic}/${monitorState.bpSignal.diastolic}");
+    final dbhelper = Provider.of<DatabaseHelper>(context, listen: false);
+    BpModel signal = monitorState.bpSignal;
+    signal.startTime = DateTime.now();
+    signal.stopTime = DateTime.now();
+    final signalId = await dbhelper.createBpData(signal);
+    _showSnackBar('${signal.name} saved successfully (ID: $signalId)');
+  }
+
   Widget _buildControlButtons(SignalMonitorState monitorState) {
     if (_bpException(monitorState)) {
-      return const SizedBox.shrink();
+      return Container(
+        height: 100,
+        padding: const EdgeInsets.all(16.0),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return ScaleTransition(scale: animation, child: child);
+          },
+          child: ElevatedButton.icon(
+            onPressed: () => _saveRealBP(monitorState),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+            ),
+            icon: const Icon(Icons.done),
+            label: const Text("Save BP Data"),
+          ),
+        ),
+      );
     }
     return Container(
       height: 100,

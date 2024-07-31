@@ -190,19 +190,6 @@ class BPInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!isActive) {
-      return const Center(
-        child: Text(
-          'Record Your BP',
-          style: TextStyle(
-            color: Colors.grey,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-    }
-
     final color =
         bpSignal.systolic > 120 ? Colors.red : bpSignal.signalType.color;
 
@@ -269,6 +256,16 @@ class BPInput extends StatelessWidget {
               keyboardType: TextInputType.number,
               onChanged: (val) {
                 // Handle value change
+                try {
+                  int bpValue = int.parse(val);
+                  if (label == 'systolic') {
+                    bpSignal.systolic = bpValue;
+                  } else {
+                    bpSignal.diastolic = bpValue;
+                  }
+                } catch (e) {
+                  print("ErrorInputType: $e");
+                }
               },
             ),
           ),
