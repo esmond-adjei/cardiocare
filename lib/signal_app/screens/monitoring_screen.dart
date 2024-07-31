@@ -30,15 +30,15 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
       initialIndex: widget.initialScreen,
       vsync: this,
     );
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        setState(() {}); // Trigger state update when tab index changes
+      }
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkBluetoothConnection();
     });
-  }
-
-  @override
-  void didUpdateWidget(covariant SingleMonitorLayout oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _checkBluetoothConnection();
   }
 
   @override
@@ -55,6 +55,11 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
         MaterialPageRoute(builder: (context) => const ConnectDevice()),
       );
     }
+  }
+
+  bool _bpException(SignalMonitorState monitorState) {
+    dev.log("current tab: ${_tabController.index}");
+    return !monitorState.isVirtualDevice && _tabController.index == 1;
   }
 
   void _showSnackBar(String message) {
@@ -123,9 +128,8 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   @override
   Widget build(BuildContext context) {
     final monitorState = Provider.of<SignalMonitorState>(context);
-    // final blueState = Provider.of<BluetoothConnectState>(context);
-
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: _buildAppBar(context),
       body: Column(
         children: [
@@ -139,9 +143,9 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   }
 
   AppBar _buildAppBar(BuildContext context) {
-    final monitorState = Provider.of<SignalMonitorState>(context, listen: true);
-    // final blueState =
-    //     Provider.of<BluetoothConnectState>(context, listen: false);
+    final monitorState =
+        Provider.of<SignalMonitorState>(context, listen: false);
+
     return AppBar(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       iconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
@@ -175,6 +179,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
         ),
         monitorState.isBluetoothConnected
             ? PopupMenuButton<String>(
+                enabled: !monitorState.isVirtualDevice,
                 onSelected: (value) {
                   if (value == 'disconnect bluetooth') {
                     monitorState.disconnectFromDevice();
@@ -195,6 +200,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                 ],
               )
             : PopupMenuButton<String>(
+                enabled: !monitorState.isVirtualDevice,
                 onSelected: (value) {
                   if (value == 'connect bluetooth') {
                     monitorState.disconnectFromDevice();
@@ -222,6 +228,9 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   }
 
   Widget _buildTimer(SignalMonitorState monitorState) {
+    if (_bpException(monitorState)) {
+      return const SizedBox.shrink();
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Text(
@@ -243,10 +252,15 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
             isActive: monitorState.isRecording,
             ecgSignal: monitorState.ecgSignal,
           ),
-          BPRenderer(
-            isActive: monitorState.isRecording,
-            bpSignal: monitorState.bpSignal,
-          ),
+          (monitorState.isVirtualDevice)
+              ? BPRenderer(
+                  isActive: monitorState.isRecording,
+                  bpSignal: monitorState.bpSignal,
+                )
+              : BPInput(
+                  isActive: monitorState.isRecording,
+                  bpSignal: monitorState.bpSignal,
+                ),
           BtempRenderer(
             isActive: monitorState.isRecording,
             btempSignal: monitorState.btempSignal,
@@ -291,6 +305,9 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   }
 
   Widget _buildControlButtons(SignalMonitorState monitorState) {
+    if (_bpException(monitorState)) {
+      return const SizedBox.shrink();
+    }
     return Container(
       height: 100,
       padding: const EdgeInsets.all(16.0),
@@ -335,33 +352,6 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
                     label: const Text("Restart"),
                   ),
                   const SizedBox(width: 16),
-
-                  // ElevatedButton.icon(
-                  //   onPressed: monitorState.isPaused
-                  //       ? monitorState.resumeRecording
-                  //       : monitorState.pauseRecording,
-                  //   style: ElevatedButton.styleFrom(
-                  //     backgroundColor: monitorState.isPaused
-                  //         ? Colors.amberAccent
-                  //         : Colors.grey.shade400,
-                  //   ),
-                  //   icon: AnimatedSwitcher(
-                  //     duration: const Duration(milliseconds: 300),
-                  //     transitionBuilder:
-                  //         (Widget child, Animation<double> animation) {
-                  //       return ScaleTransition(
-                  //         scale: animation,
-                  //         child: child,
-                  //       );
-                  //     },
-                  //     child: monitorState.isPaused
-                  //         ? const Icon(Icons.play_arrow, key: ValueKey("play"))
-                  //         : const Icon(Icons.pause, key: ValueKey("pause")),
-                  //   ),
-                  //   label: Text(monitorState.isPaused ? "Resume" : "Paused"),
-                  // ),
-                  // const SizedBox(width: 16),
-
                   ElevatedButton.icon(
                     onPressed: () => _showSaveDialog(monitorState),
                     style: ElevatedButton.styleFrom(

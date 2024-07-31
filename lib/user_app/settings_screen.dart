@@ -1,4 +1,4 @@
-import 'package:cardiocare/user_app/widgets/demo_setup.dart';
+import 'package:cardiocare/user_app/demo_settings_screen.dart';
 import 'package:cardiocare/user_app/widgets/user_info_edit.dart';
 import 'package:flutter/material.dart';
 

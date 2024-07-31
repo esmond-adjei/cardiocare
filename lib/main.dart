@@ -18,7 +18,7 @@ import 'package:cardiocare/user_app/login_screen.dart';
 import 'package:cardiocare/user_app/register_screen.dart';
 
 import 'package:cardiocare/services/db_helper.dart';
-import 'package:cardiocare/services/customTheme.dart';
+import 'package:cardiocare/services/custom_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,8 +27,16 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => DatabaseHelper()),
+        // ChangeNotifierProvider.value(value: SharedPreferencesManager.instance),
+        // ChangeNotifierProvider(create: (_) => SignalMonitorState()),
         ChangeNotifierProvider.value(value: SharedPreferencesManager.instance),
-        ChangeNotifierProvider(create: (_) => SignalMonitorState()),
+        ChangeNotifierProxyProvider<SharedPreferencesManager,
+            SignalMonitorState>(
+          create: (context) =>
+              SignalMonitorState(SharedPreferencesManager.instance),
+          update: (context, prefManager, previous) =>
+              previous ?? SignalMonitorState(prefManager),
+        ),
       ],
       child: const MyApp(),
     ),

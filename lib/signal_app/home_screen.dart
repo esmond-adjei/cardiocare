@@ -1,9 +1,10 @@
+import 'package:cardiocare/chatbot_app/chat_screen.dart';
 import 'package:cardiocare/services/preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import 'package:cardiocare/_playground.dart';
+// import 'package:cardiocare/_playground.dart';
 import 'package:cardiocare/services/db_helper.dart';
 import 'package:cardiocare/utils/format_datetime.dart';
 import 'package:cardiocare/signal_app/charts/trend_line_chart.dart';
@@ -115,9 +116,8 @@ class _HomeState extends State<HomeScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          // const ChatScreen(),
-                          const Playground(),
+                      builder: (context) => const ChatScreen(),
+                      // const Playground(),
                     ),
                   );
                 },
