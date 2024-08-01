@@ -140,6 +140,7 @@ class HealthBlogScreen extends StatelessWidget {
   }
 
   Widget _buildBlogCard(BuildContext context, BlogPost post) {
+    const blog_background = 'assets/images/blog-image-placeholder.png';
     return Card(
       elevation: 0,
       color: Theme.of(context).colorScheme.surface,
@@ -158,7 +159,7 @@ class HealthBlogScreen extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: FadeInImage.assetNetwork(
-                  placeholder: 'assets/images/blog-image-placeholder.png',
+                  placeholder: blog_background,
                   image: post.featuredImageUrl,
                   width: 80,
                   height: 80,

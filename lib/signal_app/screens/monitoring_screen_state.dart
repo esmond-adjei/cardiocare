@@ -194,6 +194,7 @@ class SignalMonitorState extends ChangeNotifier {
           _btempSignal.avgTemp = parsedNumber;
           _btempSignal.minTemp = minTemp;
           _btempSignal.maxTemp = maxTemp;
+          notifyListeners();
         } catch (e) {
           dev.log("Error parsing temperature data: $e");
         }

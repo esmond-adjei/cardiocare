@@ -1,11 +1,11 @@
-import 'package:cardiocare/signal_app/model/signal_enums.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:cardiocare/signal_app/model/signal_model.dart';
+import 'dart:developer' as dev;
+import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+import 'package:cardiocare/signal_app/model/signal_enums.dart';
 
 class AIAnalysis extends StatefulWidget {
-  final Signal signal;
+  final dynamic signal;
 
   const AIAnalysis({super.key, required this.signal});
 
@@ -24,26 +24,212 @@ class _AIAnalysisState extends State<AIAnalysis> {
 
     try {
       // Prepare the signal data
-      final signalData = widget.signal.toMap();
+      final signalData = [
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+        0.890123,
+        0.901234,
+        0.012345,
+        0.123456,
+        0.234567,
+        0.345678,
+        0.456789,
+        0.567890,
+        0.678901,
+        0.789012,
+      ];
+
+      // widget.signal.ecg;
 
       // Make API call to the generative AI service
       final response = await http.post(
-        Uri.parse('YOUR_GENERATIVE_AI_API_ENDPOINT'),
+        Uri.parse('http://192.168.53.178:8000/api/classify/'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'signal_type': widget.signal.signalType.toString(),
-          'signal_data': signalData,
-        }),
+        body: json.encode(signalData),
       );
 
-      if (response.statusCode == 200) {
-        final result = json.decode(response.body);
-        setState(() {
-          _analysisResult = result['analysis'];
-        });
-      } else {
-        throw Exception('Failed to analyze signal');
-      }
+      dev.log("response: ${response.body}");
+      final result = json.decode(response.body);
+
+      dev.log("result: ${result['classification_result'] is Map}");
+      setState(() {
+        _analysisResult = "${result['classification_result']}";
+      });
     } catch (e) {
       setState(() {
         _analysisResult = 'Error: ${e.toString()}';
