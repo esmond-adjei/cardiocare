@@ -273,6 +273,8 @@ class _ConnectDeviceState extends State<ConnectDevice> {
 }
 
 class Device3DModel extends StatelessWidget {
+  // install flutter cube
+  // use 3D models from assets/3D/
   final double height;
 
   const Device3DModel({

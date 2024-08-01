@@ -12,10 +12,18 @@ const String _apiKey =
     "AIzaSyDFFinex_fsJgs5uAkXlWKkiw-EknfjHKw";
 const String _systemInstructions =
 //  String.fromEnvironment('BOT_INSTRUCTIONS');
-    "you're an expert cardiologist. your sole purpose is to help clients by providing them with useful information about the cardiac health. In less than 3 statements, provide very detailed yet concise response to their questions. your name is cardiobot. don't answer questions not related to cardiac health and those not casual information.";
+    "you're an expert cardiologist. "
+    "your sole purpose is to help clients by providing them with useful "
+    "about the cardiac health. In less than 3 statements, "
+    "provide very detailed yet concise response to their questions. "
+    "in some cases, you will be shared with raw data. do you best to explain "
+    "to the layman person. "
+    "your name is cardiobot. don't answer questions not related "
+    "to cardiac health and those not casual information.";
 
 class ChatWidget extends StatefulWidget {
-  const ChatWidget({super.key});
+  final dynamic sharedMessage;
+  const ChatWidget({super.key, this.sharedMessage});
 
   @override
   State<ChatWidget> createState() => _ChatWidgetState();
@@ -46,8 +54,6 @@ class _ChatWidgetState extends State<ChatWidget> {
   }
 
   Future<void> _initializeChat() async {
-    dev.log("what is the api key? $_apiKey");
-
     _model = GenerativeModel(
       model: 'gemini-1.5-flash-latest',
       apiKey: _apiKey,
@@ -57,7 +63,12 @@ class _ChatWidgetState extends State<ChatWidget> {
     _chat = _model.startChat(
       history: _conversationHistory.map((m) => m.toContent()).toList(),
     );
-    setState(() {}); // Trigger a rebuild after loading the chat history
+
+    // send [external] message if exists
+    if (widget.sharedMessage != null) {
+      _sendChatMessage(widget.sharedMessage);
+    }
+    setState(() {});
   }
 
   void _restartConversation() async {
@@ -68,8 +79,33 @@ class _ChatWidgetState extends State<ChatWidget> {
     await _dbHelper.clearChatHistory(1);
   }
 
+  void _deleteAllMessages(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Account'),
+          content: const Text('Are you sure you want to clear all messages?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text('Delete All'),
+              onPressed: () {
+                _restartConversation();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _sendChatMessage(String message) async {
-    if (message.isEmpty) return;
+    if (message.trim().isEmpty) return;
 
     _textController.clear();
     _scrollDown();
@@ -115,7 +151,6 @@ class _ChatWidgetState extends State<ChatWidget> {
       dev.log("Failed to send message: $e");
     } finally {
       setState(() => _loading = false);
-      _textFieldFocus.requestFocus();
     }
 
     _scrollDown();
@@ -199,7 +234,7 @@ class _ChatWidgetState extends State<ChatWidget> {
           textController: _textController,
           focusNode: _textFieldFocus,
           onSend: _sendChatMessage,
-          onRestart: _restartConversation,
+          onRestart: () => _deleteAllMessages(context),
           loading: _loading,
         ),
       ],
@@ -239,10 +274,16 @@ class _InputRow extends StatelessWidget {
       ),
       child: Row(
         children: [
+          IconButton(
+            icon: Icon(Icons.refresh, color: Theme.of(context).primaryColor),
+            onPressed: onRestart,
+          ),
           Expanded(
             child: TextField(
               controller: textController,
               focusNode: focusNode,
+              maxLines: 3,
+              minLines: 1,
               decoration: InputDecoration(
                 hintText: 'What is on your mind...',
                 border: const OutlineInputBorder(
@@ -255,15 +296,22 @@ class _InputRow extends StatelessWidget {
               onSubmitted: onSend,
             ),
           ),
-          if (!loading)
-            IconButton(
-              icon: Icon(Icons.send, color: Theme.of(context).primaryColor),
-              onPressed: () => onSend(textController.text),
-            ),
-          IconButton(
-            icon: Icon(Icons.refresh, color: Theme.of(context).primaryColor),
-            onPressed: onRestart,
-          ),
+          (!loading)
+              ? IconButton(
+                  icon: Icon(Icons.send, color: Theme.of(context).primaryColor),
+                  onPressed: () => onSend(textController.text),
+                )
+              : Row(
+                  children: [
+                    const SizedBox(width: 10),
+                    const CircularProgressIndicator(strokeWidth: 2.0),
+                    IconButton(
+                      icon: Icon(Icons.cancel_schedule_send_rounded,
+                          color: Theme.of(context).primaryColor),
+                      onPressed: () => onSend(textController.text),
+                    )
+                  ],
+                )
         ],
       ),
     );

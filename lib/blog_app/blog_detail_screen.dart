@@ -125,16 +125,16 @@ class BlogDetail extends StatelessWidget {
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   ...post.keyTakeaways.map(_buildTakeaway),
-                  if (post.relatedArticles.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Further Reading:',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    ...post.relatedArticles.map(_buildRelatedArticle),
-                  ],
+                  // if (post.relatedArticles.isNotEmpty) ...[
+                  //   const SizedBox(height: 16),
+                  //   const Text(
+                  //     'Further Reading:',
+                  //     style:
+                  //         TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  //   ),
+                  //   const SizedBox(height: 8),
+                  //   ...post.relatedArticles.map(_buildRelatedArticle),
+                  // ],
                 ],
               ),
             ),

@@ -5,6 +5,7 @@ import 'package:cardiocare/chatbot_app/chat_model.dart';
 class MessageWidget extends StatelessWidget {
   const MessageWidget({
     super.key,
+    bool isShared = false,
     required this.message,
     required this.onResend,
     required this.onCopy,

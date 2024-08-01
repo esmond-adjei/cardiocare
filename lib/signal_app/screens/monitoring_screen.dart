@@ -1,5 +1,4 @@
 import 'dart:developer' as dev;
-import 'package:cardiocare/signal_app/model/signal_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cardiocare/main.dart';
@@ -8,6 +7,7 @@ import 'package:cardiocare/services/db_helper.dart';
 import 'package:cardiocare/signal_app/screens/monitoring_screen_state.dart';
 import 'package:cardiocare/signal_app/screens/connect_device_screen.dart';
 import 'package:cardiocare/signal_app/model/signal_enums.dart';
+import 'package:cardiocare/signal_app/model/signal_model.dart';
 import 'package:cardiocare/utils/format_datetime.dart';
 
 class SingleMonitorLayout extends StatefulWidget {
@@ -22,6 +22,7 @@ class SingleMonitorLayout extends StatefulWidget {
 class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool isVirtualDevice = true;
 
   @override
   void initState() {
@@ -38,9 +39,11 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
       }
     });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkBluetoothConnection();
-    });
+    if (isVirtualDevice) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _checkBluetoothConnection();
+      });
+    }
   }
 
   @override
@@ -51,6 +54,7 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
 
   void _checkBluetoothConnection() {
     final blueState = Provider.of<SignalMonitorState>(context, listen: false);
+    setState(() => isVirtualDevice = blueState.isVirtualDevice);
     if (!blueState.isBluetoothConnected) {
       Navigator.pushReplacement(
         context,
@@ -309,11 +313,12 @@ class _SingleMonitorLayoutState extends State<SingleMonitorLayout>
   void _saveRealBP(SignalMonitorState monitorState) async {
     dev.log(
         "${monitorState.bpSignal.systolic}/${monitorState.bpSignal.diastolic}");
-    final dbhelper = Provider.of<DatabaseHelper>(context, listen: false);
+    final dbhelper = Provider.of<DatabaseHelper>(context, listen: true);
     BpModel signal = monitorState.bpSignal;
     signal.startTime = DateTime.now();
     signal.stopTime = DateTime.now();
     final signalId = await dbhelper.createBpData(signal);
+    signal.reset();
     _showSnackBar('${signal.name} saved successfully (ID: $signalId)');
   }
 

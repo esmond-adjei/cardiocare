@@ -51,8 +51,8 @@ class SignalMonitorState extends ChangeNotifier {
       ? BluetoothConnectionState.connected
       : _device.state;
   String get bluetoothError => _device.error;
-  bool get isBluetoothConnected => true;
-  // _device is VirtualDevice ? true : _device.isConnected;
+  bool get isBluetoothConnected =>
+      _device is VirtualDevice ? true : _device.isConnected;
   bool get isVirtualDevice => _device is VirtualDevice ? true : false;
   String get targetDeviceName => _device.targetDeviceName;
   EcgModel get ecgSignal => _ecgSignal;

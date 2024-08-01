@@ -8,13 +8,6 @@ import 'package:cardiocare/blog_app/model/blog_api.dart';
 class HealthBlogScreen extends StatelessWidget {
   const HealthBlogScreen({super.key});
 
-  static const String placeholderImage =
-      'assets/images/blog-image-placeholder.png';
-  static const String backgroundImage =
-      'https://img.freepik.com/free-photo/people-working-out-indoors-together-with-dumbbells_23-2149175410.jpg';
-
-  // fetch blog data
-
   @override
   Widget build(BuildContext context) {
     final blogData = fetchBlogPosts();
@@ -47,7 +40,7 @@ class HealthBlogScreen extends StatelessWidget {
                     autoPlay: true,
                     viewportFraction: 0.9,
                   ),
-                  items: blogData.take(5).map((post) {
+                  items: blogData.take(3).map((post) {
                     return Builder(
                       builder: (BuildContext context) {
                         return GestureDetector(
@@ -165,7 +158,7 @@ class HealthBlogScreen extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: FadeInImage.assetNetwork(
-                  placeholder: placeholderImage,
+                  placeholder: 'assets/images/blog-image-placeholder.png',
                   image: post.featuredImageUrl,
                   width: 80,
                   height: 80,

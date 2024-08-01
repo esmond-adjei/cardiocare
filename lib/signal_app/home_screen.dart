@@ -1,5 +1,6 @@
 import 'package:cardiocare/chatbot_app/chat_screen.dart';
 import 'package:cardiocare/services/preferences.dart';
+import 'package:cardiocare/signal_app/charts/line_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -196,24 +197,32 @@ class DashSignalView extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 10),
-                TrendLineChart(
-                  height: 70,
-                  showLeftTitles: false,
-                  lines: [
-                    TrendLine(
-                      data: ecgData.ecgList
-                          .map(
-                            (e) => TrendLinePoint(
-                              e.toDouble(),
-                              e.toDouble(),
-                            ),
-                          )
-                          .toList(),
-                      color: Theme.of(context).primaryColor,
-                      beautify: true,
-                    )
-                  ],
+                ScrollableLineChart(
+                  dataList: ecgData.ecgList,
+                  height: 50,
+                  stretchFactor: 0.2,
+                  showBottomTitles: false,
+                  lineColor: Colors.red,
+                  rounded: true,
                 ),
+                // TrendLineChart(
+                //   height: 70,
+                //   showLeftTitles: false,
+                //   lines: [
+                //     TrendLine(
+                //       data: ecgData.ecgList
+                //           .map(
+                //             (e) => TrendLinePoint(
+                //               e.toDouble(),
+                //               e.toDouble(),
+                //             ),
+                //           )
+                //           .toList(),
+                //       color: Theme.of(context).primaryColor,
+                //       beautify: true,
+                //     )
+                //   ],
+                // ),
               ],
             );
           }

@@ -27,8 +27,6 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => DatabaseHelper()),
-        // ChangeNotifierProvider.value(value: SharedPreferencesManager.instance),
-        // ChangeNotifierProvider(create: (_) => SignalMonitorState()),
         ChangeNotifierProvider.value(value: SharedPreferencesManager.instance),
         ChangeNotifierProxyProvider<SharedPreferencesManager,
             SignalMonitorState>(

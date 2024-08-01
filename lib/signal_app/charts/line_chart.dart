@@ -10,6 +10,7 @@ class ScrollableLineChart extends StatefulWidget {
   final double stretchFactor;
   final double maxY;
   final bool rounded;
+  final bool showBottomTitles;
 
   const ScrollableLineChart({
     super.key,
@@ -20,6 +21,7 @@ class ScrollableLineChart extends StatefulWidget {
     this.stretchFactor = 1.0,
     this.maxY = 300.0,
     this.rounded = false,
+    this.showBottomTitles = true,
   });
 
   @override
@@ -115,7 +117,7 @@ class _ScrollableLineChartState extends State<ScrollableLineChart> {
         leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         bottomTitles: AxisTitles(
           sideTitles: SideTitles(
-            showTitles: true,
+            showTitles: widget.showBottomTitles,
             reservedSize: 30,
             interval: 1.0,
             getTitlesWidget: (value, meta) => SideTitleWidget(

@@ -155,6 +155,11 @@ class BpModel extends Signal {
 
   List<int> get bpData => [bpSystolic ?? 0, bpDiastolic ?? 0];
 
+  void reset() {
+    bpSystolic = 120;
+    bpDiastolic = 80;
+  }
+
   factory BpModel.fromMap(Map<String, dynamic> map) {
     return BpModel(
       id: map[idColumn] as int?,

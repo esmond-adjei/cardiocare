@@ -48,6 +48,10 @@ class _HistoryTabViewState extends State<HistoryTabView> {
     return [];
   }
 
+  Future<void> _refreshData() async {
+    setState(() => _dataFuture = _fetchData());
+  }
+
   Future<void> _updatePreferences() async {
     final prefsManager =
         Provider.of<SharedPreferencesManager>(context, listen: false);
@@ -75,29 +79,33 @@ class _HistoryTabViewState extends State<HistoryTabView> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Signal>>(
-      future: _dataFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return const Center(child: Text('Error: something went wrong'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No data available'));
-        } else {
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                _buildChartSummary(context, snapshot.data!),
-                ListContainer(
-                  listHeading: '${widget.dataType.description} History',
-                  listData: snapshot.data!,
-                ),
-              ],
-            ),
-          );
-        }
-      },
+    return RefreshIndicator(
+      onRefresh: _refreshData,
+      // color: ,
+      child: FutureBuilder<List<Signal>>(
+        future: _dataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return const Center(child: Text('Error: something went wrong'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No data available'));
+          } else {
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  _buildChartSummary(context, snapshot.data!),
+                  ListContainer(
+                    listHeading: '${widget.dataType.description} History',
+                    listData: snapshot.data!,
+                  ),
+                ],
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 
