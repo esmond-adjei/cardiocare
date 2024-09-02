@@ -1,5 +1,5 @@
-import 'package:cardiocare/signal_app/model/signal_model.dart';
 import 'package:flutter/material.dart';
+import 'package:cardiocare/signal_app/model/signal_model.dart';
 import 'package:cardiocare/signal_app/charts/line_chart.dart';
 
 // ========== ECG RENDERER RENDERER =========
@@ -13,11 +13,6 @@ class ECGRenderer extends StatelessWidget {
     required this.ecgSignal,
   });
 
-//   @override
-//   State<ECGRenderer> createState() => _ECGRendererState();
-// }
-
-// class _ECGRendererState extends State<ECGRenderer> {
   @override
   Widget build(BuildContext context) {
     if (!isActive) {
@@ -86,9 +81,7 @@ class ECGRenderer extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title, style: const TextStyle(fontSize: 12.0)),
-                //Theme.of(context).textTheme.labelMedium),
                 Text(value, style: const TextStyle(fontSize: 16)),
-                //Theme.of(context).textTheme.bodyLarge),
               ],
             ),
           ],
@@ -177,6 +170,103 @@ class BPRenderer extends StatelessWidget {
               color: color,
               fontSize: 72.0,
               fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class BPInput extends StatelessWidget {
+  final bool isActive;
+  final BpModel bpSignal;
+
+  const BPInput({
+    super.key,
+    required this.isActive,
+    required this.bpSignal,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color =
+        bpSignal.systolic > 120 ? Colors.red : bpSignal.signalType.color;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildBloodPressureRow(
+          'systolic',
+          bpSignal.systolic,
+          color,
+        ),
+        const SizedBox(height: 20),
+        _buildBloodPressureRow(
+          'diastolic',
+          bpSignal.diastolic,
+          color.withOpacity(0.6),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBloodPressureRow(String label, int value, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 50.0),
+      child: Row(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Text(
+                'mmHg',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14.0,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 50),
+          Expanded(
+            child: TextFormField(
+              initialValue: '$value',
+              decoration: InputDecoration(
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: color),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: color),
+                ),
+              ),
+              style: TextStyle(
+                color: color,
+                fontSize: 48.0,
+                fontWeight: FontWeight.bold,
+              ),
+              keyboardType: TextInputType.number,
+              onChanged: (val) {
+                // Handle value change
+                try {
+                  int bpValue = int.parse(val);
+                  if (label == 'systolic') {
+                    bpSignal.systolic = bpValue;
+                  } else {
+                    bpSignal.diastolic = bpValue;
+                  }
+                } catch (e) {
+                  print("ErrorInputType: $e");
+                }
+              },
             ),
           ),
         ],

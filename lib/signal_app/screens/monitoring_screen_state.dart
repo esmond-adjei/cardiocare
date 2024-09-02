@@ -1,79 +1,92 @@
 import 'dart:developer' as dev;
 import 'dart:async';
+import 'package:cardiocare/services/preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cardiocare/signal_app/model/signal_model.dart';
-import 'package:cardiocare/utils/device.dart';
+import 'package:cardiocare/signal_app/model/signal_device.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
-enum DeviceType { virtual, real }
-
-const DeviceType DEVICE_TYPE = DeviceType.real;
+enum DeviceType { real, virtual }
 
 class SignalMonitorState extends ChangeNotifier {
-  final CardioDevice _cardioDevice = CardioDevice();
-  final VirtualDevice _virtualDevice = VirtualDevice();
+  final SharedPreferencesManager _preferencesManager;
+  late dynamic _device;
 
-  // Signal models
-  final EcgModel _ecgSignal = EcgModel(userId: 1);
-  final BpModel _bpSignal = BpModel(userId: 1);
-  final BtempModel _btempSignal = BtempModel(userId: 1);
+  final EcgModel _ecgSignal;
+  final BpModel _bpSignal;
+  final BtempModel _btempSignal;
 
-  // Recording states
   bool isRecording = false;
   bool isPaused = false;
   final Stopwatch _stopwatch = Stopwatch();
   int _currentMode = -1;
   late DateTime _startTime;
 
-  SignalMonitorState() {
-    _cardioDevice.stateStream.listen((state) {
-      notifyListeners();
-    });
+  SignalMonitorState(this._preferencesManager)
+      : _ecgSignal = EcgModel(userId: 1),
+        _bpSignal = BpModel(userId: 1),
+        _btempSignal = BtempModel(userId: 1) {
+    _initializeDevice();
+    _preferencesManager.addListener(_onSettingsChanged);
+  }
 
-    _cardioDevice.dataStream.listen(_onDataReceived);
+  void _initializeDevice() {
+    if (_preferencesManager.appSettings.isDemoMode &&
+        _preferencesManager.appSettings.isVirtualDevice) {
+      _device = VirtualDevice();
+    } else {
+      _device = CardioDevice();
+      _device.stateStream.listen((state) => notifyListeners());
+      _device.dataStream.listen(_processRealDeviceData);
+    }
+  }
+
+  void _onSettingsChanged() {
+    _initializeDevice();
+    notifyListeners();
   }
 
   // Getters
-  BluetoothConnectionState get bluetoothState => _cardioDevice.state;
-  String get bluetoothError => _cardioDevice.error;
+  BluetoothConnectionState get bluetoothState => _device is VirtualDevice
+      ? BluetoothConnectionState.connected
+      : _device.state;
+  String get bluetoothError => _device.error;
   bool get isBluetoothConnected =>
-      DEVICE_TYPE == DeviceType.virtual ? true : _cardioDevice.isConnected;
-  String get targetDeviceName => _cardioDevice.targetDeviceName;
+      _device is VirtualDevice ? true : _device.isConnected;
+  bool get isVirtualDevice => _device is VirtualDevice ? true : false;
+  String get targetDeviceName => _device.targetDeviceName;
   EcgModel get ecgSignal => _ecgSignal;
   BpModel get bpSignal => _bpSignal;
   BtempModel get btempSignal => _btempSignal;
   Stopwatch get stopwatch => _stopwatch;
 
   Future<void> startDiscovery() async {
-    if (DEVICE_TYPE == DeviceType.virtual) {
-      return;
+    if (_device is CardioDevice) {
+      await _device.startDiscovery();
     }
-    await _cardioDevice.startDiscovery();
   }
 
   Future<void> stopDiscovery() async {
-    if (DEVICE_TYPE == DeviceType.virtual) {
-      return;
+    if (_device is CardioDevice) {
+      await _device.stopDiscovery();
     }
-    await _cardioDevice.stopDiscovery();
   }
 
   Future<void> connectToDevice(BluetoothDevice device) async {
-    if (DEVICE_TYPE == DeviceType.virtual) {
-      return;
+    if (_device is CardioDevice) {
+      await _device.connectToDevice(device);
     }
-    await _cardioDevice.connectToDevice(device);
   }
 
   Future<void> disconnectFromDevice() async {
-    if (DEVICE_TYPE == DeviceType.virtual) {
-      return;
+    if (_device is CardioDevice) {
+      await _device.sendData(Uint8List.fromList([0]));
+      await _device.disconnectFromDevice();
     }
-    await _cardioDevice.disconnectFromDevice();
   }
 
   Future<void> startRecording(int mode) async {
-    if (!isBluetoothConnected && DEVICE_TYPE != DeviceType.virtual) {
+    if (!isBluetoothConnected && _device is CardioDevice) {
       dev.log('Cannot send mode, device not connected');
       return;
     }
@@ -87,24 +100,23 @@ class SignalMonitorState extends ChangeNotifier {
     _stopwatch.start();
     _currentMode = mode;
     _startTime = DateTime.now();
+    notifyListeners();
 
-    if (DEVICE_TYPE == DeviceType.virtual) {
+    if (_device is VirtualDevice) {
       Signal currentSignal = getCurrentSignal(mode);
       currentSignal.starttime = _startTime;
-      _virtualDevice.selectSignalMode(mode);
-      _virtualDevice.listenToSignalStream(_onVirtualDataReceived);
+      _device.selectSignalMode(mode);
+      _device.listenToSignalStream(_processVirtualDeviceData);
     } else {
-      await _cardioDevice.sendData(Uint8List.fromList([mode]));
+      await _device.sendData(Uint8List.fromList([mode]));
     }
-
-    notifyListeners();
   }
 
   void pauseRecording() {
     isPaused = true;
     _stopwatch.stop();
-    if (DEVICE_TYPE == DeviceType.virtual) {
-      _virtualDevice.pauseListening();
+    if (_device is VirtualDevice) {
+      _device.pauseListening();
     }
     notifyListeners();
   }
@@ -112,24 +124,33 @@ class SignalMonitorState extends ChangeNotifier {
   void resumeRecording() {
     isPaused = false;
     _stopwatch.start();
-    if (DEVICE_TYPE == DeviceType.virtual) {
-      _virtualDevice.resumeListening();
+    if (_device is VirtualDevice) {
+      _device.resumeListening();
     }
     notifyListeners();
   }
 
-  void stopRecording() {
+  void stopRecording() async {
     isRecording = false;
     isPaused = false;
+
+    _ecgSignal.clearEcg();
+    minTemp = 100.0;
+    maxTemp = 0.0;
+    parsedNumber = 0.0;
+    ecgValue = 0;
+
+    _stopwatch.stop();
     _stopwatch.reset();
-    if (DEVICE_TYPE == DeviceType.virtual) {
-      _virtualDevice.stopListening();
+    if (_device is VirtualDevice) {
+      _device.stopListening();
+    } else {
+      await _device.sendData(Uint8List.fromList([0]));
     }
     notifyListeners();
   }
 
-  // ============== utilities ==============
-  // get signal
+  // Utilities
   Signal getCurrentSignal(int tabIndex) {
     switch (tabIndex) {
       case 0:
@@ -143,20 +164,40 @@ class SignalMonitorState extends ChangeNotifier {
     }
   }
 
-  void _onDataReceived(Uint8List data) {
-    // Process received data
-    dev.log('Data received: ${String.fromCharCodes(data)}');
+  double minTemp = 100.0;
+  double maxTemp = 0.0;
+  double parsedNumber = 0.0;
+  int ecgValue = 0;
 
+  void _processRealDeviceData(Uint8List data) {
     String strData = String.fromCharCodes(data);
     switch (_currentMode) {
       case 1:
-        dev.log('Updating ECG data: $strData');
+        try {
+          ecgValue = int.parse(strData);
+          _ecgSignal.addEcgCache(ecgValue);
+        } catch (e) {
+          dev.log("Error parsing ECG data: $e");
+        }
         break;
       case 2:
         dev.log('Updating BP data: $strData');
         break;
       case 3:
-        dev.log('Updating Body Temperature data: $strData');
+        try {
+          parsedNumber =
+              double.parse(strData) + 3; // adjusting for body temperature
+          if (parsedNumber > 0) {
+            minTemp = parsedNumber < minTemp ? parsedNumber : minTemp;
+            maxTemp = parsedNumber > maxTemp ? parsedNumber : maxTemp;
+          }
+          _btempSignal.avgTemp = parsedNumber;
+          _btempSignal.minTemp = minTemp;
+          _btempSignal.maxTemp = maxTemp;
+          notifyListeners();
+        } catch (e) {
+          dev.log("Error parsing temperature data: $e");
+        }
         break;
       default:
         dev.log('Invalid mode: $_currentMode');
@@ -164,34 +205,32 @@ class SignalMonitorState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _onVirtualDataReceived(dynamic data) {
+  void _processVirtualDeviceData(dynamic data) {
     switch (_currentMode) {
       case 1:
         _ecgSignal.addEcgCache(data['ecg']);
         _ecgSignal.hrv = data['hrv'];
         _ecgSignal.hbpm = data['hbpm'];
-        notifyListeners();
         break;
       case 2:
-        _bpSignal.bpData = data;
-        notifyListeners();
+        _bpSignal.bpData = data as List<int>;
         break;
       case 3:
-        _btempSignal.tempData = data;
-        notifyListeners();
+        _btempSignal.tempData = data as Map<String, double>;
         break;
       default:
         dev.log('Invalid mode: $_currentMode');
     }
+    notifyListeners();
   }
 
   @override
   void dispose() {
-    _cardioDevice.dispose();
+    _preferencesManager.removeListener(_onSettingsChanged);
+    _device.dispose();
     super.dispose();
   }
 }
-
 // class SignalMonitorState extends ChangeNotifier {
 //   // Bluetooth states
 //   BluetoothConnectionState _bluetoothState =

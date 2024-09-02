@@ -14,7 +14,9 @@ enum BluetoothConnectionState {
 }
 
 class CardioDevice {
-  final String _deviceName = 'CardioCare';
+  static const String _deviceName = 'CardioCare';
+  static const String _deviceAddress = '00:22:12:01:62:6E';
+
   final FlutterBluetoothSerial _bluetooth = FlutterBluetoothSerial.instance;
   BluetoothDevice? _targetDevice;
   BluetoothConnection? _connection;
@@ -59,10 +61,11 @@ class CardioDevice {
       _discoveryStreamSubscription = _bluetooth.startDiscovery().listen(
         (r) {
           dev.log("Discovered device: ${r.device.name}");
-          if (r.device.name == _deviceName) {
+          if (r.device.address == _deviceAddress) {
             _targetDevice = r.device;
+            dev.log("${r.device.name} @ ${r.device.address}");
             stopDiscovery();
-            connectToDevice(_targetDevice!);
+            connectToDevice(r.device);
           }
         },
         onDone: () {

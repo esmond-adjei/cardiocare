@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:developer' as dev;
-import 'package:cardiocare/utils/device.dart';
+import 'package:cardiocare/signal_app/model/signal_device.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -273,6 +273,8 @@ class _ConnectDeviceState extends State<ConnectDevice> {
 }
 
 class Device3DModel extends StatelessWidget {
+  // install flutter cube
+  // use 3D models from assets/3D/
   final double height;
 
   const Device3DModel({

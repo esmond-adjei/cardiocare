@@ -1,4 +1,6 @@
 import 'dart:developer' as dev;
+import 'package:cardiocare/signal_app/widgets/ai_analysis.dart';
+import 'package:cardiocare/signal_app/widgets/share_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cardiocare/signal_app/model/signal_enums.dart';
@@ -29,11 +31,25 @@ class ListItem extends StatelessWidget {
 
   void _showPeakDrawer(BuildContext context) {
     showModalBottomSheet(
-      // TODO: adjustable to full screen
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       context: context,
       isScrollControlled: true,
-      builder: (context) => PeakItemDrawer(signal: signal),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.5, // Start at 50% of the screen height
+        minChildSize: 0.2, // Minimum height (20% of screen)
+        maxChildSize: 1.0, // Can expand to full screen
+        expand: false,
+        builder: (context, scrollController) => Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: PeakItemDrawer(signal: signal), // called by this widget
+          ),
+        ),
+      ),
     );
   }
 
@@ -225,6 +241,8 @@ class _PeakItemDrawerState extends State<PeakItemDrawer> {
             _buildHeader(dbhelper),
             const SizedBox(height: 16),
             _buildSignalContent(),
+            const SizedBox(height: 16),
+            AIAnalysis(signal: widget.signal),
           ],
         ),
       ),
@@ -267,6 +285,14 @@ class _PeakItemDrawerState extends State<PeakItemDrawer> {
               _controller.text = widget.signal.name;
             }),
           ),
+
+        // SHARE BUTTON
+        ShareButton(
+          shareText:
+              'Checkout my ${widget.signal.signalType} data from the CardioCare App',
+          signal: widget.signal,
+          child: _buildSignalContent(),
+        )
       ],
     );
   }

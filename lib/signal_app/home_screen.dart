@@ -1,12 +1,13 @@
+import 'package:cardiocare/chatbot_app/chat_screen.dart';
 import 'package:cardiocare/services/preferences.dart';
+import 'package:cardiocare/signal_app/charts/line_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import 'package:cardiocare/_playground.dart';
+// import 'package:cardiocare/_playground.dart';
 import 'package:cardiocare/services/db_helper.dart';
 import 'package:cardiocare/utils/format_datetime.dart';
-import 'package:cardiocare/signal_app/charts/trend_line_chart.dart';
 import 'package:cardiocare/signal_app/widgets/stressmogi.dart';
 import 'package:cardiocare/signal_app/widgets/list_container.dart';
 import 'package:cardiocare/signal_app/model/signal_model.dart';
@@ -115,9 +116,8 @@ class _HomeState extends State<HomeScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          // const ChatScreen(),
-                          const Playground(),
+                      builder: (context) => const ChatScreen(),
+                      // const Playground(),
                     ),
                   );
                 },
@@ -196,24 +196,32 @@ class DashSignalView extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 10),
-                TrendLineChart(
-                  height: 70,
-                  showLeftTitles: false,
-                  lines: [
-                    TrendLine(
-                      data: ecgData.ecgList
-                          .map(
-                            (e) => TrendLinePoint(
-                              e.toDouble(),
-                              e.toDouble(),
-                            ),
-                          )
-                          .toList(),
-                      color: Theme.of(context).primaryColor,
-                      beautify: true,
-                    )
-                  ],
+                ScrollableLineChart(
+                  dataList: ecgData.ecgList,
+                  height: 50,
+                  stretchFactor: 0.2,
+                  showBottomTitles: false,
+                  lineColor: Colors.red,
+                  rounded: true,
                 ),
+                // TrendLineChart(
+                //   height: 70,
+                //   showLeftTitles: false,
+                //   lines: [
+                //     TrendLine(
+                //       data: ecgData.ecgList
+                //           .map(
+                //             (e) => TrendLinePoint(
+                //               e.toDouble(),
+                //               e.toDouble(),
+                //             ),
+                //           )
+                //           .toList(),
+                //       color: Theme.of(context).primaryColor,
+                //       beautify: true,
+                //     )
+                //   ],
+                // ),
               ],
             );
           }

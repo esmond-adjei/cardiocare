@@ -3,7 +3,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cardiocare/chatbot_app/widgets/chat.dart';
 
 class ChatScreen extends StatelessWidget {
-  const ChatScreen({super.key});
+  final dynamic sharedMessage;
+  const ChatScreen({super.key, this.sharedMessage});
 
   @override
   Widget build(BuildContext context) {
@@ -50,8 +51,8 @@ class ChatScreen extends StatelessWidget {
               fit: BoxFit.cover,
             ),
           ),
-          const SafeArea(
-            child: ChatWidget(),
+          SafeArea(
+            child: ChatWidget(sharedMessage: sharedMessage),
           ),
         ],
       ),

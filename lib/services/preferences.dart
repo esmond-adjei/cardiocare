@@ -23,6 +23,48 @@ class Metric {
       );
 }
 
+class AppSettings {
+  bool isDemoMode;
+  bool isDemoUser;
+  bool isVirtualDevice;
+
+  AppSettings({
+    this.isDemoMode = false,
+    this.isDemoUser = false,
+    this.isVirtualDevice = false,
+  });
+
+  factory AppSettings.fromJson(Map<String, dynamic> json) {
+    return AppSettings(
+      isDemoMode: json['isDemoMode'] as bool? ?? false,
+      isDemoUser: json['isDemoUser'] as bool? ?? false,
+      isVirtualDevice: json['isVirtualDevice'] as bool? ?? false,
+    );
+  }
+
+  bool get deviceIsVirtual => isVirtualDevice;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'isDemoMode': isDemoMode,
+      'isDemoUser': isDemoUser,
+      'isVirtualDevice': isVirtualDevice,
+    };
+  }
+
+  AppSettings copyWith({
+    bool? isDemoMode,
+    bool? isDemoUser,
+    bool? isVirtualDevice,
+  }) {
+    return AppSettings(
+      isDemoMode: isDemoMode ?? this.isDemoMode,
+      isDemoUser: isDemoUser ?? this.isDemoUser,
+      isVirtualDevice: isVirtualDevice ?? this.isVirtualDevice,
+    );
+  }
+}
+
 class SharedPreferencesManager extends ChangeNotifier {
   SharedPreferencesManager._privateConstructor();
   static final SharedPreferencesManager instance =
@@ -34,7 +76,7 @@ class SharedPreferencesManager extends ChangeNotifier {
 
   List<Metric> _metrics = [];
   String? _stressMoji;
-  Map<String, dynamic>? _appSettings;
+  AppSettings _appSettings = AppSettings();
   bool _isInitialized = false;
 
   Future<void> initialize() async {
@@ -57,7 +99,6 @@ class SharedPreferencesManager extends ChangeNotifier {
               .map((data) => Metric.fromJson(Map<String, dynamic>.from(data)))
               .toList();
         } else if (decodedData is Map) {
-          // Handle the case where it's stored as a single object
           _metrics = [Metric.fromJson(Map<String, dynamic>.from(decodedData))];
         }
       }
@@ -68,15 +109,15 @@ class SharedPreferencesManager extends ChangeNotifier {
       // Load app settings
       String? settingsString = prefs.getString(_appSettingsKey);
       if (settingsString != null) {
-        dynamic decodedSettings = json.decode(settingsString);
-        _appSettings = Map<String, dynamic>.from(decodedSettings);
+        Map<String, dynamic> decodedSettings = json.decode(settingsString);
+        _appSettings = AppSettings.fromJson(decodedSettings);
       }
     } catch (e) {
       dev.log('Error loading data: $e');
       // Handle the error appropriately, maybe set default values
       _metrics = [];
       _stressMoji = null;
-      _appSettings = null;
+      _appSettings = AppSettings();
     }
 
     notifyListeners();
@@ -97,11 +138,7 @@ class SharedPreferencesManager extends ChangeNotifier {
     }
 
     // Save app settings
-    if (_appSettings != null) {
-      await prefs.setString(_appSettingsKey, json.encode(_appSettings));
-    } else {
-      await prefs.remove(_appSettingsKey);
-    }
+    await prefs.setString(_appSettingsKey, json.encode(_appSettings.toJson()));
   }
 
   List<Metric> getAllMetrics() => _metrics;
@@ -125,10 +162,10 @@ class SharedPreferencesManager extends ChangeNotifier {
     saveAllData();
   }
 
-  Map<String, dynamic>? get appSettings => _appSettings;
+  AppSettings get appSettings => _appSettings;
 
-  void saveAppSettings(Map<String, dynamic> settings) {
-    _appSettings = settings;
+  void updateAppSettings(AppSettings newSettings) {
+    _appSettings = newSettings;
     notifyListeners();
     saveAllData();
   }
@@ -136,7 +173,7 @@ class SharedPreferencesManager extends ChangeNotifier {
   Future<void> clearAll() async {
     _metrics.clear();
     _stressMoji = null;
-    _appSettings = null;
+    _appSettings = AppSettings();
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     notifyListeners();
