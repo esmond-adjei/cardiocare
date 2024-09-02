@@ -8,7 +8,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 // import 'package:cardiocare/_playground.dart';
 import 'package:cardiocare/services/db_helper.dart';
 import 'package:cardiocare/utils/format_datetime.dart';
-import 'package:cardiocare/signal_app/charts/trend_line_chart.dart';
 import 'package:cardiocare/signal_app/widgets/stressmogi.dart';
 import 'package:cardiocare/signal_app/widgets/list_container.dart';
 import 'package:cardiocare/signal_app/model/signal_model.dart';
